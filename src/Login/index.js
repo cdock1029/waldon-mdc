@@ -11,21 +11,22 @@ const uiConfig = {
     signInSuccessWithAutResult: () => false,
   },
   credentialHelper: firebaseui.auth.CredentialHelper.NONE,
-  signInOptions: [
-    firebase.auth.EmailAuthProvider.PROVIDER_ID,
-    // firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-    // firebase.auth.FacebookAuthProvider.PROVIDER_ID
-  ],
+  signInOptions: [firebase.auth.EmailAuthProvider.PROVIDER_ID],
 }
 
 export class Login extends React.Component {
+  componentDidMount() {
+    document.querySelector('body').classList.add('darken')
+  }
+  componentWillUnmount() {
+    document.querySelector('body').classList.remove('darken')
+  }
   render() {
     return (
       <div>
         <AppBar />
         <div className="Login">
-          <h1>My App</h1>
-          <p>Please sign-in:</p>
+          <h1>WPM</h1>
           <StyledFirebaseAuth
             uiConfig={uiConfig}
             firebaseAuth={firebase.auth()}

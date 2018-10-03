@@ -6,4 +6,9 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 400ms ease;
+}
+
+body.darken {
+  background-color: #676767;
 }

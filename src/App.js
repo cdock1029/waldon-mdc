@@ -1,36 +1,23 @@
 import React, { Component } from 'react'
 import { AppBar } from './AppBar'
-import { TopAppBarFixedAdjust } from 'rmwc'
-import firebase from './firebase'
+import { Drawer } from './Drawer'
+import { DrawerAppContent } from 'rmwc'
 import './App.css'
 
 class App extends Component {
-  signOut = () => {
-    firebase.auth().signOut()
+  state = {
+    isOpen: false,
   }
+  handleMenuClick = () => this.setState(({ isOpen }) => ({ isOpen: !isOpen }))
   render() {
-    const { user } = this.props
+    const { isOpen } = this.state
     return (
       <div className="App">
-        <AppBar />
-        <TopAppBarFixedAdjust />
-        <div>
-          <button onClick={this.signOut}>Sign Out</button>
-          <pre>user: {user.email}</pre>
-        </div>
-        <header className="App-header">
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <AppBar onMenuClick={this.handleMenuClick} />
+        <Drawer isOpen={isOpen} />
+        <DrawerAppContent>
+          <p>this is some content</p>
+        </DrawerAppContent>
       </div>
     )
   }

@@ -7,10 +7,7 @@ import { Login } from './Login'
 import * as serviceWorker from './serviceWorker'
 
 firebase.auth().onAuthStateChanged(user => {
-  ReactDOM.render(
-    user ? <App user={user} /> : <Login />,
-    document.getElementById('root')
-  )
+  ReactDOM.render(user ? <App /> : <Login />, document.getElementById('root'))
 })
 
 // If you want your app to work offline and load faster, you can change
