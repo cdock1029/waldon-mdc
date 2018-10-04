@@ -2,9 +2,6 @@
   "name": "waldon-mdc",
   "version": "0.1.0",
   "private": true,
-  "installConfig": {
-    "pnp": true
-  },
   "dependencies": {
     "@rmwc/data-table": "^3.0.3",
     "firebase": "^5.5.2",
@@ -15,8 +12,10 @@
     "react-dom": "^16.5.2",
     "react-firebaseui": "^3.0.7",
     "react-scripts": "2.0.3",
+    "recompose": "^0.30.0",
     "rmwc": "^3.0.3",
-    "rxfire": "^3.0.4"
+    "rxfire": "^3.0.4",
+    "rxjs": "^6.3.3"
   },
   "scripts": {
     "start": "react-scripts start",
