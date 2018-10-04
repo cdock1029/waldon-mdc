@@ -19,7 +19,14 @@ import { Submenu } from '../Submenu'
 import './styles.scss'
 
 const NoData = ({ label }) => (
-  <div style={{ padding: '1rem 2rem' }}>
+  <div
+    style={{
+      padding: '1rem 2rem',
+      border: '1px solid var(--mdc-theme-secondary)',
+      borderRadius: '4px',
+      margin: '1rem',
+    }}
+  >
     <p>NO {label}</p>
   </div>
 )
@@ -90,21 +97,23 @@ export class Drawer extends React.Component {
               </div>
             ) : (
               <>
-                <div
-                  style={{
-                    padding: '1rem',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                  }}
-                >
-                  <Fab
-                    style={{ backgroundColor: '#6200ee' }}
-                    mini
-                    icon="add"
-                    onClick={this.toggleShowForm}
-                  />
+                <div className="DrawerControls">
+                  <div
+                    style={{
+                      padding: '1rem',
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    <Fab
+                      style={{ backgroundColor: '#6200ee' }}
+                      mini
+                      icon="add"
+                      onClick={this.toggleShowForm}
+                    />
+                  </div>
                 </div>
-                <List>
+                <List className="DrawerList">
                   <Collection path="properties" options={{ orderBy: ['name'] }}>
                     {({ data }) => {
                       console.log('render Properties')
