@@ -5,10 +5,8 @@ import qs from 'query-string'
 export const Location = ({ children }) => (
   <L>
     {props => {
-      let q
-      if (props.location.search) {
-        q = qs.parse(props.location.search)
-      }
+      const { search } = props.location
+      const q = search ? qs.parse(search) : {}
       return children({ ...props, q })
     }}
   </L>

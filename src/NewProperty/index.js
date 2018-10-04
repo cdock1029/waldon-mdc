@@ -5,7 +5,7 @@ import * as Yup from 'yup'
 // import './styles.scss'
 
 const PropertySchema = Yup.object().shape({
-  name: Yup.string()
+  propertyName: Yup.string()
     .min(2, 'Property name must be at least 2 characters in length')
     .max(100)
     .required('Property name is required'),
@@ -18,7 +18,7 @@ export class NewProperty extends React.Component {
         <h2>Add a new Property</h2>
         <NewEntityForm
           path="properties"
-          initialValues={{ name: '' }}
+          initialValues={{ propertyName: '' }}
           validationSchema={PropertySchema}
         >
           <div>
