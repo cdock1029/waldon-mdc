@@ -1,4 +1,8 @@
 .AppBar-TopAppBar {
   position: absolute;
   z-index: 7;
+
+  .mdc-top-app-bar__title {
+    cursor: pointer;
+  }
 }

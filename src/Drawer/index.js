@@ -3,14 +3,15 @@ import {
   Drawer as D,
   DrawerHeader,
   DrawerContent,
-  // DrawerTitle,
-  // DrawerSubtitle,
   ListItem,
   List,
   TabBar,
   Tab,
+  Fab,
 } from 'rmwc'
+import { navigate, Link } from '@reach/router'
 import { Collection } from '../Collection'
+import { Location } from '../Location'
 import './styles.scss'
 
 export class Drawer extends React.Component {
@@ -26,38 +27,103 @@ export class Drawer extends React.Component {
     const { tabIndex } = this.state
     return (
       <D dismissible open={isOpen} className="Drawer">
-        <DrawerHeader>
+        <DrawerHeader
+          style={{ backgroundColor: 'var(--mdc-theme-primary)/*#6200ee*/' }}
+        >
           {/* <DrawerTitle>Properties</DrawerTitle>
-      <DrawerSubtitle>ToDo</DrawerSubtitle> */}
+          <DrawerSubtitle>ToDo</DrawerSubtitle> */}
+        </DrawerHeader>
+        <DrawerContent className="DrawerContent">
           <TabBar activeTabIndex={tabIndex} onActivate={this.setTabIndex}>
             <Tab>Properties</Tab>
             <Tab>Tenants</Tab>
           </TabBar>
-        </DrawerHeader>
-        <DrawerContent className="DrawerContent">
-          <List>
-            {tabIndex === 0 ? (
-              <Collection path="properties">
-                {({ data }) => {
-                  console.log('render Properties')
-                  return data.map(property => (
-                    <ListItem key={property.id}>{property.name}</ListItem>
-                  ))
+          {tabIndex === 0 ? (
+            <>
+              <div
+                style={{
+                  padding: '1rem',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
                 }}
-              </Collection>
-            ) : (
-              <Collection path="tenants">
-                {({ data }) => {
-                  console.log('render Tenants')
-                  return data.map(tenant => (
-                    <ListItem key={tenant.id}>
-                      {tenant.firstName} {tenant.lastName}
-                    </ListItem>
-                  ))
+              >
+                <Fab
+                  style={{ backgroundColor: '#6200ee' }}
+                  mini
+                  icon="add"
+                  onClick={() => navigate('/new-property')}
+                />
+              </div>
+              <List>
+                <Collection path="properties" options={{ orderBy: ['name'] }}>
+                  {({ data }) => {
+                    console.log('render Properties')
+                    return (
+                      <Location>
+                        {({ q }) =>
+                          data.map(property => (
+                            <ListItem
+                              tag={Link}
+                              to={`/?p=${property.id}`}
+                              activated={q.p === property.id}
+                              key={property.id}
+                            >
+                              {property.name}
+                            </ListItem>
+                          ))
+                        }
+                      </Location>
+                    )
+                  }}
+                </Collection>
+              </List>
+            </>
+          ) : (
+            <>
+              <div
+                style={{
+                  padding: '1rem',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
                 }}
-              </Collection>
-            )}
-          </List>
+              >
+                {/* <IconButton icon="add" label="Add new tenant" /> */}
+                <Fab
+                  style={{ backgroundColor: '#6200ee' }}
+                  mini
+                  icon="add"
+                  onClick={() => navigate('/new-tenant')}
+                />
+                {/* <Button dense outlined>
+                  <ButtonIcon icon="add" /> Add
+                </Button> */}
+              </div>
+
+              <List>
+                <Collection path="tenants">
+                  {({ data }) => {
+                    console.log('render Tenants')
+                    return (
+                      <Location>
+                        {({ q }) =>
+                          data.map(tenant => (
+                            <ListItem
+                              key={tenant.id}
+                              tag={Link}
+                              to={`/?t=${tenant.id}`}
+                              activated={q.t === tenant.id}
+                            >
+                              {tenant.firstName} {tenant.lastName}
+                            </ListItem>
+                          ))
+                        }
+                      </Location>
+                    )
+                  }}
+                </Collection>
+              </List>
+            </>
+          )}
         </DrawerContent>
       </D>
     )

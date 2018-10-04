@@ -8,6 +8,7 @@ import {
   TopAppBarActionItem,
   TopAppBarTitle,
 } from 'rmwc'
+import { navigate } from '@reach/router'
 import './styles.scss'
 import firebase from '../firebase'
 
@@ -26,7 +27,9 @@ export class AppBar extends React.Component {
               <React.Fragment>
                 <TopAppBarSection alignStart>
                   <TopAppBarNavigationIcon onClick={onMenuClick} icon="menu" />
-                  <TopAppBarTitle>WPM</TopAppBarTitle>
+                  <TopAppBarTitle onClick={() => navigate('/')}>
+                    WPM
+                  </TopAppBarTitle>
                 </TopAppBarSection>
                 <TopAppBarSection alignEnd>
                   <React.Fragment>

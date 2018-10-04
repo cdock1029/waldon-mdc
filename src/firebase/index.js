@@ -65,4 +65,9 @@ export function observeUser(
 }
 export const getClaim = key => claimsData[key]
 
+export function createDoc(path, data) {
+  const [ref] = getRef(path)
+  return ref.doc().set(data)
+}
+
 export default firebase
