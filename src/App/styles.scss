@@ -1,0 +1,11 @@
+.App {
+  display: flex;
+  height: 100vh;
+  .DrawerAppContent {
+    flex: 1;
+    .Content {
+      overflow: auto;
+      padding: 0 1em;
+    }
+  }
+}

@@ -1,7 +1,5 @@
-import React from 'react'
 import { componentFromStream } from 'recompose'
 import { map, switchMap } from 'rxjs/operators'
-import { combineLatest } from 'rxjs'
 import { authCollection } from './firebase'
 
 export const Collection = componentFromStream(props$ => {
