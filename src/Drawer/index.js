@@ -18,6 +18,12 @@ import { MaterialField } from '../MaterialField'
 import { Submenu } from '../Submenu'
 import './styles.scss'
 
+const NoData = ({ label }) => (
+  <div style={{ padding: '1rem 2rem' }}>
+    <p>NO {label}</p>
+  </div>
+)
+
 const PropertySchema = Yup.object().shape({
   propertyName: Yup.string()
     .min(2, 'Property name must be at least 2 characters in length')
@@ -107,44 +113,52 @@ export class Drawer extends React.Component {
                           {({ q }) =>
                             data.map(property => {
                               const activated = q.p === property.id
-                              return activated ? (
+                              return (
                                 <Submenu
+                                  activated={activated}
                                   label={property.name}
-                                  key={property.id}
-                                >
-                                  <Collection
-                                    path={`properties/${property.id}/units`}
-                                    options={{ orderBy: ['label'] }}
-                                  >
-                                    {({ data }) => {
-                                      if (!data.length) {
-                                        return <div>No units.</div>
-                                      }
-                                      return data.map(unit => (
-                                        <ListItem
-                                          key={unit.id}
-                                          tag={Link}
-                                          to={`/?p=${property.id}&u=${unit.id}`}
-                                          onClick={() => window.scrollTo(0, 0)}
-                                          activated={q.u === unit.id}
-                                        >
-                                          <span>{unit.label}</span>
-                                        </ListItem>
-                                      ))
-                                    }}
-                                  </Collection>
-                                </Submenu>
-                              ) : (
-                                <ListItem
                                   key={property.id}
                                   tag={Link}
                                   to={`/?p=${property.id}`}
-                                  onClick={() => window.scrollTo(0, 0)}
-                                  activated={activated}
                                 >
-                                  <span>{property.name}</span>
-                                </ListItem>
+                                  {activated ? (
+                                    <Collection
+                                      path={`properties/${property.id}/units`}
+                                      options={{ orderBy: ['label'] }}
+                                    >
+                                      {({ data }) => {
+                                        if (!data.length) {
+                                          return <NoData label="Units" />
+                                        }
+                                        return data.map(unit => (
+                                          <ListItem
+                                            key={unit.id}
+                                            tag={Link}
+                                            to={`/?p=${property.id}&u=${
+                                              unit.id
+                                            }`}
+                                            onClick={() =>
+                                              window.scrollTo(0, 0)
+                                            }
+                                            activated={q.u === unit.id}
+                                          >
+                                            <span>{unit.label}</span>
+                                          </ListItem>
+                                        ))
+                                      }}
+                                    </Collection>
+                                  ) : null}
+                                </Submenu>
                               )
+                              // <ListItem
+                              //   key={property.id}
+                              //   tag={Link}
+                              //   to={`/?p=${property.id}`}
+                              //   onClick={() => window.scrollTo(0, 0)}
+                              //   activated={activated}
+                              // >
+                              //   <span>{property.name}</span>
+                              // </ListItem>
                             })
                           }
                         </Location>
