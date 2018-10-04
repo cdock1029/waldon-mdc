@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import {
   Drawer as D,
   DrawerHeader,
@@ -15,6 +15,7 @@ import { Collection } from '../Collection'
 import { Location } from '../Location'
 import { NewEntityForm } from '../NewEntityForm'
 import { MaterialField } from '../MaterialField'
+import { Submenu } from '../Submenu'
 import './styles.scss'
 
 const PropertySchema = Yup.object().shape({
@@ -104,16 +105,47 @@ export class Drawer extends React.Component {
                       return (
                         <Location>
                           {({ q }) =>
-                            data.map(property => (
-                              <ListItem
-                                key={property.id}
-                                tag={Link}
-                                to={`/?p=${property.id}`}
-                                activated={q.p === property.id}
-                              >
-                                {property.name}
-                              </ListItem>
-                            ))
+                            data.map(property => {
+                              const activated = q.p === property.id
+                              return activated ? (
+                                <Submenu
+                                  label={property.name}
+                                  key={property.id}
+                                >
+                                  <Collection
+                                    path={`properties/${property.id}/units`}
+                                    options={{ orderBy: ['label'] }}
+                                  >
+                                    {({ data }) => {
+                                      if (!data.length) {
+                                        return <div>No units.</div>
+                                      }
+                                      return data.map(unit => (
+                                        <ListItem
+                                          key={unit.id}
+                                          tag={Link}
+                                          to={`/?p=${property.id}&u=${unit.id}`}
+                                          onClick={() => window.scrollTo(0, 0)}
+                                          activated={q.u === unit.id}
+                                        >
+                                          <span>{unit.label}</span>
+                                        </ListItem>
+                                      ))
+                                    }}
+                                  </Collection>
+                                </Submenu>
+                              ) : (
+                                <ListItem
+                                  key={property.id}
+                                  tag={Link}
+                                  to={`/?p=${property.id}`}
+                                  onClick={() => window.scrollTo(0, 0)}
+                                  activated={activated}
+                                >
+                                  <span>{property.name}</span>
+                                </ListItem>
+                              )
+                            })
                           }
                         </Location>
                       )
