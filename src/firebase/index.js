@@ -4,7 +4,7 @@ import 'firebase/firestore'
 import './observableConfig'
 import { user } from 'rxfire/auth'
 import { collectionData } from 'rxfire/firestore'
-// import {} from 'rxjs/oper'
+import LRU from 'lru-cache'
 
 const config = {
   apiKey: 'AIzaSyDlWm0Ftq30kFD4LnPJ5sf9Mz8vyrcjIfM',
@@ -40,9 +40,27 @@ export function authCollection(path, options) {
       ref = ref.orderBy(...orderBy)
     }
   }
-  // const serialStr = JSON.stringify({ fixedPath, options })
-  // saveRef(serialStr, ref)
+  const serialStr = JSON.stringify({ fixedPath, options })
+  saveRef(serialStr, ref)
   return collectionData(ref, 'id')
+}
+
+const cache = LRU({
+  max: 20,
+  dispose: (key, unsub) => {
+    console.log('purging:', key)
+    unsub()
+  },
+})
+function noOp() {}
+function saveRef(str, ref) {
+  if (!cache.has(str)) {
+    console.log('adding', str)
+    const unsub = ref.onSnapshot({ next: noOp, error: () => unsub() })
+    cache.set(str, unsub)
+  } else {
+    console.log('cache hit!', str)
+  }
 }
 
 let claimsData
@@ -65,9 +83,15 @@ export function observeUser(
 }
 export const getClaim = key => claimsData[key]
 
+const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp()
+
 export function createDoc(path, data) {
   const [ref] = getRef(path)
-  return ref.doc().set(data)
+  return ref.doc().set({
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    ...data,
+  })
 }
 
 export default firebase

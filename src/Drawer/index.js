@@ -94,7 +94,6 @@ export class Drawer extends React.Component {
                     style={{ backgroundColor: '#6200ee' }}
                     mini
                     icon="add"
-                    // onClick={() => navigate('/new-property')}
                     onClick={this.toggleShowForm}
                   />
                 </div>
@@ -107,10 +106,10 @@ export class Drawer extends React.Component {
                           {({ q }) =>
                             data.map(property => (
                               <ListItem
+                                key={property.id}
                                 tag={Link}
                                 to={`/?p=${property.id}`}
                                 activated={q.p === property.id}
-                                key={property.id}
                               >
                                 {property.name}
                               </ListItem>
@@ -164,7 +163,6 @@ export class Drawer extends React.Component {
                   style={{ backgroundColor: '#6200ee' }}
                   mini
                   icon="add"
-                  // onClick={() => navigate('/new-tenant')}
                   onClick={this.toggleShowForm}
                 />
               </div>
