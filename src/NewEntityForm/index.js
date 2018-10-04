@@ -6,7 +6,13 @@ import './styles.scss'
 
 export class NewEntityForm extends React.Component {
   render() {
-    const { path, initialValues, validationSchema, children } = this.props
+    const {
+      path,
+      initialValues,
+      validationSchema,
+      children,
+      onCancel,
+    } = this.props
     return (
       <Formik
         initialValues={initialValues}
@@ -14,8 +20,16 @@ export class NewEntityForm extends React.Component {
         onSubmit={async (values, { setSubmitting, setStatus }) => {
           setSubmitting(true)
           try {
-            await createDoc(path, values)
-            setStatus('Success!')
+            await createDoc(
+              path,
+              Object.entries(values).reduce((acc, [key, val]) => {
+                if (val || val === 0) {
+                  acc[key] = val
+                }
+                return acc
+              }, {})
+            )
+            onCancel()
           } catch (e) {
             setStatus(e.message)
           } finally {
@@ -27,8 +41,15 @@ export class NewEntityForm extends React.Component {
           return (
             <Form className="NewEntity">
               {children}
-              <div>
-                <Button type="submit" disabled={!isValid || isSubmitting}>
+              <div className="Buttons">
+                <Button type="button" onClick={onCancel}>
+                  Cancel
+                </Button>
+                <Button
+                  raised
+                  type="submit"
+                  disabled={!isValid || isSubmitting}
+                >
                   Save
                 </Button>
               </div>

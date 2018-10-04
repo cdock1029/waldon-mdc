@@ -1,11 +1,18 @@
 form.NewEntity {
   display: inline-flex;
   flex-direction: column;
+  padding: 1rem 0;
 
   & > * {
     margin-bottom: 1em;
   }
   .textField + .helperText {
     color: red;
+  }
+  .Buttons {
+    margin-top: 1rem;
+    & > button {
+      margin-right: 1rem;
+    }
   }
 }
