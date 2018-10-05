@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 import {
   Drawer as D,
   DrawerHeader,
@@ -10,12 +10,16 @@ import {
   Fab,
 } from 'rmwc'
 import { Link } from '@reach/router'
-import * as Yup from 'yup'
-import { Collection } from '../Collection'
+import {
+  Collection,
+  PropertiesConsumer,
+  TenantsConsumer,
+} from '../firebase/Collection'
 import { Location } from '../Location'
 import { NewEntityForm } from '../NewEntityForm'
 import { MaterialField } from '../MaterialField'
 import { Submenu } from '../Submenu'
+import { PropertySchema, TenantSchema } from '../firebase/schemas'
 import './styles.scss'
 
 const NoData = ({ label }) => (
@@ -30,25 +34,6 @@ const NoData = ({ label }) => (
     <p>NO {label}</p>
   </div>
 )
-
-const PropertySchema = Yup.object().shape({
-  propertyName: Yup.string()
-    .min(2, 'Property name must be at least 2 characters in length')
-    .max(100)
-    .required('Property name is required'),
-})
-
-const TenantSchema = Yup.object().shape({
-  firstName: Yup.string()
-    .min(2, 'First name must be at least 2 letters')
-    .max(100)
-    .required('First name is required'),
-  lastName: Yup.string()
-    .min(2, 'Last name must be at least 2 letters')
-    .max(100)
-    .required('Last name is required'),
-  email: Yup.string().email('Must be a valid email address'),
-})
 
 export class Drawer extends React.Component {
   state = {
@@ -114,21 +99,21 @@ export class Drawer extends React.Component {
                   </div>
                 </div>
                 <List className="DrawerList">
-                  <Collection path="properties" options={{ orderBy: ['name'] }}>
-                    {({ data }) => {
-                      console.log('render Properties')
+                  <PropertiesConsumer>
+                    {properties => {
                       return (
                         <Location>
                           {({ q }) =>
-                            data.map(property => {
+                            properties.map(property => {
                               const activated = q.p === property.id
+                              const propertyPath = `/property/${property.id}`
                               return (
                                 <Submenu
                                   activated={activated}
                                   label={property.name}
                                   key={property.id}
                                   tag={Link}
-                                  to={`/?p=${property.id}`}
+                                  to={`${propertyPath}?p=${property.id}`}
                                 >
                                   {activated ? (
                                     <Collection
@@ -143,9 +128,9 @@ export class Drawer extends React.Component {
                                           <ListItem
                                             key={unit.id}
                                             tag={Link}
-                                            to={`/?p=${property.id}&u=${
+                                            to={`${propertyPath}/unit/${
                                               unit.id
-                                            }`}
+                                            }?p=${property.id}&u=${unit.id}`}
                                             onClick={() =>
                                               window.scrollTo(0, 0)
                                             }
@@ -159,21 +144,12 @@ export class Drawer extends React.Component {
                                   ) : null}
                                 </Submenu>
                               )
-                              // <ListItem
-                              //   key={property.id}
-                              //   tag={Link}
-                              //   to={`/?p=${property.id}`}
-                              //   onClick={() => window.scrollTo(0, 0)}
-                              //   activated={activated}
-                              // >
-                              //   <span>{property.name}</span>
-                              // </ListItem>
                             })
                           }
                         </Location>
                       )
                     }}
-                  </Collection>
+                  </PropertiesConsumer>
                 </List>
               </>
             )
@@ -223,13 +199,12 @@ export class Drawer extends React.Component {
               </div>
 
               <List>
-                <Collection path="tenants">
-                  {({ data }) => {
-                    console.log('render Tenants')
+                <TenantsConsumer>
+                  {tenants => {
                     return (
                       <Location>
                         {({ q }) =>
-                          data.map(tenant => (
+                          tenants.map(tenant => (
                             <ListItem
                               key={tenant.id}
                               tag={Link}
@@ -243,7 +218,7 @@ export class Drawer extends React.Component {
                       </Location>
                     )
                   }}
-                </Collection>
+                </TenantsConsumer>
               </List>
             </>
           )}

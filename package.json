@@ -6,6 +6,7 @@
     "@material/react-text-field": "^0.5.1",
     "@reach/router": "^1.2.1",
     "@rmwc/data-table": "^3.0.3",
+    "create-subscription": "^16.5.2",
     "emotion": "^9.2.12",
     "firebase": "^5.5.2",
     "firebaseui": "^3.4.1",

@@ -3,7 +3,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import './observableConfig'
 import { user } from 'rxfire/auth'
-import { collectionData } from 'rxfire/firestore'
+import { collectionData, docData } from 'rxfire/firestore'
 import LRU from 'lru-cache'
 
 const config = {
@@ -46,21 +46,33 @@ export function authCollection(path, options) {
 }
 
 const cache = LRU({
-  max: 20,
+  max: 30,
   dispose: (key, unsub) => {
-    console.log('purging:', key)
+    // console.log('purging:', key)
     unsub()
   },
 })
 function noOp() {}
 function saveRef(str, ref) {
   if (!cache.has(str)) {
-    console.log('adding', str)
+    // console.log('adding', str)
     const unsub = ref.onSnapshot({ next: noOp, error: () => unsub() })
     cache.set(str, unsub)
   } else {
-    console.log('cache hit!', str)
+    // console.log('cache hit!', str)
   }
+}
+export function authDoc(path) {
+  let checkPath
+  if (path.charAt(0) === '/') {
+    checkPath = path
+  } else {
+    checkPath = `companies/${getClaim('activeCompany')}/${path}`
+  }
+  const ref = firebase.firestore().doc(checkPath)
+  const serialStr = JSON.stringify({ checkPath })
+  saveRef(serialStr, ref)
+  return docData(ref, 'id')
 }
 
 let claimsData
