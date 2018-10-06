@@ -7,7 +7,7 @@ export const UnitSchema = Yup.object().shape({
 })
 
 export const PropertySchema = Yup.object().shape({
-  propertyName: Yup.string()
+  name: Yup.string()
     .min(2, 'Property name must be at least 2 characters in length')
     .max(100)
     .required('Property name is required'),

@@ -56,7 +56,11 @@ const PropertiesContext = createCollectionContext()
 const TenantsContext = createCollectionContext()
 
 export const PropertiesProvider = ({ children }) => (
-  <PropertiesContext.CollectionProvider path="properties" children={children} />
+  <PropertiesContext.CollectionProvider
+    path="properties"
+    children={children}
+    options={{ orderBy: ['name'] }}
+  />
 )
 export const PropertiesConsumer = PropertiesContext.CollectionConsumer
 

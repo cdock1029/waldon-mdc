@@ -1,6 +1,16 @@
 :root {
   /* --mdc-theme-primary: #282c34; */
+  --mdc-theme-background: #f4f5f8;
 }
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -9,6 +19,6 @@ body {
   transition: background-color 400ms ease;
 }
 
-body.darken {
-  background-color: #676767;
+.darken {
+  background-color: rgba(0, 0, 0, 0.4);
 }

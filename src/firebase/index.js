@@ -17,18 +17,28 @@ const config = {
 firebase.initializeApp(config)
 firebase.firestore().settings({ timestampsInSnapshots: true })
 
-function getRef(path) {
+const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp()
+
+function fixPath(path) {
   let fixedPath
   if (path.charAt(0) === '/') {
     fixedPath = path
   } else {
     fixedPath = `companies/${getClaim('activeCompany')}/${path}`
   }
+  return fixedPath
+}
+function getCollectionRef(path) {
+  const fixedPath = fixPath(path)
   return [firebase.firestore().collection(fixedPath), fixedPath]
+}
+function getDocRef(path) {
+  const fixedPath = fixPath(path)
+  return [firebase.firestore().doc(fixedPath), fixedPath]
 }
 
 export function authCollection(path, options) {
-  let [ref, fixedPath] = getRef(path)
+  let [ref, fixedPath] = getCollectionRef(path)
   if (options) {
     const { where, orderBy } = options
     if (where) {
@@ -63,14 +73,8 @@ function saveRef(str, ref) {
   }
 }
 export function authDoc(path) {
-  let checkPath
-  if (path.charAt(0) === '/') {
-    checkPath = path
-  } else {
-    checkPath = `companies/${getClaim('activeCompany')}/${path}`
-  }
-  const ref = firebase.firestore().doc(checkPath)
-  const serialStr = JSON.stringify({ checkPath })
+  const [ref, fixedPath] = getDocRef(path)
+  const serialStr = JSON.stringify({ fixedPath })
   saveRef(serialStr, ref)
   return docData(ref, 'id')
 }
@@ -93,17 +97,26 @@ export function observeUser(
     callback(u, claimsData)
   })
 }
-export const getClaim = key => claimsData[key]
 
-const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp()
+export function saveDoc(collectionPath, data, docId) {
+  /* docId: if updating an existing doc */
 
-export function createDoc(path, data) {
-  const [ref] = getRef(path)
-  return ref.doc().set({
-    createdAt: serverTimestamp(),
+  let [ref] = getCollectionRef(collectionPath)
+  const docData = {
     updatedAt: serverTimestamp(),
+    ...(docId ? {} : { createdAt: serverTimestamp() }),
     ...data,
-  })
+  }
+  ref = docId ? ref.doc(docId) : ref.doc()
+  return ref.set(docData)
 }
+
+export function deleteDoc(collectionPath, docId) {
+  const [ref] = getCollectionRef(collectionPath)
+  return ref.doc(docId).delete()
+  // console.log({ ref: ref.doc(docId) })
+}
+
+export const getClaim = key => claimsData[key]
 
 export default firebase

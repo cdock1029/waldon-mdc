@@ -1,17 +1,18 @@
 import React from 'react'
 import { Formik, Form } from 'formik'
 import { Button } from 'rmwc'
-import { createDoc } from '../firebase'
+import { saveDoc } from '../firebase'
 import './styles.scss'
 
-export class NewEntityForm extends React.Component {
+export class EntityForm extends React.Component {
   render() {
     const {
-      path,
+      collectionPath,
       initialValues,
       validationSchema,
       children,
       onCancel,
+      updateId,
     } = this.props
     return (
       <Formik
@@ -20,14 +21,15 @@ export class NewEntityForm extends React.Component {
         onSubmit={async (values, { setSubmitting, setStatus }) => {
           setSubmitting(true)
           try {
-            await createDoc(
-              path,
+            await saveDoc(
+              collectionPath,
               Object.entries(values).reduce((acc, [key, val]) => {
                 if (val || val === 0) {
                   acc[key] = val
                 }
                 return acc
-              }, {})
+              }, {}),
+              updateId
             )
             onCancel()
           } catch (e) {
@@ -54,7 +56,9 @@ export class NewEntityForm extends React.Component {
                 </Button>
               </div>
               {status && (
-                <div onClick={() => setStatus(undefined)}>{status}</div>
+                <div className="status" onClick={() => setStatus(undefined)}>
+                  {status}
+                </div>
               )}
             </Form>
           )

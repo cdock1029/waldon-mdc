@@ -15,4 +15,9 @@ form.NewEntity {
       margin-right: 1rem;
     }
   }
+  .status {
+    color: darkred;
+    max-width: 20em;
+    overflow-wrap: break-word;
+  }
 }

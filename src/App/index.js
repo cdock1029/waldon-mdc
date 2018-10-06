@@ -4,6 +4,9 @@ import { DrawerAppContent } from 'rmwc'
 import { AppBar } from '../AppBar'
 import { Drawer } from '../Drawer'
 import { Dashboard } from '../Dashboard'
+import { ErrorBoundary } from '../ErrorBoundary'
+import { PropertyDetail } from '../PropertyDetail'
+import { UnitDetail } from '../UnitDetail'
 import { Breadcrumbs } from '../Breadcrumbs'
 import { PropertiesProvider, TenantsProvider } from '../firebase/Collection'
 import './styles.scss'
@@ -20,20 +23,22 @@ class App extends Component {
         <TenantsProvider>
           <div className="App">
             <Drawer isOpen={isOpen} />
-            <DrawerAppContent className="DrawerAppContent">
-              <AppBar onMenuClick={this.handleMenuClick} />
-              <div className="Content">
-                <Router>
-                  <Dashboard path="/">
-                    <Breadcrumbs path="property/:p">
-                      <Breadcrumbs path="unit/:u" />
-                    </Breadcrumbs>
-                  </Dashboard>
-                  {/* <NewProperty path="new-property" />
+            <ErrorBoundary>
+              <DrawerAppContent className="DrawerAppContent">
+                <AppBar onMenuClick={this.handleMenuClick} />
+                <div className="Content">
+                  <Router>
+                    <Dashboard path="/">
+                      <PropertyDetail path="property/:propertyId">
+                        <UnitDetail path="unit/:unitId" />
+                      </PropertyDetail>
+                    </Dashboard>
+                    {/* <NewProperty path="new-property" />
               <NewTenant path="new-tenant" /> */}
-                </Router>
-              </div>
-            </DrawerAppContent>
+                  </Router>
+                </div>
+              </DrawerAppContent>
+            </ErrorBoundary>
           </div>
         </TenantsProvider>
       </PropertiesProvider>

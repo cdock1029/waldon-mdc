@@ -7,7 +7,9 @@ import {
   List,
   TabBar,
   Tab,
-  Fab,
+  // Fab,
+  Button,
+  ButtonIcon,
 } from 'rmwc'
 import { Link } from '@reach/router'
 import {
@@ -16,11 +18,11 @@ import {
   TenantsConsumer,
 } from '../firebase/Collection'
 import { Location } from '../Location'
-import { NewEntityForm } from '../NewEntityForm'
+import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 import { Submenu } from '../Submenu'
 import { PropertySchema, TenantSchema } from '../firebase/schemas'
-import './styles.scss'
+import { css } from 'emotion'
 
 const NoData = ({ label }) => (
   <div
@@ -50,7 +52,7 @@ export class Drawer extends React.Component {
     const { isOpen } = this.props
     const { tabIndex, showForm } = this.state
     return (
-      <D dismissible open={isOpen} className="Drawer">
+      <D dismissible open={isOpen} className={styles}>
         <DrawerHeader className="DrawerHeader" />
         <DrawerContent className="DrawerContent">
           <TabBar activeTabIndex={tabIndex} onActivate={this.setTabIndex}>
@@ -66,9 +68,9 @@ export class Drawer extends React.Component {
                   alignItems: 'center',
                 }}
               >
-                <NewEntityForm
-                  path="properties"
-                  initialValues={{ propertyName: '' }}
+                <EntityForm
+                  collectionPath="properties"
+                  initialValues={{ name: '' }}
                   validationSchema={PropertySchema}
                   onCancel={this.toggleShowForm}
                 >
@@ -76,9 +78,9 @@ export class Drawer extends React.Component {
                     <h2>Add a new Property</h2>
                   </div>
                   <div>
-                    <MaterialField name="propertyName" label="Property name" />
+                    <MaterialField name="name" label="Property name" />
                   </div>
-                </NewEntityForm>
+                </EntityForm>
               </div>
             ) : (
               <>
@@ -90,12 +92,16 @@ export class Drawer extends React.Component {
                       justifyContent: 'flex-end',
                     }}
                   >
-                    <Fab
+                    {/* <Fab
                       style={{ backgroundColor: '#6200ee' }}
                       mini
                       icon="add"
                       onClick={this.toggleShowForm}
-                    />
+                    /> */}
+                    <Button dense onClick={this.toggleShowForm}>
+                      <ButtonIcon icon="add" />
+                      New property
+                    </Button>
                   </div>
                 </div>
                 <List className="DrawerList">
@@ -161,8 +167,8 @@ export class Drawer extends React.Component {
                 alignItems: 'center',
               }}
             >
-              <NewEntityForm
-                path="tenants"
+              <EntityForm
+                collectionPath="tenants"
                 initialValues={{ firstName: '', lastName: '', email: '' }}
                 validationSchema={TenantSchema}
                 onCancel={this.toggleShowForm}
@@ -179,7 +185,7 @@ export class Drawer extends React.Component {
                 <div>
                   <MaterialField name="email" type="email" label="Email" />
                 </div>
-              </NewEntityForm>
+              </EntityForm>
             </div>
           ) : (
             <>
@@ -190,12 +196,16 @@ export class Drawer extends React.Component {
                   justifyContent: 'flex-end',
                 }}
               >
-                <Fab
+                {/* <Fab
                   style={{ backgroundColor: '#6200ee' }}
                   mini
                   icon="add"
                   onClick={this.toggleShowForm}
-                />
+                /> */}
+                <Button dense onClick={this.toggleShowForm}>
+                  <ButtonIcon icon="add" />
+                  New tenant
+                </Button>
               </div>
 
               <List>
@@ -227,3 +237,18 @@ export class Drawer extends React.Component {
     )
   }
 }
+
+const styles = css`
+  .DrawerHeader {
+    background-color: #282c34;
+  }
+  .DrawerContent {
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .DrawerList {
+    flex: 1;
+    overflow-y: scroll;
+  }
+`
