@@ -89,7 +89,7 @@ export class Drawer extends React.Component {
                     style={{
                       padding: '1rem',
                       display: 'flex',
-                      justifyContent: 'flex-end',
+                      // justifyContent: 'flex-end',
                     }}
                   >
                     {/* <Fab
@@ -193,7 +193,7 @@ export class Drawer extends React.Component {
                 style={{
                   padding: '1rem',
                   display: 'flex',
-                  justifyContent: 'flex-end',
+                  // justifyContent: 'flex-end',
                 }}
               >
                 {/* <Fab
@@ -218,7 +218,7 @@ export class Drawer extends React.Component {
                             <ListItem
                               key={tenant.id}
                               tag={Link}
-                              to={`/?t=${tenant.id}`}
+                              to={`/tenant/${tenant.id}?t=${tenant.id}`}
                               activated={q.t === tenant.id}
                             >
                               {tenant.firstName} {tenant.lastName}

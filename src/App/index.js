@@ -7,6 +7,7 @@ import { Dashboard } from '../Dashboard'
 import { ErrorBoundary } from '../ErrorBoundary'
 import { PropertyDetail } from '../PropertyDetail'
 import { UnitDetail } from '../UnitDetail'
+import { TenantDetail } from '../TenantDetail'
 import { Breadcrumbs } from '../Breadcrumbs'
 import { PropertiesProvider, TenantsProvider } from '../firebase/Collection'
 import './styles.scss'
@@ -32,6 +33,7 @@ class App extends Component {
                       <PropertyDetail path="property/:propertyId">
                         <UnitDetail path="unit/:unitId" />
                       </PropertyDetail>
+                      <TenantDetail path="tenant/:tenantId" />
                     </Dashboard>
                     {/* <NewProperty path="new-property" />
               <NewTenant path="new-tenant" /> */}

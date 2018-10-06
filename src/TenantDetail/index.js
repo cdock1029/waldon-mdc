@@ -4,64 +4,77 @@ import { Button, ButtonIcon, IconButton, Elevation, Typography } from 'rmwc'
 import { navigate } from '@reach/router'
 import { Doc } from '../firebase/Doc'
 import { deleteDoc } from '../firebase'
-import { UnitSchema } from '../firebase/schemas'
+import { TenantSchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 
-export class UnitDetail extends React.Component {
+export class TenantDetail extends React.Component {
   state = {
-    showUnitForm: false,
+    showTenantForm: false,
   }
-  toggleShowUnitForm = () =>
-    this.setState(({ showUnitForm }) => ({ showUnitForm: !showUnitForm }))
+  toggleShowTenantForm = () =>
+    this.setState(({ showTenantForm }) => ({ showTenantForm: !showTenantForm }))
   handleDelete = async () => {
     const result = window.confirm('Confirm DELETE?')
     if (result) {
-      const { propertyId, unitId } = this.props
-      console.log({ result, propertyId, unitId })
+      const { tenantId } = this.props
+      console.log({ result, tenantId })
       try {
-        await deleteDoc(`properties/${propertyId}/units`, unitId)
-        navigate(`/property/${propertyId}?p=${propertyId}`)
+        await deleteDoc('tenants', tenantId)
+        navigate('/')
       } catch (e) {
         alert(e.message)
       }
     }
   }
   render() {
-    const { propertyId, unitId } = this.props
-    const { showUnitForm } = this.state
+    const { tenantId } = this.props
+    const { showTenantForm } = this.state
     return (
-      <Doc path={`properties/${propertyId}/units/${unitId}`}>
+      <Doc path={`tenants/${tenantId}`}>
         {({ data }) => (
           <div className={styles}>
             <div className="header">
-              <div className="title-bar unit">
-                <Typography use="headline6">{data.label}</Typography>
-                <IconButton
-                  icon="edit"
-                  type="button"
-                  onClick={this.toggleShowUnitForm}
-                />
+              <div className="title">
+                <div className="title-bar">
+                  <Typography use="headline4">
+                    {data.firstName} {data.lastName}
+                  </Typography>
+                  <IconButton
+                    type="button"
+                    icon="edit"
+                    onClick={this.toggleShowTenantForm}
+                  />
+                </div>
+                {data.email && (
+                  <Typography use="subtitle1">{data.email}</Typography>
+                )}
               </div>
             </div>
-            {showUnitForm && (
+            {showTenantForm && (
               <div className="backdrop darken">
                 <Elevation className="form-wrapper" z={7}>
                   <EntityForm
-                    collectionPath={`properties/${propertyId}/units`}
-                    initialValues={{ label: data.label }}
-                    validationSchema={UnitSchema}
-                    onCancel={this.toggleShowUnitForm}
-                    updateId={unitId}
+                    collectionPath="tenants"
+                    initialValues={{ ...data }}
+                    validationSchema={TenantSchema}
+                    onCancel={this.toggleShowTenantForm}
+                    updateId={tenantId}
                   >
                     <div className="form-header">
-                      <h2>Edit unit</h2>
+                      <h2>Edit tenant</h2>
                       <Button type="button" dense onClick={this.handleDelete}>
                         Delete
                       </Button>
                     </div>
                     <div>
-                      <MaterialField name="label" label="Unit label" />
+                      <MaterialField name="firstName" label="First name" />
+                    </div>
+                    <div>
+                      <MaterialField name="lastName" label="Last name" />
+                    </div>
+                    <div>
+                      <MaterialField name="email" type="email" label="Email" />
                     </div>
                   </EntityForm>
                 </Elevation>
@@ -80,8 +93,10 @@ const styles = css`
     justify-content: space-between;
     align-items: center;
 
-    .title-bar.unit {
-      margin: 1em 0;
+    .title {
+      margin: 1.5em 0;
+    }
+    .title-bar {
       display: flex;
       align-items: center;
     }

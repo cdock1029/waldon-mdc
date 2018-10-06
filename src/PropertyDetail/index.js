@@ -1,6 +1,6 @@
 import React from 'react'
 import { css } from 'react-emotion'
-import { Button, ButtonIcon, Elevation } from 'rmwc'
+import { Button, ButtonIcon, IconButton, Elevation, Typography } from 'rmwc'
 import { Doc } from '../firebase/Doc'
 import { UnitSchema, PropertySchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
@@ -26,23 +26,15 @@ export class PropertyDetail extends React.Component {
         {({ data }) => (
           <div className={styles}>
             <div className="header">
-              <div className="title-bar">
-                <h3>{data.name}</h3>
-                <Button
+              <div className="title-bar property">
+                <Typography use="headline4">{data.name}</Typography>
+                <IconButton
+                  icon="edit"
                   type="button"
-                  dense
                   onClick={this.toggleShowPropertyForm}
-                >
-                  <ButtonIcon icon="edit" />
-                  Edit
-                </Button>
+                />
               </div>
-              <Button
-                type="button"
-                raised
-                dense
-                onClick={this.toggleShowUnitForm}
-              >
+              <Button type="button" dense onClick={this.toggleShowUnitForm}>
                 <ButtonIcon icon="add" />
                 New sub-unit
               </Button>
@@ -100,9 +92,10 @@ const styles = css`
     justify-content: space-between;
     align-items: center;
 
-    .title-bar {
+    .title-bar.property {
       display: flex;
       align-items: center;
+      margin-top: 1.5em;
     }
 
     button {
