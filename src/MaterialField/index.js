@@ -1,28 +1,34 @@
 import React from 'react'
 import { Field } from 'formik'
-import TextField, { HelperText, Input } from '@material/react-text-field'
+import { TextField, TextFieldHelperText } from 'rmwc'
+import { css, cx } from 'react-emotion/macro'
 
-export const MaterialField = ({ label, ...rest }) => {
+export const MaterialField = ({ label, className, ...rest }) => {
   return (
     <Field {...rest}>
       {({ field, form: { touched, errors } }) => {
         return (
-          <TextField
-            className="textField"
-            outlined
-            helperText={
-              touched[field.name] && errors[field.name] ? (
-                <HelperText persistent className="helperText">
-                  {errors[field.name]}
-                </HelperText>
-              ) : null
-            }
-            label={label}
-          >
-            <Input autoComplete="off" {...field} />
-          </TextField>
+          <div className={cx(fieldStyles, className)}>
+            <TextField
+              label={label}
+              autoComplete="off"
+              className="materialTextField"
+              {...field}
+            />
+            <TextFieldHelperText persistent className="materialHelperText">
+              {touched[field.name] && errors[field.name]
+                ? errors[field.name]
+                : null}
+            </TextFieldHelperText>
+          </div>
         )
       }}
     </Field>
   )
 }
+
+const fieldStyles = css`
+  .materialTextField + .materialHelperText {
+    color: red;
+  }
+`

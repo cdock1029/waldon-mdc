@@ -7,7 +7,7 @@ import {
   List,
   TabBar,
   Tab,
-  // Fab,
+  Typography,
   Button,
   ButtonIcon,
 } from 'rmwc'
@@ -22,20 +22,7 @@ import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 import { Submenu } from '../Submenu'
 import { PropertySchema, TenantSchema } from '../firebase/schemas'
-import { css } from 'emotion'
-
-const NoData = ({ label }) => (
-  <div
-    style={{
-      padding: '1rem 2rem',
-      border: '1px solid var(--mdc-theme-secondary)',
-      borderRadius: '4px',
-      margin: '1rem',
-    }}
-  >
-    <p>NO {label}</p>
-  </div>
-)
+import { css } from 'react-emotion/macro'
 
 export class Drawer extends React.Component {
   state = {
@@ -61,27 +48,19 @@ export class Drawer extends React.Component {
           </TabBar>
           {tabIndex === 0 ? (
             showForm ? (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
+              <EntityForm
+                collectionPath="properties"
+                initialValues={{ name: '' }}
+                validationSchema={PropertySchema}
+                onCancel={this.toggleShowForm}
               >
-                <EntityForm
-                  collectionPath="properties"
-                  initialValues={{ name: '' }}
-                  validationSchema={PropertySchema}
-                  onCancel={this.toggleShowForm}
-                >
-                  <div>
-                    <h2>Add a new Property</h2>
-                  </div>
-                  <div>
-                    <MaterialField name="name" label="Property name" />
-                  </div>
-                </EntityForm>
-              </div>
+                <div className="title">
+                  <Typography use="headline4">New property</Typography>
+                </div>
+                <div>
+                  <MaterialField name="name" label="Property name" />
+                </div>
+              </EntityForm>
             ) : (
               <>
                 <div className="DrawerControls">
@@ -160,33 +139,25 @@ export class Drawer extends React.Component {
               </>
             )
           ) : showForm ? (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
+            <EntityForm
+              collectionPath="tenants"
+              initialValues={{ firstName: '', lastName: '', email: '' }}
+              validationSchema={TenantSchema}
+              onCancel={this.toggleShowForm}
             >
-              <EntityForm
-                collectionPath="tenants"
-                initialValues={{ firstName: '', lastName: '', email: '' }}
-                validationSchema={TenantSchema}
-                onCancel={this.toggleShowForm}
-              >
-                <div>
-                  <h2>Add a new Tenant</h2>
-                </div>
-                <div>
-                  <MaterialField name="firstName" label="First name" />
-                </div>
-                <div>
-                  <MaterialField name="lastName" label="Last name" />
-                </div>
-                <div>
-                  <MaterialField name="email" type="email" label="Email" />
-                </div>
-              </EntityForm>
-            </div>
+              <div className="title">
+                <Typography use="headline4">New tenant</Typography>
+              </div>
+              <div>
+                <MaterialField name="firstName" label="First name" />
+              </div>
+              <div>
+                <MaterialField name="lastName" label="Last name" />
+              </div>
+              <div>
+                <MaterialField name="email" type="email" label="Email" />
+              </div>
+            </EntityForm>
           ) : (
             <>
               <div
@@ -237,6 +208,19 @@ export class Drawer extends React.Component {
     )
   }
 }
+
+const NoData = ({ label }) => (
+  <div
+    style={{
+      padding: '1rem 2rem',
+      border: '1px solid var(--mdc-theme-secondary)',
+      borderRadius: '4px',
+      margin: '1rem',
+    }}
+  >
+    <p>NO {label}</p>
+  </div>
+)
 
 const styles = css`
   .DrawerHeader {
