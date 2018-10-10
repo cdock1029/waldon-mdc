@@ -1,6 +1,6 @@
 import React from 'react'
 import { css } from 'react-emotion'
-import { Button, ButtonIcon, IconButton, Elevation, Typography } from 'rmwc'
+import { Button, IconButton, Elevation, Typography } from 'rmwc'
 import { navigate } from '@reach/router'
 import { Doc } from '../firebase/Doc'
 import { deleteDoc } from '../firebase'
@@ -20,7 +20,7 @@ export class TenantDetail extends React.Component {
       const { tenantId } = this.props
       console.log({ result, tenantId })
       try {
-        await deleteDoc('tenants', tenantId)
+        await deleteDoc({ collectionPath: 'tenants', docId: tenantId })
         navigate('/')
       } catch (e) {
         alert(e.message)
@@ -56,10 +56,10 @@ export class TenantDetail extends React.Component {
                 <Elevation className="form-wrapper" z={7}>
                   <EntityForm
                     collectionPath="tenants"
+                    docId={tenantId}
                     initialValues={{ ...data }}
                     validationSchema={TenantSchema}
                     onCancel={this.toggleShowTenantForm}
-                    updateId={tenantId}
                   >
                     <div className="form-header">
                       <h2>Edit tenant</h2>

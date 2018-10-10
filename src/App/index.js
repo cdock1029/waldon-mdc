@@ -8,7 +8,6 @@ import { ErrorBoundary } from '../ErrorBoundary'
 import { PropertyDetail } from '../PropertyDetail'
 import { UnitDetail } from '../UnitDetail'
 import { TenantDetail } from '../TenantDetail'
-import { Breadcrumbs } from '../Breadcrumbs'
 import { PropertiesProvider, TenantsProvider } from '../firebase/Collection'
 import './styles.scss'
 

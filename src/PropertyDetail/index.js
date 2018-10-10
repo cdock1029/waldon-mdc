@@ -1,5 +1,5 @@
 import React from 'react'
-import { css } from 'react-emotion'
+import { css } from 'react-emotion/macro'
 import { Button, ButtonIcon, IconButton, Elevation, Typography } from 'rmwc'
 import { Doc } from '../firebase/Doc'
 import { UnitSchema, PropertySchema } from '../firebase/schemas'
@@ -63,10 +63,10 @@ export class PropertyDetail extends React.Component {
                 <Elevation className="form-wrapper" z={7}>
                   <EntityForm
                     collectionPath="properties"
+                    docId={propertyId}
                     initialValues={{ name: data.name }}
                     validationSchema={PropertySchema}
                     onCancel={this.toggleShowPropertyForm}
-                    updateId={propertyId}
                   >
                     <div>
                       <h2>Edit property</h2>
@@ -103,6 +103,7 @@ const styles = css`
     }
   }
   .backdrop {
+    z-index: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;

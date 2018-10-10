@@ -37,7 +37,7 @@ function getDocRef(path) {
   return [firebase.firestore().doc(fixedPath), fixedPath]
 }
 
-export function authCollection(path, options) {
+export function authCollection({ path, options }) {
   let [ref, fixedPath] = getCollectionRef(path)
   if (options) {
     const { where, orderBy } = options
@@ -98,7 +98,7 @@ export function observeUser(
   })
 }
 
-export function saveDoc(collectionPath, data, docId) {
+export function saveDoc({ collectionPath, data, docId }) {
   /* docId: if updating an existing doc */
 
   let [ref] = getCollectionRef(collectionPath)
@@ -111,7 +111,7 @@ export function saveDoc(collectionPath, data, docId) {
   return ref.set(docData)
 }
 
-export function deleteDoc(collectionPath, docId) {
+export function deleteDoc({ collectionPath, docId }) {
   const [ref] = getCollectionRef(collectionPath)
   return ref.doc(docId).delete()
   // console.log({ ref: ref.doc(docId) })

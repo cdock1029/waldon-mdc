@@ -1,6 +1,6 @@
 import React from 'react'
 import { css } from 'react-emotion'
-import { Button, ButtonIcon, IconButton, Elevation, Typography } from 'rmwc'
+import { Button, IconButton, Elevation, Typography } from 'rmwc'
 import { navigate } from '@reach/router'
 import { Doc } from '../firebase/Doc'
 import { deleteDoc } from '../firebase'
@@ -20,7 +20,10 @@ export class UnitDetail extends React.Component {
       const { propertyId, unitId } = this.props
       console.log({ result, propertyId, unitId })
       try {
-        await deleteDoc(`properties/${propertyId}/units`, unitId)
+        await deleteDoc({
+          collectionPath: `properties/${propertyId}/units`,
+          docId: unitId,
+        })
         navigate(`/property/${propertyId}?p=${propertyId}`)
       } catch (e) {
         alert(e.message)
@@ -49,10 +52,10 @@ export class UnitDetail extends React.Component {
                 <Elevation className="form-wrapper" z={7}>
                   <EntityForm
                     collectionPath={`properties/${propertyId}/units`}
+                    docId={unitId}
                     initialValues={{ label: data.label }}
                     validationSchema={UnitSchema}
                     onCancel={this.toggleShowUnitForm}
-                    updateId={unitId}
                   >
                     <div className="form-header">
                       <h2>Edit unit</h2>

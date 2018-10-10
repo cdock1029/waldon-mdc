@@ -12,7 +12,7 @@ export class EntityForm extends React.Component {
       validationSchema,
       children,
       onCancel,
-      updateId,
+      docId,
     } = this.props
     return (
       <Formik
@@ -21,16 +21,16 @@ export class EntityForm extends React.Component {
         onSubmit={async (values, { setSubmitting, setStatus }) => {
           setSubmitting(true)
           try {
-            await saveDoc(
+            await saveDoc({
               collectionPath,
-              Object.entries(values).reduce((acc, [key, val]) => {
+              data: Object.entries(values).reduce((acc, [key, val]) => {
                 if (val || val === 0) {
                   acc[key] = val
                 }
                 return acc
               }, {}),
-              updateId
-            )
+              docId,
+            })
             onCancel()
           } catch (e) {
             setStatus(e.message)

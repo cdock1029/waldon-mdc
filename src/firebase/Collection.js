@@ -8,7 +8,7 @@ import { authCollection } from './index'
 export const Collection = componentFromStream(props$ => {
   const result$ = props$.pipe(
     switchMap(({ path, options, children }) =>
-      authCollection(path, options).pipe(map(data => children({ data })))
+      authCollection({ path, options }).pipe(map(data => children({ data })))
     )
   )
   return result$
@@ -32,9 +32,11 @@ export function createCollectionContext() {
       }
       componentDidMount() {
         const { path, options } = this.props
-        this.subscription = authCollection(path, options).subscribe(value => {
-          this.behaviorSubject.next(value)
-        })
+        this.subscription = authCollection({ path, options }).subscribe(
+          value => {
+            this.behaviorSubject.next(value)
+          }
+        )
       }
       componentWillUnmount() {
         this.subscription.unsubscribe()
