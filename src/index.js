@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { observeUser } from './firebase'
-import './index.css'
+import './index.scss'
 import App from './App'
 import { Login } from './Login'
 import * as serviceWorker from './serviceWorker'

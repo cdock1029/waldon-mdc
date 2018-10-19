@@ -30,5 +30,7 @@ export const MaterialField = ({ label, className, ...rest }) => {
 const fieldStyles = css`
   .materialTextField + .materialHelperText {
     color: red;
+    max-width: 10.5rem;
+    overflow-wrap: break-word;
   }
 `

@@ -1,12 +1,13 @@
 import React from 'react'
 import { componentFromStream } from 'recompose'
-import { map, switchMap } from 'rxjs/operators'
+import { map, switchMap, tap } from 'rxjs/operators'
 import { BehaviorSubject } from 'rxjs'
 import { createSubscription } from 'create-subscription'
 import { authCollection } from './index'
 
 export const Collection = componentFromStream(props$ => {
   const result$ = props$.pipe(
+    tap(props => console.log('tap:', { props })),
     switchMap(({ path, options, children }) =>
       authCollection({ path, options }).pipe(map(data => children({ data })))
     )

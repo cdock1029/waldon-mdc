@@ -11,17 +11,18 @@
 
 .submenu__children {
   overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.5s ease-in-out;
+  height: 0;
+  transition: height 150ms ease-in;
 }
 
 .submenu__children--open {
-  max-height: 25rem;
+  height: 16rem;
   overflow-y: scroll;
+  transition: height 200ms ease-out;
 }
 
 .submenu__icon {
-  transition: transform 0.5s;
+  transition: transform 100ms ease-in;
   user-select: none;
 }
 

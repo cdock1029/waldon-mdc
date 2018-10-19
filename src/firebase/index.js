@@ -28,11 +28,25 @@ function fixPath(path) {
   }
   return fixedPath
 }
-function getCollectionRef(path) {
+function serialize({ fixedPath, where, orderBy }) {
+  if (where) {
+    for (let item of where) {
+      if (item[2] instanceof firebase.firestore.DocumentReference) {
+        item[2] = item[2].path
+      }
+    }
+  }
+  return JSON.stringify({
+    fixedPath,
+    where,
+    orderBy,
+  })
+}
+export function getCollectionRef(path) {
   const fixedPath = fixPath(path)
   return [firebase.firestore().collection(fixedPath), fixedPath]
 }
-function getDocRef(path) {
+export function getDocRef(path) {
   const fixedPath = fixPath(path)
   return [firebase.firestore().doc(fixedPath), fixedPath]
 }
@@ -50,7 +64,8 @@ export function authCollection({ path, options }) {
       ref = ref.orderBy(...orderBy)
     }
   }
-  const serialStr = JSON.stringify({ fixedPath, options })
+  const serialStr = serialize({ fixedPath, ...options })
+  // console.log({ serialStr, ...options })
   saveRef(serialStr, ref)
   return collectionData(ref, 'id')
 }

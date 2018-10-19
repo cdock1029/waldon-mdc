@@ -1,6 +1,6 @@
 import React from 'react'
 import { css } from 'react-emotion/macro'
-import { Button, ButtonIcon, IconButton, Elevation, Typography } from 'rmwc'
+import { Button, ButtonIcon, IconButton, Typography } from 'rmwc'
 import { Doc } from '../firebase/Doc'
 import { UnitSchema, PropertySchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
@@ -40,42 +40,41 @@ export class PropertyDetail extends React.Component {
               </Button>
             </div>
             {showUnitForm && (
-              <div className="backdrop darken">
-                <Elevation className="form-wrapper" z={7}>
-                  <EntityForm
-                    collectionPath={`properties/${propertyId}/units`}
-                    initialValues={{ label: '' }}
-                    validationSchema={UnitSchema}
-                    onCancel={this.toggleShowUnitForm}
-                  >
-                    <div>
-                      <h2>Add a new sub unit</h2>
-                    </div>
-                    <div>
-                      <MaterialField name="label" label="Unit label" />
-                    </div>
-                  </EntityForm>
-                </Elevation>
+              <div className="darken">
+                <EntityForm
+                  collectionPath={`properties/${propertyId}/units`}
+                  initialValues={{ label: '' }}
+                  validationSchema={UnitSchema}
+                  onCancel={this.toggleShowUnitForm}
+                >
+                  <div className="title">
+                    <Typography use="headline5">New sub unit</Typography>
+                  </div>
+                  <div>
+                    <MaterialField name="label" label="Unit label" />
+                  </div>
+                </EntityForm>
               </div>
             )}
             {showPropertyForm && (
-              <div className="backdrop darken">
-                <Elevation className="form-wrapper" z={7}>
-                  <EntityForm
-                    collectionPath="properties"
-                    docId={propertyId}
-                    initialValues={{ name: data.name }}
-                    validationSchema={PropertySchema}
-                    onCancel={this.toggleShowPropertyForm}
-                  >
-                    <div>
-                      <h2>Edit property</h2>
+              <div className="darken">
+                <EntityForm
+                  collectionPath="properties"
+                  docId={propertyId}
+                  initialValues={{ name: data.name }}
+                  validationSchema={PropertySchema}
+                  onCancel={this.toggleShowPropertyForm}
+                >
+                  <div className="form-header">
+                    <div className="title">
+                      <Typography use="headline5">Edit property</Typography>
                     </div>
-                    <div>
-                      <MaterialField name="name" label="Property Name" />
-                    </div>
-                  </EntityForm>
-                </Elevation>
+                    <Button type="button">Delete</Button>
+                  </div>
+                  <div>
+                    <MaterialField name="name" label="Property Name" />
+                  </div>
+                </EntityForm>
               </div>
             )}
             {children}
@@ -91,30 +90,15 @@ const styles = css`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 1.5em;
 
     .title-bar.property {
       display: flex;
       align-items: center;
-      margin-top: 1.5em;
     }
 
     button {
       margin-left: 1em;
-    }
-  }
-  .backdrop {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    .form-wrapper {
-      padding: 0 2rem;
-      background-color: #fff;
     }
   }
 `

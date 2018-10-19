@@ -7,20 +7,23 @@ export class Submenu extends React.Component {
   static defaultProps = {
     activated: false,
   }
-  componentDidUpdate(prevProps, prevState) {
-    if (this.props.activated && !prevProps.activated) {
-      this.setState(() => ({ isOpen: true }))
-    }
-    if (!this.props.activated && this.state.isOpen) {
-      this.setState(() => ({ isOpen: false }))
-    }
-  }
   state = {
-    isOpen: this.props.activated,
+    isOpen: false,
   }
-
+  componentDidMount() {
+    if (this.props.activated) {
+      setTimeout(() => {
+        this.setState(() => ({ isOpen: true }))
+      }, 0)
+    }
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.activated !== prevProps.activated) {
+      this.setState(() => ({ isOpen: this.props.activated }))
+    }
+  }
   handleListItemClick = () => {
-    this.setState({ isOpen: !this.state.isOpen })
+    this.setState(({ isOpen }) => ({ isOpen: !isOpen }))
   }
   render() {
     const { children, label, activated, ...rest } = this.props

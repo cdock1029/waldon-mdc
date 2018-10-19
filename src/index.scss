@@ -22,6 +22,21 @@ body {
 .darken {
   z-index: 1;
   background-color: rgba(0, 0, 0, 0.45);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  .form-elevation-card {
+    padding: 0 2rem;
+    background-color: #fff;
+  }
 }
 
 .rch-rtr-rt {

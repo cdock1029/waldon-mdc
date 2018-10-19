@@ -21,6 +21,7 @@ import { Location } from '../Location'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 import { Submenu } from '../Submenu'
+import { NoData } from '../NoData'
 import { PropertySchema, TenantSchema } from '../firebase/schemas'
 import { css } from 'react-emotion/macro'
 
@@ -55,7 +56,7 @@ export class Drawer extends React.Component {
                 onCancel={this.toggleShowForm}
               >
                 <div className="title">
-                  <Typography use="headline4">New property</Typography>
+                  <Typography use="headline5">New property</Typography>
                 </div>
                 <div>
                   <MaterialField name="name" label="Property name" />
@@ -146,7 +147,7 @@ export class Drawer extends React.Component {
               onCancel={this.toggleShowForm}
             >
               <div className="title">
-                <Typography use="headline4">New tenant</Typography>
+                <Typography use="headline5">New tenant</Typography>
               </div>
               <div>
                 <MaterialField name="firstName" label="First name" />
@@ -208,19 +209,6 @@ export class Drawer extends React.Component {
     )
   }
 }
-
-const NoData = ({ label }) => (
-  <div
-    style={{
-      padding: '1rem 2rem',
-      border: '1px solid var(--mdc-theme-secondary)',
-      borderRadius: '4px',
-      margin: '1rem',
-    }}
-  >
-    <p>NO {label}</p>
-  </div>
-)
 
 const styles = css`
   .DrawerHeader {

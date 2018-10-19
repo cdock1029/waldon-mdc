@@ -1,6 +1,6 @@
 import React from 'react'
-import { css } from 'react-emotion'
-import { Typography } from 'rmwc'
+import styled, { css } from 'react-emotion/macro'
+import { Typography, Button, ButtonIcon } from 'rmwc'
 import { DataTable } from '../DataTable'
 
 export class Dashboard extends React.Component {
@@ -10,7 +10,13 @@ export class Dashboard extends React.Component {
       <div className={styles}>
         <div className="Dashboard-Header">{children}</div>
         <div className="Dashboard-Data">
-          <Typography use="headline5">Leases</Typography>
+          <LeaseTableHeader>
+            <Typography use="headline5">Leases</Typography>
+            <Button>
+              <ButtonIcon icon="add" />
+              New lease
+            </Button>
+          </LeaseTableHeader>
           <div className="DataTable-wrapper">
             <DataTable />
           </div>
@@ -35,11 +41,20 @@ const styles = css`
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
+
     padding: 2em 0;
 
     .DataTable-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 2em 0;
     }
   }
+`
+
+const LeaseTableHeader = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 `

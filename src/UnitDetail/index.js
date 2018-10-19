@@ -1,6 +1,6 @@
 import React from 'react'
 import { css } from 'react-emotion'
-import { Button, IconButton, Elevation, Typography } from 'rmwc'
+import { Button, IconButton, Typography } from 'rmwc'
 import { navigate } from '@reach/router'
 import { Doc } from '../firebase/Doc'
 import { deleteDoc } from '../firebase'
@@ -48,26 +48,26 @@ export class UnitDetail extends React.Component {
               </div>
             </div>
             {showUnitForm && (
-              <div className="backdrop darken">
-                <Elevation className="form-wrapper" z={7}>
-                  <EntityForm
-                    collectionPath={`properties/${propertyId}/units`}
-                    docId={unitId}
-                    initialValues={{ label: data.label }}
-                    validationSchema={UnitSchema}
-                    onCancel={this.toggleShowUnitForm}
-                  >
-                    <div className="form-header">
-                      <h2>Edit unit</h2>
-                      <Button type="button" dense onClick={this.handleDelete}>
-                        Delete
-                      </Button>
+              <div className="darken">
+                <EntityForm
+                  collectionPath={`properties/${propertyId}/units`}
+                  docId={unitId}
+                  initialValues={{ label: data.label }}
+                  validationSchema={UnitSchema}
+                  onCancel={this.toggleShowUnitForm}
+                >
+                  <div className="form-header">
+                    <div className="title">
+                      <Typography use="headline5">Edit unit</Typography>
                     </div>
-                    <div>
-                      <MaterialField name="label" label="Unit label" />
-                    </div>
-                  </EntityForm>
-                </Elevation>
+                    <Button type="button" dense onClick={this.handleDelete}>
+                      Delete
+                    </Button>
+                  </div>
+                  <div>
+                    <MaterialField name="label" label="Unit label" />
+                  </div>
+                </EntityForm>
               </div>
             )}
           </div>
@@ -93,7 +93,7 @@ const styles = css`
       margin-left: 1em;
     }
   }
-  .backdrop {
+  /* .backdrop {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -115,5 +115,5 @@ const styles = css`
         color: var(--mdc-theme-error);
       }
     }
-  }
+  } */
 `

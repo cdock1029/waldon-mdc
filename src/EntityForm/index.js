@@ -1,15 +1,25 @@
 import React from 'react'
 import { Formik, Form } from 'formik'
-import { Button } from 'rmwc'
+import { Button, Elevation } from 'rmwc'
+import { Padding } from '../widgets/Padding'
 import { saveDoc } from '../firebase'
 import styled, { css } from 'react-emotion/macro'
 
-const FromWrapper = styled.div({
+const FormWrapper = styled.div({
   label: 'FormWrapper',
   display: 'flex',
   flexDirection: 'column',
   padding: '1rem',
-  '.title': { padding: '1.5rem 0' },
+  '.title': { padding: '1.5rem 0', display: 'inline-flex' },
+  '.form-header': {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    button: {
+      marginLeft: '1rem',
+      color: 'var(--mdc-theme-error)',
+    },
+  },
 })
 
 export class EntityForm extends React.Component {
@@ -21,6 +31,7 @@ export class EntityForm extends React.Component {
       children,
       onCancel,
       docId,
+      elevation = 6,
     } = this.props
     return (
       <Formik
@@ -49,28 +60,35 @@ export class EntityForm extends React.Component {
       >
         {({ status, setStatus, isValid, isSubmitting }) => {
           return (
-            <FromWrapper>
-              <Form className={newEntityStyles}>
-                {children}
-                <div className="Buttons">
-                  <Button type="button" onClick={onCancel}>
-                    Cancel
-                  </Button>
-                  <Button
-                    raised
-                    type="submit"
-                    disabled={!isValid || isSubmitting}
-                  >
-                    Save
-                  </Button>
-                </div>
-                {status && (
-                  <div className="status" onClick={() => setStatus(undefined)}>
-                    {status}
-                  </div>
-                )}
-              </Form>
-            </FromWrapper>
+            <Padding padding="1rem">
+              <Elevation className="form-elevation-card" z={elevation}>
+                <FormWrapper>
+                  <Form className={newEntityStyles}>
+                    {children}
+                    <div className="Buttons">
+                      <Button type="button" onClick={onCancel}>
+                        Cancel
+                      </Button>
+                      <Button
+                        raised
+                        type="submit"
+                        disabled={!isValid || isSubmitting}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                    {status && (
+                      <div
+                        className="status"
+                        onClick={() => setStatus(undefined)}
+                      >
+                        {status}
+                      </div>
+                    )}
+                  </Form>
+                </FormWrapper>
+              </Elevation>
+            </Padding>
           )
         }}
       </Formik>
@@ -91,6 +109,9 @@ const newEntityStyles = css`
   } */
   .Buttons {
     margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
     & > button {
       margin-right: 1rem;
     }

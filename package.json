@@ -9,6 +9,7 @@
     "@rmwc/data-table": "^3.0.4",
     "babel-plugin-emotion": "^9.2.11",
     "create-subscription": "^16.5.2",
+    "dinero.js": "^1.4.0",
     "emotion": "^9.2.12",
     "firebase": "^5.5.2",
     "firebaseui": "^3.4.1",
@@ -26,6 +27,7 @@
     "rmwc": "^3.0.4",
     "rxfire": "^3.0.4",
     "rxjs": "^6.3.3",
+    "serve": "^10.0.2",
     "yup": "^0.26.6"
   },
   "scripts": {
@@ -38,9 +40,6 @@
     "extends": "react-app"
   },
   "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
+    "last 2 Chrome versions"
   ]
 }
