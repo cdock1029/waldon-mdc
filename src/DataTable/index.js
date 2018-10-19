@@ -47,18 +47,26 @@ const StyledTable = styled(RmwcDataTable)`
 `
 
 const ExpandedRow = styled.div`
+  label: ExpandedRow;
   display: flex;
   flex-direction: column;
   margin-left: 1rem;
+  max-height: 40rem;
+  overflow-y: scroll;
+  .titleWrap {
+    flex-shrink: 0;
+  }
   .title {
     margin: 1rem 0;
   }
-  max-height: 0px;
+  /* max-height: 30rem;
+  overflow-y: scroll; */
+  /* max-height: 0px;
   overflow: hidden;
   transition: max-height 200ms ease-in;
   &.expanded {
     max-height: 100vh;
-  }
+  } */
 `
 
 function buildWhere(q) {
@@ -167,7 +175,7 @@ export const DataTable = () => {
                                       {formatCents(l.balance)}
                                     </DataTableCell>
                                   </DataTableRow>
-                                  {/*i === activated*/ true && (
+                                  {i === activated && (
                                     <Collection
                                       path={`leases/${l.id}/transactions`}
                                       options={{ orderBy: ['date', 'desc'] }}
@@ -176,12 +184,9 @@ export const DataTable = () => {
                                         return (
                                           <DataTableRow>
                                             <DataTableCell colSpan="6">
-                                              <ExpandedRow
-                                                className={cx({
-                                                  expanded: i === activated,
-                                                })}
-                                              >
+                                              <ExpandedRow>
                                                 <Flex
+                                                  className="titleWrap"
                                                   justifyContent="space-between"
                                                   alignItems="center"
                                                 >
