@@ -14,7 +14,7 @@ const StyledNoData = styled(Elevation)({
 })
 
 export const NoData = ({ label }) => (
-  <StyledNoData z={4}>
+  <StyledNoData z={2}>
     <p>No {label} exist</p>
   </StyledNoData>
 )

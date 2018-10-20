@@ -51,8 +51,8 @@ const ExpandedRow = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: 1rem;
-  max-height: 40rem;
-  overflow-y: scroll;
+  /* max-height: 40rem;
+  overflow-y: scroll; */
   .titleWrap {
     flex-shrink: 0;
   }

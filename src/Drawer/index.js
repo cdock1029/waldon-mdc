@@ -10,6 +10,7 @@ import {
   Typography,
   Button,
   ButtonIcon,
+  ThemeProvider,
 } from 'rmwc'
 import { Link } from '@reach/router'
 import {
@@ -41,12 +42,22 @@ export class Drawer extends React.Component {
     const { tabIndex, showForm } = this.state
     return (
       <D dismissible open={isOpen} className={styles}>
-        <DrawerHeader className="DrawerHeader" />
+        <DrawerHeader className="DrawerHeader">
+          <ThemeProvider
+            options={{ primary: 'white', onSurface: 'white' }}
+            wrap
+          >
+            <TabBar
+              className="darkTabBar"
+              activeTabIndex={tabIndex}
+              onActivate={this.setTabIndex}
+            >
+              <Tab>Properties</Tab>
+              <Tab>Tenants</Tab>
+            </TabBar>
+          </ThemeProvider>
+        </DrawerHeader>
         <DrawerContent className="DrawerContent">
-          <TabBar activeTabIndex={tabIndex} onActivate={this.setTabIndex}>
-            <Tab>Properties</Tab>
-            <Tab>Tenants</Tab>
-          </TabBar>
           {tabIndex === 0 ? (
             showForm ? (
               <EntityForm
@@ -211,8 +222,12 @@ export class Drawer extends React.Component {
 }
 
 const styles = css`
+  background-color: #e8e9eb;
   .DrawerHeader {
+    display: flex;
+    align-items: flex-end;
     background-color: #282c34;
+    padding: 0;
   }
   .DrawerContent {
     overflow-y: hidden;

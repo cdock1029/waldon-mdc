@@ -30,7 +30,7 @@ const styles = css`
   label: Dashboard;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* height: 100%; */
   .rch-rtr-rt {
     height: auto;
   }
@@ -45,6 +45,7 @@ const styles = css`
     padding: 2em 0;
 
     .DataTable-wrapper {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;

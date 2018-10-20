@@ -7,6 +7,7 @@ import styled, { css } from 'react-emotion/macro'
 
 const FormWrapper = styled.div({
   label: 'FormWrapper',
+  backgroundColor: '#fff',
   display: 'flex',
   flexDirection: 'column',
   padding: '1rem',
