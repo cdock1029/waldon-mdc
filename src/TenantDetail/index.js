@@ -1,6 +1,6 @@
 import React from 'react'
 import { css } from 'react-emotion'
-import { Button, IconButton, Elevation, Typography } from 'rmwc'
+import { Button, IconButton, Typography } from 'rmwc'
 import { navigate } from '@reach/router'
 import { Doc } from '../firebase/Doc'
 import { deleteDoc } from '../firebase'
@@ -53,31 +53,31 @@ export class TenantDetail extends React.Component {
             </div>
             {showTenantForm && (
               <div className="backdrop darken">
-                <Elevation className="form-wrapper" z={7}>
-                  <EntityForm
-                    collectionPath="tenants"
-                    docId={tenantId}
-                    initialValues={{ ...data }}
-                    validationSchema={TenantSchema}
-                    onCancel={this.toggleShowTenantForm}
-                  >
-                    <div className="form-header">
-                      <h2>Edit tenant</h2>
-                      <Button type="button" dense onClick={this.handleDelete}>
-                        Delete
-                      </Button>
+                <EntityForm
+                  collectionPath="tenants"
+                  docId={tenantId}
+                  initialValues={{ ...data }}
+                  validationSchema={TenantSchema}
+                  onCancel={this.toggleShowTenantForm}
+                >
+                  <div className="form-header">
+                    <div className="title">
+                      <Typography use="headline5">Edit tenant</Typography>
                     </div>
-                    <div>
-                      <MaterialField name="firstName" label="First name" />
-                    </div>
-                    <div>
-                      <MaterialField name="lastName" label="Last name" />
-                    </div>
-                    <div>
-                      <MaterialField name="email" type="email" label="Email" />
-                    </div>
-                  </EntityForm>
-                </Elevation>
+                    <Button type="button" dense onClick={this.handleDelete}>
+                      Delete
+                    </Button>
+                  </div>
+                  <div>
+                    <MaterialField name="firstName" label="First name" />
+                  </div>
+                  <div>
+                    <MaterialField name="lastName" label="Last name" />
+                  </div>
+                  <div>
+                    <MaterialField name="email" type="email" label="Email" />
+                  </div>
+                </EntityForm>
               </div>
             )}
           </div>
