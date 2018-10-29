@@ -1,23 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { css } from 'react-emotion'
 import { Button, IconButton, Typography } from 'rmwc'
 import { navigate } from '@reach/router'
-import { Doc } from '../firebase/Doc'
+import { useDoc } from '../firebase/Doc'
 import { deleteDoc } from '../firebase'
 import { TenantSchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 
-export class TenantDetail extends React.Component {
-  state = {
-    showTenantForm: false,
+export function TenantDetail({ tenantId }) {
+  const [showTenantForm, setShowTenantForm] = useState(false)
+  const data = useDoc({ path: `tenants/${tenantId}` })
+  function toggleShowTenantForm() {
+    setShowTenantForm(!showTenantForm)
   }
-  toggleShowTenantForm = () =>
-    this.setState(({ showTenantForm }) => ({ showTenantForm: !showTenantForm }))
-  handleDelete = async () => {
+  async function handleDelete() {
     const result = window.confirm('Confirm DELETE?')
     if (result) {
-      const { tenantId } = this.props
       console.log({ result, tenantId })
       try {
         await deleteDoc({ collectionPath: 'tenants', docId: tenantId })
@@ -27,64 +26,54 @@ export class TenantDetail extends React.Component {
       }
     }
   }
-  render() {
-    const { tenantId } = this.props
-    const { showTenantForm } = this.state
-    return (
-      <Doc path={`tenants/${tenantId}`}>
-        {({ data }) => (
-          <div className={styles}>
-            <div className="header">
-              <div className="title">
-                <div className="title-bar">
-                  <Typography use="headline4">
-                    {data.firstName} {data.lastName}
-                  </Typography>
-                  <IconButton
-                    type="button"
-                    icon="edit"
-                    onClick={this.toggleShowTenantForm}
-                  />
-                </div>
-                {data.email && (
-                  <Typography use="subtitle1">{data.email}</Typography>
-                )}
-              </div>
-            </div>
-            {showTenantForm && (
-              <div className="backdrop darken">
-                <EntityForm
-                  collectionPath="tenants"
-                  docId={tenantId}
-                  initialValues={{ ...data }}
-                  validationSchema={TenantSchema}
-                  onCancel={this.toggleShowTenantForm}
-                >
-                  <div className="form-header">
-                    <div className="title">
-                      <Typography use="headline5">Edit tenant</Typography>
-                    </div>
-                    <Button type="button" dense onClick={this.handleDelete}>
-                      Delete
-                    </Button>
-                  </div>
-                  <div>
-                    <MaterialField name="firstName" label="First name" />
-                  </div>
-                  <div>
-                    <MaterialField name="lastName" label="Last name" />
-                  </div>
-                  <div>
-                    <MaterialField name="email" type="email" label="Email" />
-                  </div>
-                </EntityForm>
-              </div>
-            )}
+  return !data ? null : (
+    <div className={styles}>
+      <div className="header">
+        <div className="title">
+          <div className="title-bar">
+            <Typography use="headline4">
+              {data.firstName} {data.lastName}
+            </Typography>
+            <IconButton
+              type="button"
+              icon="edit"
+              onClick={toggleShowTenantForm}
+            />
           </div>
-        )}
-      </Doc>
-    )
-  }
+          {data.email && <Typography use="subtitle1">{data.email}</Typography>}
+        </div>
+      </div>
+      {showTenantForm && (
+        <div className="backdrop darken">
+          <EntityForm
+            collectionPath="tenants"
+            docId={tenantId}
+            initialValues={{ ...data }}
+            validationSchema={TenantSchema}
+            onCancel={toggleShowTenantForm}
+          >
+            <div className="form-header">
+              <div className="title">
+                <Typography use="headline5">Edit tenant</Typography>
+              </div>
+              <Button type="button" dense onClick={handleDelete}>
+                Delete
+              </Button>
+            </div>
+            <div>
+              <MaterialField name="firstName" label="First name" />
+            </div>
+            <div>
+              <MaterialField name="lastName" label="Last name" />
+            </div>
+            <div>
+              <MaterialField name="email" type="email" label="Email" />
+            </div>
+          </EntityForm>
+        </div>
+      )}
+    </div>
+  )
 }
 
 const styles = css`

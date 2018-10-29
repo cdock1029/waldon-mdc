@@ -1,88 +1,84 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { css } from 'react-emotion/macro'
 import { Button, ButtonIcon, IconButton, Typography } from 'rmwc'
-import { Doc } from '../firebase/Doc'
+import { useDoc } from '../firebase/Doc'
 import { UnitSchema, PropertySchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 
-export class PropertyDetail extends React.Component {
-  state = {
-    showUnitForm: false,
-    showPropertyForm: false,
+export function PropertyDetail({ propertyId, children }) {
+  const [showUnitForm, setShowUnitForm] = useState(false)
+  const [showPropertyForm, setShowPropertyForm] = useState(false)
+
+  // todo: should throw a promise....
+  const data = useDoc({ path: `properties/${propertyId}` })
+  function toggleShowUnitForm() {
+    setShowUnitForm(!showUnitForm)
   }
-  toggleShowUnitForm = () => {
-    this.setState(({ showUnitForm }) => ({ showUnitForm: !showUnitForm }))
+  function toggleShowPropertyForm() {
+    setShowPropertyForm(!showPropertyForm)
   }
-  toggleShowPropertyForm = () =>
-    this.setState(({ showPropertyForm }) => ({
-      showPropertyForm: !showPropertyForm,
-    }))
-  render() {
-    const { propertyId, children } = this.props
-    const { showUnitForm, showPropertyForm } = this.state
-    return (
-      <Doc path={`properties/${propertyId}`}>
-        {({ data }) => (
-          <div className={styles}>
-            <div className="header">
-              <div className="title-bar property">
-                <Typography use="headline4">{data.name}</Typography>
-                <IconButton
-                  icon="edit"
-                  type="button"
-                  onClick={this.toggleShowPropertyForm}
-                />
-              </div>
-              <Button type="button" dense onClick={this.toggleShowUnitForm}>
-                <ButtonIcon icon="add" />
-                New sub-unit
-              </Button>
+  // todo: should be handled by suspense...
+  if (!data) {
+    return null
+  }
+  return (
+    <div className={styles}>
+      <div className="header">
+        <div className="title-bar property">
+          <Typography use="headline4">{data.name}</Typography>
+          <IconButton
+            icon="edit"
+            type="button"
+            onClick={toggleShowPropertyForm}
+          />
+        </div>
+        <Button type="button" dense onClick={toggleShowUnitForm}>
+          <ButtonIcon icon="add" />
+          New sub-unit
+        </Button>
+      </div>
+      {showUnitForm && (
+        <div className="darken">
+          <EntityForm
+            collectionPath={`properties/${propertyId}/units`}
+            initialValues={{ label: '' }}
+            validationSchema={UnitSchema}
+            onCancel={toggleShowUnitForm}
+          >
+            <div className="title">
+              <Typography use="headline5">New sub unit</Typography>
             </div>
-            {showUnitForm && (
-              <div className="darken">
-                <EntityForm
-                  collectionPath={`properties/${propertyId}/units`}
-                  initialValues={{ label: '' }}
-                  validationSchema={UnitSchema}
-                  onCancel={this.toggleShowUnitForm}
-                >
-                  <div className="title">
-                    <Typography use="headline5">New sub unit</Typography>
-                  </div>
-                  <div>
-                    <MaterialField name="label" label="Unit label" />
-                  </div>
-                </EntityForm>
+            <div>
+              <MaterialField name="label" label="Unit label" />
+            </div>
+          </EntityForm>
+        </div>
+      )}
+      {showPropertyForm && (
+        <div className="darken">
+          <EntityForm
+            collectionPath="properties"
+            docId={propertyId}
+            initialValues={{ name: data.name }}
+            validationSchema={PropertySchema}
+            onCancel={toggleShowPropertyForm}
+          >
+            <div className="form-header">
+              <div className="title">
+                <Typography use="headline5">Edit property</Typography>
               </div>
-            )}
-            {showPropertyForm && (
-              <div className="darken">
-                <EntityForm
-                  collectionPath="properties"
-                  docId={propertyId}
-                  initialValues={{ name: data.name }}
-                  validationSchema={PropertySchema}
-                  onCancel={this.toggleShowPropertyForm}
-                >
-                  <div className="form-header">
-                    <div className="title">
-                      <Typography use="headline5">Edit property</Typography>
-                    </div>
-                    <Button type="button">Delete</Button>
-                  </div>
-                  <div>
-                    <MaterialField name="name" label="Property Name" />
-                  </div>
-                </EntityForm>
-              </div>
-            )}
-            {children}
-          </div>
-        )}
-      </Doc>
-    )
-  }
+              <Button type="button">Delete</Button>
+            </div>
+            <div>
+              <MaterialField name="name" label="Property Name" />
+            </div>
+          </EntityForm>
+        </div>
+      )}
+      {children}
+    </div>
+  )
 }
 
 const styles = css`

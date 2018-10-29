@@ -1,19 +1,36 @@
-import React from 'react'
-import { componentFromStream } from 'recompose'
-import { map, switchMap, tap } from 'rxjs/operators'
+import React, { useState, useEffect } from 'react'
 import { BehaviorSubject } from 'rxjs'
 import { createSubscription } from 'create-subscription'
 import { authCollection } from './index'
 
-export const Collection = componentFromStream(props$ => {
-  const result$ = props$.pipe(
-    tap(props => console.log('tap:', { props })),
-    switchMap(({ path, options, children }) =>
-      authCollection({ path, options }).pipe(map(data => children({ data })))
-    )
+export function Collection({ path, options, children }) {
+  const [data, setData] = useState(null)
+  useEffect(
+    () => {
+      console.log('running effect')
+      const sub = authCollection({ path, options }).subscribe(setData)
+      return () => {
+        sub.unsubscribe()
+      }
+    },
+    [path, JSON.stringify(options)]
   )
-  return result$
-})
+  return data ? children({ data }) : null
+}
+export function useCollection({ path, options }) {
+  const [data, setData] = useState(null)
+  useEffect(
+    () => {
+      console.log('running effect')
+      const sub = authCollection({ path, options }).subscribe(setData)
+      return () => {
+        sub.unsubscribe()
+      }
+    },
+    [path, JSON.stringify(options)]
+  )
+  return data
+}
 
 const BehaviorSubscription = createSubscription({
   getCurrentValue: behaviorSubject => behaviorSubject.getValue(),
@@ -24,7 +41,7 @@ const BehaviorSubscription = createSubscription({
 })
 
 export function createCollectionContext() {
-  const { Provider, Consumer } = React.createContext()
+  const RootContext = React.createContext()
   return {
     CollectionProvider: class CollectionProvider extends React.Component {
       constructor(props) {
@@ -46,28 +63,38 @@ export function createCollectionContext() {
         const { children } = this.props
         return (
           <BehaviorSubscription source={this.behaviorSubject}>
-            {data => <Provider value={data} children={children} />}
+            {data => {
+              console.log({ contextData: data })
+              return <RootContext.Provider value={data} children={children} />
+            }}
           </BehaviorSubscription>
         )
       }
     },
-    CollectionConsumer: Consumer,
+    CollectionConsumer: RootContext.Consumer,
+    RootContext,
   }
 }
 
-const PropertiesContext = createCollectionContext()
-const TenantsContext = createCollectionContext()
+const PropertiesContextWrapper = createCollectionContext()
+export const PropertiesContext = PropertiesContextWrapper.RootContext
+
+const TenantsContextWrapper = createCollectionContext()
+export const TenantsContext = TenantsContextWrapper.RootContext
 
 export const PropertiesProvider = ({ children }) => (
-  <PropertiesContext.CollectionProvider
+  <PropertiesContextWrapper.CollectionProvider
     path="properties"
     children={children}
     options={{ orderBy: ['name'] }}
   />
 )
-export const PropertiesConsumer = PropertiesContext.CollectionConsumer
+export const PropertiesConsumer = PropertiesContextWrapper.CollectionConsumer
 
 export const TenantsProvider = ({ children }) => (
-  <TenantsContext.CollectionProvider path="tenants" children={children} />
+  <TenantsContextWrapper.CollectionProvider
+    path="tenants"
+    children={children}
+  />
 )
-export const TenantsConsumer = TenantsContext.CollectionConsumer
+export const TenantsConsumer = TenantsContextWrapper.CollectionConsumer

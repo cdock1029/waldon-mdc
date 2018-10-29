@@ -1,24 +1,22 @@
 import React from 'react'
-import { Doc } from '../firebase/Doc'
+import { useDoc } from '../firebase/Doc'
 
-export const Breadcrumbs = ({ p, u, children }) => (
-  <div style={{ display: 'flex' }}>
-    {u ? (
-      <Doc path={`properties/${p}/units/${u}`}>
-        {({ data }) => (
-          <span>
-            &nbsp;
-            {'/'}
-            &nbsp;
-            {data.label}
-          </span>
-        )}
-      </Doc>
-    ) : p ? (
-      <Doc path={`properties/${p}`}>
-        {({ data }) => <span>{data.name}</span>}
-      </Doc>
-    ) : null}
-    {children}
-  </div>
-)
+export const Breadcrumbs = ({ p, u, children }) => {
+  let path = u ? `properties/${p}/units/${u}` : p ? `properties/${p}` : null
+  const data = path ? useDoc({ path }) : null
+  return !data ? null : (
+    <div style={{ display: 'flex' }}>
+      {u ? (
+        <span>
+          &nbsp;
+          {'/'}
+          &nbsp;
+          {data.label}
+        </span>
+      ) : p ? (
+        <span>{data.name}</span>
+      ) : null}
+      {children}
+    </div>
+  )
+}

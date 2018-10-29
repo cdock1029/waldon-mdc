@@ -1,23 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { css } from 'react-emotion'
 import { Button, IconButton, Typography } from 'rmwc'
 import { navigate } from '@reach/router'
-import { Doc } from '../firebase/Doc'
+import { useDoc } from '../firebase/Doc'
 import { deleteDoc } from '../firebase'
 import { UnitSchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 
-export class UnitDetail extends React.Component {
-  state = {
-    showUnitForm: false,
+export function UnitDetail({ propertyId, unitId }) {
+  const [showUnitForm, setShowUnitForm] = useState(false)
+  const data = useDoc({ path: `properties/${propertyId}/units/${unitId}` })
+  function toggleShowUnitForm() {
+    setShowUnitForm(!showUnitForm)
   }
-  toggleShowUnitForm = () =>
-    this.setState(({ showUnitForm }) => ({ showUnitForm: !showUnitForm }))
-  handleDelete = async () => {
+  async function handleDelete() {
+    console.log('handling delete unit')
     const result = window.confirm('Confirm DELETE?')
     if (result) {
-      const { propertyId, unitId } = this.props
       console.log({ result, propertyId, unitId })
       try {
         await deleteDoc({
@@ -30,51 +30,39 @@ export class UnitDetail extends React.Component {
       }
     }
   }
-  render() {
-    const { propertyId, unitId } = this.props
-    const { showUnitForm } = this.state
-    return (
-      <Doc path={`properties/${propertyId}/units/${unitId}`}>
-        {({ data }) => (
-          <div className={styles}>
-            <div className="header">
-              <div className="title-bar unit">
-                <Typography use="headline6">{data.label}</Typography>
-                <IconButton
-                  icon="edit"
-                  type="button"
-                  onClick={this.toggleShowUnitForm}
-                />
+  return !data ? null : (
+    <div className={styles}>
+      <div className="header">
+        <div className="title-bar unit">
+          <Typography use="headline6">{data.label}</Typography>
+          <IconButton icon="edit" type="button" onClick={toggleShowUnitForm} />
+        </div>
+      </div>
+      {showUnitForm && (
+        <div className="darken">
+          <EntityForm
+            collectionPath={`properties/${propertyId}/units`}
+            docId={unitId}
+            initialValues={{ label: data.label }}
+            validationSchema={UnitSchema}
+            onCancel={toggleShowUnitForm}
+          >
+            <div className="form-header">
+              <div className="title">
+                <Typography use="headline5">Edit unit</Typography>
               </div>
+              <Button type="button" dense onClick={handleDelete}>
+                Delete
+              </Button>
             </div>
-            {showUnitForm && (
-              <div className="darken">
-                <EntityForm
-                  collectionPath={`properties/${propertyId}/units`}
-                  docId={unitId}
-                  initialValues={{ label: data.label }}
-                  validationSchema={UnitSchema}
-                  onCancel={this.toggleShowUnitForm}
-                >
-                  <div className="form-header">
-                    <div className="title">
-                      <Typography use="headline5">Edit unit</Typography>
-                    </div>
-                    <Button type="button" dense onClick={this.handleDelete}>
-                      Delete
-                    </Button>
-                  </div>
-                  <div>
-                    <MaterialField name="label" label="Unit label" />
-                  </div>
-                </EntityForm>
-              </div>
-            )}
-          </div>
-        )}
-      </Doc>
-    )
-  }
+            <div>
+              <MaterialField name="label" label="Unit label" />
+            </div>
+          </EntityForm>
+        </div>
+      )}
+    </div>
+  )
 }
 
 const styles = css`

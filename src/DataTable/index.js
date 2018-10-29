@@ -99,7 +99,6 @@ export const DataTable = () => {
         return (
           <Collection path={'leases'} options={{ where: buildWhere(q) }}>
             {({ data }) => {
-              console.log({ data })
               if (!data.length) {
                 return <NoData label="Leases" />
               }

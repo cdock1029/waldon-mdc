@@ -1,12 +1,16 @@
-import { componentFromStream } from 'recompose'
-import { map, switchMap } from 'rxjs/operators'
+import { useState, useEffect } from 'react'
 import { authDoc } from './index'
 
-export const Doc = componentFromStream(props$ => {
-  const result$ = props$.pipe(
-    switchMap(({ path, children }) =>
-      authDoc(path).pipe(map(data => children({ data })))
-    )
+export function useDoc({ path }) {
+  const [data, setData] = useState(null)
+  useEffect(
+    () => {
+      const sub = authDoc(path).subscribe(setData)
+      return () => {
+        sub.unsubscribe()
+      }
+    },
+    [path]
   )
-  return result$
-})
+  return data
+}
