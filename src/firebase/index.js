@@ -1,7 +1,6 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
-import './observableConfig'
 import { user } from 'rxfire/auth'
 import { collectionData, docData } from 'rxfire/firestore'
 import LRU from 'lru-cache'
@@ -28,7 +27,7 @@ function fixPath(path) {
   }
   return fixedPath
 }
-function serialize({ fixedPath, where, orderBy }) {
+export function serialize({ fixedPath, where, orderBy }) {
   if (where) {
     for (let item of where) {
       if (item[2] instanceof firebase.firestore.DocumentReference) {
@@ -51,7 +50,7 @@ export function getDocRef(path) {
   return [firebase.firestore().doc(fixedPath), fixedPath]
 }
 
-export function authCollection({ path, options }) {
+export function authCollection({ path, options, auth }) {
   let [ref, fixedPath] = getCollectionRef(path)
   if (options) {
     const { where, orderBy } = options
@@ -78,7 +77,7 @@ const cache = LRU({
   },
 })
 function noOp() {}
-function saveRef(str, ref) {
+export function saveRef(str, ref) {
   if (!cache.has(str)) {
     // console.log('adding', str)
     const unsub = ref.onSnapshot({ next: noOp, error: () => unsub() })
@@ -95,23 +94,6 @@ export function authDoc(path) {
 }
 
 let claimsData
-export function observeUser(
-  callback, //: (u, c) => void,
-  claimsKeys //: string[],
-) {
-  return user(firebase.auth()).subscribe(async u => {
-    const tempClaims = {}
-    if (u) {
-      const token = await u.getIdTokenResult()
-      claimsData = claimsKeys.reduce((acc, claim) => {
-        acc[claim] = token.claims[claim]
-        return acc
-      }, tempClaims)
-    }
-    claimsData = tempClaims
-    callback(u, claimsData)
-  })
-}
 
 export function saveDoc({ collectionPath, data, docId }) {
   /* docId: if updating an existing doc */

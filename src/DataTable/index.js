@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useContext, useState } from 'react'
 import Component from '@reach/component-component'
 import styled, { cx } from 'react-emotion/macro'
 import { Typography, Button, ButtonIcon, ChipSet, Chip, ChipText } from 'rmwc'
@@ -13,11 +13,190 @@ import {
 } from '@rmwc/data-table'
 import '@rmwc/data-table/data-table.css'
 import { formatCents } from '../utils/money'
-import { Location } from '../Location'
 import { NoData } from '../NoData'
 import { Flex } from '../widgets/Flex'
-import { Collection } from '../firebase/Collection'
-// import { getDocRef } from '../firebase'
+import { useCollection } from '../firebase/Collection'
+import { QueryContext } from '../Location'
+
+function buildWhere(q) {
+  const { p: propertyId, u: unitId, t: tenantId } = q
+  const where = [['status', '==', 'ACTIVE']]
+  if (propertyId) {
+    where.push([`properties.${propertyId}.exists`, '==', true])
+    if (unitId) {
+      where.push([`units.${unitId}.exists`, '==', true])
+    }
+  } else if (tenantId) {
+    where.push([`tenants.${tenantId}.exists`, '==', true])
+  }
+  return where
+  /* const str = propertyId
+    ? `properties/${propertyId}${unitId ? `/units/${unitId}` : ''}`
+    : tenantId
+      ? `tenants/${tenantId}`
+      : ''
+  const ref = getDocRef(str)[0]
+  console.log({ str, REF: ref })
+  return [['propertyList', 'array-contains', ref]]
+  */
+}
+
+export const DataTable = () => {
+  const q = useContext(QueryContext)
+  const [sortDir, setSortDir] = useState(null)
+  const [activated, setActivated] = useState(null)
+  const data = useCollection({
+    path: 'leases',
+    options: { where: buildWhere(q) },
+  })
+  function handleSortChange(sortDir) {
+    setSortDir(sortDir)
+  }
+  function handleRowClick(i) {
+    setActivated(activated === i ? null : i)
+  }
+  if (!data) {
+    return null
+  }
+  if (!data.length) {
+    return <NoData label="Leases" />
+  }
+  return (
+    <StyledTable>
+      <DataTableContent>
+        <DataTableHead>
+          <DataTableRow>
+            <DataTableHeadCell>Tenants</DataTableHeadCell>
+            <DataTableHeadCell>Active</DataTableHeadCell>
+            <DataTableHeadCell sort={sortDir} onSortChange={handleSortChange}>
+              Properties
+            </DataTableHeadCell>
+            <DataTableHeadCell>Units</DataTableHeadCell>
+            <DataTableHeadCell alignEnd>Rent</DataTableHeadCell>
+            <DataTableHeadCell alignEnd>Balance</DataTableHeadCell>
+          </DataTableRow>
+        </DataTableHead>
+        <DataTableBody>
+          {data.map(
+            (l, i) =>
+              console.log() || (
+                <LeaseRow
+                  key={l.id}
+                  lease={l}
+                  activated={i === activated}
+                  handleRowClick={() => handleRowClick(i)}
+                />
+              )
+          )}
+        </DataTableBody>
+      </DataTableContent>
+    </StyledTable>
+  )
+}
+
+function LeaseRow({ activated, handleRowClick, lease }) {
+  return (
+    <Fragment>
+      <DataTableRow
+        className="leaseRow"
+        activated={activated}
+        onClick={handleRowClick}
+      >
+        <DataTableCell>
+          {Object.values(lease.tenants).map((t, i) => (
+            <p key={i}>{t.name}</p>
+          ))}
+        </DataTableCell>
+        <DataTableCell>{lease.status}</DataTableCell>
+        <DataTableCell>
+          {Object.values(lease.properties).map((p, i) => (
+            <p key={i}>{p.name}</p>
+          ))}
+        </DataTableCell>
+        <DataTableCell>
+          {Object.values(lease.units).map((u, i) => (
+            <p key={i}>{/* TODO: replace with label */ u.address}</p>
+          ))}
+        </DataTableCell>
+        <DataTableCell alignEnd className="money">
+          {formatCents(lease.rent)}
+        </DataTableCell>
+        <DataTableCell alignEnd className="money">
+          {formatCents(lease.balance)}
+        </DataTableCell>
+      </DataTableRow>
+      {activated && <Transactions leaseId={lease.id} />}
+    </Fragment>
+  )
+}
+
+function Transactions({ leaseId }) {
+  const transactions = useCollection({
+    path: `leases/${leaseId}/transactions`,
+    options: {
+      orderBy: ['date', 'desc'],
+    },
+  })
+  return (
+    <DataTableRow>
+      <DataTableCell colSpan="6">
+        <ExpandedRow>
+          <Flex
+            className="titleWrap"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography className="title" use="headline6">
+              Transactions
+            </Typography>
+            <Button>
+              <ButtonIcon icon="add" />
+              New transaction
+            </Button>
+          </Flex>
+          <DataTableContent>
+            <DataTableHead>
+              <DataTableRow>
+                <DataTableHeadCell>Type</DataTableHeadCell>
+                <DataTableHeadCell>Date</DataTableHeadCell>
+                <DataTableHeadCell alignEnd>Amount</DataTableHeadCell>
+              </DataTableRow>
+            </DataTableHead>
+            <DataTableBody>
+              {transactions.map(t => (
+                <DataTableRow key={t.id} className="transactionRow">
+                  <DataTableCell>
+                    <ChipSet>
+                      <Chip>
+                        <ChipText>{t.type}</ChipText>
+                      </Chip>
+                      {t.subType && (
+                        <Chip>
+                          <ChipText>{t.subType.replace('_', ' ')}</ChipText>
+                        </Chip>
+                      )}
+                    </ChipSet>
+                  </DataTableCell>
+                  <DataTableCell>
+                    {t.date.toDate().toDateString()}
+                  </DataTableCell>
+                  <DataTableCell
+                    alignEnd
+                    className={cx('money', t.type, t.subType)}
+                  >
+                    {formatCents(
+                      `${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`
+                    )}
+                  </DataTableCell>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTableContent>
+        </ExpandedRow>
+      </DataTableCell>
+    </DataTableRow>
+  )
+}
 
 const StyledTable = styled(RmwcDataTable)`
   label: StyledTable;
@@ -68,225 +247,3 @@ const ExpandedRow = styled.div`
     max-height: 100vh;
   } */
 `
-
-function buildWhere(q) {
-  const { p: propertyId, u: unitId, t: tenantId } = q
-  const where = [['status', '==', 'ACTIVE']]
-  if (propertyId) {
-    where.push([`properties.${propertyId}.exists`, '==', true])
-    if (unitId) {
-      where.push([`units.${unitId}.exists`, '==', true])
-    }
-  } else if (tenantId) {
-    where.push([`tenants.${tenantId}.exists`, '==', true])
-  }
-  return where
-  /* const str = propertyId
-    ? `properties/${propertyId}${unitId ? `/units/${unitId}` : ''}`
-    : tenantId
-      ? `tenants/${tenantId}`
-      : ''
-  const ref = getDocRef(str)[0]
-  console.log({ str, REF: ref })
-  return [['propertyList', 'array-contains', ref]]
-  */
-}
-
-export const DataTable = () => {
-  return (
-    <Location>
-      {({ q }) => {
-        return (
-          <Collection path={'leases'} options={{ where: buildWhere(q) }}>
-            {({ data }) => {
-              if (!data.length) {
-                return <NoData label="Leases" />
-              }
-              return (
-                <Component
-                  initialState={{ sortDir: null, activated: null }}
-                  key={`${q.p}${q.u}${q.t}`}
-                >
-                  {({ setState, state: { sortDir, activated } }) => (
-                    <StyledTable>
-                      <DataTableContent>
-                        <DataTableHead>
-                          <DataTableRow>
-                            <DataTableHeadCell>Tenants</DataTableHeadCell>
-                            <DataTableHeadCell>Active</DataTableHeadCell>
-                            <DataTableHeadCell
-                              sort={sortDir}
-                              onSortChange={sortDir => {
-                                setState({ sortDir })
-                                console.log(sortDir)
-                              }}
-                            >
-                              Properties
-                            </DataTableHeadCell>
-                            <DataTableHeadCell>Units</DataTableHeadCell>
-                            <DataTableHeadCell alignEnd>Rent</DataTableHeadCell>
-                            <DataTableHeadCell alignEnd>
-                              Balance
-                            </DataTableHeadCell>
-                          </DataTableRow>
-                        </DataTableHead>
-                        <DataTableBody>
-                          {data.map(
-                            (l, i) =>
-                              console.log() || (
-                                <Fragment key={l.id}>
-                                  <DataTableRow
-                                    className="leaseRow"
-                                    activated={i === activated}
-                                    onClick={() => {
-                                      // this.handleSelect(i)
-                                      setState(({ activated }) => ({
-                                        activated: activated === i ? null : i,
-                                      }))
-                                    }}
-                                  >
-                                    <DataTableCell>
-                                      {Object.values(l.tenants).map((t, i) => (
-                                        <p key={i}>{t.name}</p>
-                                      ))}
-                                    </DataTableCell>
-                                    <DataTableCell>{l.status}</DataTableCell>
-                                    <DataTableCell>
-                                      {Object.values(l.properties).map(
-                                        (p, i) => (
-                                          <p key={i}>{p.name}</p>
-                                        )
-                                      )}
-                                    </DataTableCell>
-                                    <DataTableCell>
-                                      {Object.values(l.units).map((u, i) => (
-                                        <p key={i}>
-                                          {
-                                            /* TODO: replace with label */ u.address
-                                          }
-                                        </p>
-                                      ))}
-                                    </DataTableCell>
-                                    <DataTableCell alignEnd className="money">
-                                      {formatCents(l.rent)}
-                                    </DataTableCell>
-                                    <DataTableCell alignEnd className="money">
-                                      {formatCents(l.balance)}
-                                    </DataTableCell>
-                                  </DataTableRow>
-                                  {i === activated && (
-                                    <Collection
-                                      path={`leases/${l.id}/transactions`}
-                                      options={{ orderBy: ['date', 'desc'] }}
-                                    >
-                                      {({ data: transactions }) => {
-                                        return (
-                                          <DataTableRow>
-                                            <DataTableCell colSpan="6">
-                                              <ExpandedRow>
-                                                <Flex
-                                                  className="titleWrap"
-                                                  justifyContent="space-between"
-                                                  alignItems="center"
-                                                >
-                                                  <Typography
-                                                    className="title"
-                                                    use="headline6"
-                                                  >
-                                                    Transactions
-                                                  </Typography>
-                                                  <Button>
-                                                    <ButtonIcon icon="add" />
-                                                    New transaction
-                                                  </Button>
-                                                </Flex>
-                                                <DataTableContent>
-                                                  <DataTableHead>
-                                                    <DataTableRow>
-                                                      <DataTableHeadCell>
-                                                        Type
-                                                      </DataTableHeadCell>
-                                                      <DataTableHeadCell>
-                                                        Date
-                                                      </DataTableHeadCell>
-                                                      <DataTableHeadCell
-                                                        alignEnd
-                                                      >
-                                                        Amount
-                                                      </DataTableHeadCell>
-                                                    </DataTableRow>
-                                                  </DataTableHead>
-                                                  <DataTableBody>
-                                                    {transactions.map(t => (
-                                                      <DataTableRow
-                                                        key={t.id}
-                                                        className="transactionRow"
-                                                      >
-                                                        <DataTableCell>
-                                                          <ChipSet>
-                                                            <Chip>
-                                                              <ChipText>
-                                                                {t.type}
-                                                              </ChipText>
-                                                            </Chip>
-                                                            {t.subType && (
-                                                              <Chip>
-                                                                <ChipText>
-                                                                  {t.subType.replace(
-                                                                    '_',
-                                                                    ' '
-                                                                  )}
-                                                                </ChipText>
-                                                              </Chip>
-                                                            )}
-                                                          </ChipSet>
-                                                        </DataTableCell>
-                                                        <DataTableCell>
-                                                          {t.date
-                                                            .toDate()
-                                                            .toDateString()}
-                                                        </DataTableCell>
-                                                        <DataTableCell
-                                                          alignEnd
-                                                          className={cx(
-                                                            'money',
-                                                            t.type,
-                                                            t.subType
-                                                          )}
-                                                        >
-                                                          {formatCents(
-                                                            `${
-                                                              t.type ===
-                                                              'PAYMENT'
-                                                                ? '-'
-                                                                : ''
-                                                            }${t.amount}`
-                                                          )}
-                                                        </DataTableCell>
-                                                      </DataTableRow>
-                                                    ))}
-                                                  </DataTableBody>
-                                                </DataTableContent>
-                                              </ExpandedRow>
-                                            </DataTableCell>
-                                          </DataTableRow>
-                                        )
-                                      }}
-                                    </Collection>
-                                  )}
-                                </Fragment>
-                              )
-                          )}
-                        </DataTableBody>
-                      </DataTableContent>
-                    </StyledTable>
-                  )}
-                </Component>
-              )
-            }}
-          </Collection>
-        )
-      }}
-    </Location>
-  )
-}

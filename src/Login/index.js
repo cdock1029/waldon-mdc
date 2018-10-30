@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import styled from 'react-emotion/macro'
 import firebase from '../firebase'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import './style.scss'
@@ -14,25 +15,23 @@ const uiConfig = {
   signInOptions: [firebase.auth.EmailAuthProvider.PROVIDER_ID],
 }
 
-export class Login extends React.Component {
-  componentDidMount() {
+export function Login() {
+  useEffect(() => {
     document.querySelector('body').classList.add('darken')
-  }
-  componentWillUnmount() {
-    document.querySelector('body').classList.remove('darken')
-  }
-  render() {
-    return (
-      <div>
-        <AppBar />
-        <div className="Login">
-          <h1>WPM</h1>
-          <StyledFirebaseAuth
-            uiConfig={uiConfig}
-            firebaseAuth={firebase.auth()}
-          />
-        </div>
-      </div>
-    )
-  }
+    return () => {
+      document.querySelector('body').classList.remove('darken')
+    }
+  }, [])
+  return (
+    <LoginPage>
+      <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
+    </LoginPage>
+  )
 }
+
+const LoginPage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10rem;
+`

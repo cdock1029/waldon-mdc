@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@material/react-text-field": "^0.5.1",
-    "@reach/component-component": "^0.1.1",
     "@reach/router": "^1.2.1",
     "@rmwc/data-table": "^3.0.4",
     "babel-plugin-emotion": "^9.2.11",
@@ -23,7 +22,6 @@
     "react-emotion": "^9.2.12",
     "react-firebaseui": "^3.0.7",
     "react-scripts": "^2.0.6-next.c662dfb0",
-    "recompose": "^0.30.0",
     "rmwc": "^3.0.4",
     "rxfire": "^3.0.4",
     "rxjs": "^6.3.3",

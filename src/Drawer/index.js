@@ -35,6 +35,7 @@ export function Drawer({ isOpen }) {
 
   function handleSetTabIndex(e) {
     const tabIndex = e.detail.index
+    console.log('handle tab:', tabIndex)
     setTabIndex(tabIndex)
     setShowForm(false)
   }
@@ -88,15 +89,17 @@ export function Drawer({ isOpen }) {
                 </div>
               </div>
               <List className="DrawerList">
-                {properties.map(property => {
-                  return (
-                    <PropertyItem
-                      key={property.id}
-                      {...property}
-                      propertyActivated={q.p === property.id}
-                    />
-                  )
-                })}
+                {properties
+                  ? properties.map(property => {
+                      return (
+                        <PropertyItem
+                          key={property.id}
+                          {...property}
+                          propertyActivated={q.p === property.id}
+                        />
+                      )
+                    })
+                  : null}
               </List>
             </>
           )

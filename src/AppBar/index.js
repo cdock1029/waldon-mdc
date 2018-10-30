@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { useContext } from 'react'
 import {
   TopAppBar,
   TopAppBarFixedAdjust,
@@ -8,46 +8,53 @@ import {
   TopAppBarActionItem,
   TopAppBarTitle,
 } from 'rmwc'
+import { css } from 'react-emotion/macro'
 import { navigate } from '@reach/router'
-import './styles.scss'
-import firebase from '../firebase'
+import { AuthContext } from '../firebase/Auth'
 
-export class AppBar extends React.Component {
-  signOut = () => {
-    firebase.auth().signOut()
+export function AppBar({ onMenuClick }) {
+  const auth = useContext(AuthContext)
+  function signOut() {
+    auth.signOut()
   }
-  render() {
-    const user = firebase.auth().currentUser
-    const { onMenuClick } = this.props
-    return (
-      <Fragment>
-        <TopAppBar className="AppBar-TopAppBar">
-          <TopAppBarRow>
-            {user ? (
-              <React.Fragment>
-                <TopAppBarSection alignStart>
-                  <TopAppBarNavigationIcon onClick={onMenuClick} icon="menu" />
-                  <TopAppBarTitle onClick={() => navigate('/')}>
-                    WPM
-                  </TopAppBarTitle>
-                </TopAppBarSection>
-                <TopAppBarSection alignEnd>
-                  <React.Fragment>
-                    <TopAppBarTitle>{user.email}</TopAppBarTitle>
-                    <TopAppBarActionItem
-                      onClick={this.signOut}
-                      aria-label="Sign out"
-                      alt="Sign out"
-                      icon="exit_to_app"
-                    />
-                  </React.Fragment>
-                </TopAppBarSection>
-              </React.Fragment>
-            ) : null}
-          </TopAppBarRow>
-        </TopAppBar>
-        <TopAppBarFixedAdjust />
-      </Fragment>
-    )
-  }
+  return (
+    <>
+      <TopAppBar className={styles}>
+        <TopAppBarRow>
+          {auth.user ? (
+            <React.Fragment>
+              <TopAppBarSection alignStart>
+                <TopAppBarNavigationIcon onClick={onMenuClick} icon="menu" />
+                <TopAppBarTitle onClick={() => navigate('/')}>
+                  WPM
+                </TopAppBarTitle>
+              </TopAppBarSection>
+              <TopAppBarSection alignEnd>
+                <React.Fragment>
+                  <TopAppBarTitle>{auth.user.email}</TopAppBarTitle>
+                  <TopAppBarActionItem
+                    onClick={signOut}
+                    aria-label="Sign out"
+                    alt="Sign out"
+                    icon="exit_to_app"
+                  />
+                </React.Fragment>
+              </TopAppBarSection>
+            </React.Fragment>
+          ) : null}
+        </TopAppBarRow>
+      </TopAppBar>
+      <TopAppBarFixedAdjust />
+    </>
+  )
 }
+
+const styles = css`
+  background-color: #282c34;
+  position: absolute;
+  z-index: 7;
+
+  .mdc-top-app-bar__title {
+    cursor: pointer;
+  }
+`
