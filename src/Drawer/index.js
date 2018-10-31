@@ -1,4 +1,4 @@
-import React, { useState, useContext, memo } from 'react'
+import React, { useState, useContext, memo, lazy, Suspense } from 'react'
 import {
   Drawer as D,
   DrawerHeader,
@@ -12,25 +12,23 @@ import {
   ButtonIcon,
   ThemeProvider,
 } from 'rmwc'
+import { css } from 'react-emotion/macro'
 import { Link } from '@reach/router'
-import {
-  PropertiesContext,
-  TenantsContext,
-  useCollection,
-} from '../firebase/Collection'
+import { PropertiesContext, useCollection } from '../firebase/Collection'
 import { QueryContext } from '../Location'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 import { Submenu } from '../Submenu'
 import { NoData } from '../NoData'
-import { PropertySchema, TenantSchema } from '../firebase/schemas'
-import { css } from 'react-emotion/macro'
+import { PropertySchema } from '../firebase/schemas'
+
+const TenantList = lazy(() => import('./TenantList'))
+const NewTenantForm = lazy(() => import('./NewTenantForm'))
 
 export function Drawer({ isOpen }) {
   const [tabIndex, setTabIndex] = useState(0)
   const [showForm, setShowForm] = useState(false)
   const properties = useContext(PropertiesContext)
-  const tenants = useContext(TenantsContext)
   const q = useContext(QueryContext)
 
   function handleSetTabIndex(e) {
@@ -104,56 +102,13 @@ export function Drawer({ isOpen }) {
             </>
           )
         ) : showForm ? (
-          <EntityForm
-            collectionPath="tenants"
-            initialValues={{ firstName: '', lastName: '', email: '' }}
-            validationSchema={TenantSchema}
-            onCancel={toggleShowForm}
-          >
-            <div className="title">
-              <Typography use="headline5">New tenant</Typography>
-            </div>
-            <div>
-              <MaterialField name="firstName" label="First name" />
-            </div>
-            <div>
-              <MaterialField name="lastName" label="Last name" />
-            </div>
-            <div>
-              <MaterialField name="email" type="email" label="Email" />
-            </div>
-          </EntityForm>
+          <Suspense fallback={<div>...</div>}>
+            <NewTenantForm toggleShowForm={toggleShowForm} />
+          </Suspense>
         ) : (
-          <>
-            <div
-              style={{
-                padding: '1rem',
-                display: 'flex',
-                // justifyContent: 'flex-end',
-              }}
-            >
-              {/* <Fab
-                  style={{ backgroundColor: '#6200ee' }}
-                  mini
-                  icon="add"
-                  onClick={toggleShowForm}
-                /> */}
-              <Button dense onClick={toggleShowForm}>
-                <ButtonIcon icon="add" />
-                New tenant
-              </Button>
-            </div>
-
-            <List>
-              {tenants.map(tenant => (
-                <TenantItem
-                  key={tenant.id}
-                  {...tenant}
-                  tenantActivated={q.t === tenant.id}
-                />
-              ))}
-            </List>
-          </>
+          <Suspense fallback={<div>...</div>}>
+            <TenantList t={q.t} toggleShowForm={toggleShowForm} />
+          </Suspense>
         )}
       </DrawerContent>
     </D>
@@ -203,21 +158,6 @@ const UnitItem = memo(function UnitItemComponent({ propertyId, ...unit }) {
       activated={u === unit.id}
     >
       <span>{unit.label}</span>
-    </ListItem>
-  )
-})
-
-const TenantItem = memo(function TenantItemComponent({
-  tenantActivated,
-  ...tenant
-}) {
-  return (
-    <ListItem
-      tag={Link}
-      to={`/tenant/${tenant.id}?t=${tenant.id}`}
-      activated={tenantActivated}
-    >
-      {tenant.firstName} {tenant.lastName}
     </ListItem>
   )
 })

@@ -6,6 +6,9 @@
     "**/CVS": true,
     "**/.DS_Store": true,
     ".pnp": true,
-    ".pnp.js": true
+    ".pnp.js": true,
+    "build": true,
+    ".vscode": true,
+    "package-lock.json": true
   }
 }

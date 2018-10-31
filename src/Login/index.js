@@ -2,8 +2,6 @@ import React, { useEffect } from 'react'
 import styled from 'react-emotion/macro'
 import firebase from '../firebase'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
-import './style.scss'
-import { AppBar } from '../AppBar'
 import firebaseui from 'firebaseui'
 
 const uiConfig = {
@@ -33,5 +31,6 @@ const LoginPage = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100vh;
   padding-top: 10rem;
 `

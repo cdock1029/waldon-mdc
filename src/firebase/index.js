@@ -1,7 +1,6 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
-import { user } from 'rxfire/auth'
 import { collectionData, docData } from 'rxfire/firestore'
 import LRU from 'lru-cache'
 
@@ -17,57 +16,6 @@ firebase.initializeApp(config)
 firebase.firestore().settings({ timestampsInSnapshots: true })
 
 const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp()
-
-function fixPath(path) {
-  let fixedPath
-  if (path.charAt(0) === '/') {
-    fixedPath = path
-  } else {
-    fixedPath = `companies/${getClaim('activeCompany')}/${path}`
-  }
-  return fixedPath
-}
-export function serialize({ fixedPath, where, orderBy }) {
-  if (where) {
-    for (let item of where) {
-      if (item[2] instanceof firebase.firestore.DocumentReference) {
-        item[2] = item[2].path
-      }
-    }
-  }
-  return JSON.stringify({
-    fixedPath,
-    where,
-    orderBy,
-  })
-}
-export function getCollectionRef(path) {
-  const fixedPath = fixPath(path)
-  return [firebase.firestore().collection(fixedPath), fixedPath]
-}
-export function getDocRef(path) {
-  const fixedPath = fixPath(path)
-  return [firebase.firestore().doc(fixedPath), fixedPath]
-}
-
-export function authCollection({ path, options, auth }) {
-  let [ref, fixedPath] = getCollectionRef(path)
-  if (options) {
-    const { where, orderBy } = options
-    if (where) {
-      for (const clause of where) {
-        ref = ref.where(...clause)
-      }
-    }
-    if (orderBy) {
-      ref = ref.orderBy(...orderBy)
-    }
-  }
-  const serialStr = serialize({ fixedPath, ...options })
-  // console.log({ serialStr, ...options })
-  saveRef(serialStr, ref)
-  return collectionData(ref, 'id')
-}
 
 const cache = LRU({
   max: 30,
@@ -86,34 +34,78 @@ export function saveRef(str, ref) {
     // console.log('cache hit!', str)
   }
 }
-export function authDoc(path) {
-  const [ref, fixedPath] = getDocRef(path)
+
+function fixPath({ path, activeCompany }) {
+  let fixedPath
+  if (path.charAt(0) === '/') {
+    fixedPath = path
+  } else {
+    fixedPath = `companies/${activeCompany}/${path}`
+  }
+  return fixedPath
+}
+export function serialize({ fixedPath, where, orderBy }) {
+  if (where) {
+    for (let item of where) {
+      if (item[2] instanceof firebase.firestore.DocumentReference) {
+        item[2] = item[2].path
+      }
+    }
+  }
+  return JSON.stringify({
+    fixedPath,
+    where,
+    orderBy,
+  })
+}
+
+export function authCollection({ path, options, activeCompany }) {
+  const fixedPath = fixPath({ path, activeCompany })
+  let ref = firebase.firestore().collection(fixedPath)
+
+  if (options) {
+    const { where, orderBy } = options
+    if (where) {
+      for (const clause of where) {
+        ref = ref.where(...clause)
+      }
+    }
+    if (orderBy) {
+      ref = ref.orderBy(...orderBy)
+    }
+  }
+  const serialStr = serialize({ fixedPath, ...options })
+  saveRef(serialStr, ref)
+  return collectionData(ref, 'id')
+}
+export function authDoc({ path, activeCompany }) {
+  const fixedPath = fixPath({ path, activeCompany })
+  let ref = firebase.firestore().doc(fixedPath)
   const serialStr = JSON.stringify({ fixedPath })
   saveRef(serialStr, ref)
   return docData(ref, 'id')
 }
 
-let claimsData
+export function saveDoc({ collectionPath, data, docId, activeCompany }) {
+  const fixedPath = fixPath({ path: collectionPath, activeCompany })
+  let ref = firebase.firestore().collection(fixedPath)
 
-export function saveDoc({ collectionPath, data, docId }) {
-  /* docId: if updating an existing doc */
-
-  let [ref] = getCollectionRef(collectionPath)
   const docData = {
     updatedAt: serverTimestamp(),
     ...(docId ? {} : { createdAt: serverTimestamp() }),
     ...data,
   }
+  /* docId: if updating an existing doc */
   ref = docId ? ref.doc(docId) : ref.doc()
   return ref.set(docData)
 }
 
-export function deleteDoc({ collectionPath, docId }) {
-  const [ref] = getCollectionRef(collectionPath)
+export function deleteDoc({ collectionPath, docId, activeCompany }) {
+  const fixedPath = fixPath({ path: collectionPath, activeCompany })
+  let ref = firebase.firestore().collection(fixedPath)
+
   return ref.doc(docId).delete()
   // console.log({ ref: ref.doc(docId) })
 }
-
-export const getClaim = key => claimsData[key]
 
 export default firebase

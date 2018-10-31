@@ -1,7 +1,15 @@
-import React, { Fragment, useContext, useState } from 'react'
-import Component from '@reach/component-component'
+import React, { Fragment, useContext, useState, useEffect } from 'react'
 import styled, { cx } from 'react-emotion/macro'
-import { Typography, Button, ButtonIcon, ChipSet, Chip, ChipText } from 'rmwc'
+import {
+  Typography,
+  Button,
+  ButtonIcon,
+  ChipSet,
+  Chip,
+  ChipText,
+  TabBar,
+  Tab,
+} from 'rmwc'
 import {
   DataTable as RmwcDataTable,
   DataTableContent,
@@ -18,9 +26,12 @@ import { Flex } from '../widgets/Flex'
 import { useCollection } from '../firebase/Collection'
 import { QueryContext } from '../Location'
 
-function buildWhere(q) {
+const ACTIVE = 'ACTIVE'
+const INACTIVE = 'INACTIVE'
+
+function buildIt({ q, activeTab }) {
+  let where = [['status', '==', activeTab]]
   const { p: propertyId, u: unitId, t: tenantId } = q
-  const where = [['status', '==', 'ACTIVE']]
   if (propertyId) {
     where.push([`properties.${propertyId}.exists`, '==', true])
     if (unitId) {
@@ -30,6 +41,23 @@ function buildWhere(q) {
     where.push([`tenants.${tenantId}.exists`, '==', true])
   }
   return where
+}
+
+function useWhereParam() {
+  const q = useContext(QueryContext)
+  const [activeTab, setActiveTab] = useState(ACTIVE)
+  const [where, setWhere] = useState(buildIt({ q, activeTab: ACTIVE }))
+  useEffect(
+    () => {
+      setWhere(buildIt({ q, activeTab }))
+    },
+    [activeTab, q]
+  )
+
+  function toggleActiveTab() {
+    setActiveTab(activeTab === ACTIVE ? INACTIVE : ACTIVE)
+  }
+  return [where, toggleActiveTab]
   /* const str = propertyId
     ? `properties/${propertyId}${unitId ? `/units/${unitId}` : ''}`
     : tenantId
@@ -42,12 +70,13 @@ function buildWhere(q) {
 }
 
 export const DataTable = () => {
-  const q = useContext(QueryContext)
   const [sortDir, setSortDir] = useState(null)
   const [activated, setActivated] = useState(null)
+  const [where, toggleActiveTab] = useWhereParam()
+  console.log([...where])
   const data = useCollection({
     path: 'leases',
-    options: { where: buildWhere(q) },
+    options: { where },
   })
   function handleSortChange(sortDir) {
     setSortDir(sortDir)
@@ -62,35 +91,41 @@ export const DataTable = () => {
     return <NoData label="Leases" />
   }
   return (
-    <StyledTable>
-      <DataTableContent>
-        <DataTableHead>
-          <DataTableRow>
-            <DataTableHeadCell>Tenants</DataTableHeadCell>
-            <DataTableHeadCell>Active</DataTableHeadCell>
-            <DataTableHeadCell sort={sortDir} onSortChange={handleSortChange}>
-              Properties
-            </DataTableHeadCell>
-            <DataTableHeadCell>Units</DataTableHeadCell>
-            <DataTableHeadCell alignEnd>Rent</DataTableHeadCell>
-            <DataTableHeadCell alignEnd>Balance</DataTableHeadCell>
-          </DataTableRow>
-        </DataTableHead>
-        <DataTableBody>
-          {data.map(
-            (l, i) =>
-              console.log() || (
-                <LeaseRow
-                  key={l.id}
-                  lease={l}
-                  activated={i === activated}
-                  handleRowClick={() => handleRowClick(i)}
-                />
-              )
-          )}
-        </DataTableBody>
-      </DataTableContent>
-    </StyledTable>
+    <div>
+      <StyledTabBar>
+        <Tab>Active</Tab>
+        <Tab>Inactive</Tab>
+      </StyledTabBar>
+      <StyledTable>
+        <DataTableContent>
+          <DataTableHead>
+            <DataTableRow>
+              <DataTableHeadCell>Tenants</DataTableHeadCell>
+              <DataTableHeadCell>Active</DataTableHeadCell>
+              <DataTableHeadCell sort={sortDir} onSortChange={handleSortChange}>
+                Properties
+              </DataTableHeadCell>
+              <DataTableHeadCell>Units</DataTableHeadCell>
+              <DataTableHeadCell alignEnd>Rent</DataTableHeadCell>
+              <DataTableHeadCell alignEnd>Balance</DataTableHeadCell>
+            </DataTableRow>
+          </DataTableHead>
+          <DataTableBody>
+            {data.map(
+              (l, i) =>
+                console.log() || (
+                  <LeaseRow
+                    key={l.id}
+                    lease={l}
+                    activated={i === activated}
+                    handleRowClick={() => handleRowClick(i)}
+                  />
+                )
+            )}
+          </DataTableBody>
+        </DataTableContent>
+      </StyledTable>
+    </div>
   )
 }
 
@@ -137,10 +172,13 @@ function Transactions({ leaseId }) {
       orderBy: ['date', 'desc'],
     },
   })
+  if (!transactions) {
+    return null
+  }
   return (
     <DataTableRow>
       <DataTableCell colSpan="6">
-        <ExpandedRow>
+        <Expanded>
           <Flex
             className="titleWrap"
             justifyContent="space-between"
@@ -192,20 +230,29 @@ function Transactions({ leaseId }) {
               ))}
             </DataTableBody>
           </DataTableContent>
-        </ExpandedRow>
+        </Expanded>
       </DataTableCell>
     </DataTableRow>
   )
 }
 
+const StyledTabBar = styled(TabBar)`
+  max-width: 18rem;
+  background-color: #fff;
+`
+
 const StyledTable = styled(RmwcDataTable)`
   label: StyledTable;
-  /* box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-    0 1px 5px 0 rgba(0, 0, 0, 0.12);
-    */
+
   box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
     0 1px 3px 0 rgba(0, 0, 0, 0.12);
   border: none;
+  &,
+  table {
+    width: 100%;
+  }
+  max-width: 900px;
+
   tr.leaseRow,
   tr.transactionRow {
     cursor: pointer;
@@ -225,8 +272,8 @@ const StyledTable = styled(RmwcDataTable)`
   }
 `
 
-const ExpandedRow = styled.div`
-  label: ExpandedRow;
+const Expanded = styled.div`
+  label: Expanded;
   display: flex;
   flex-direction: column;
   margin-left: 1rem;

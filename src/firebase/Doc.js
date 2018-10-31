@@ -1,20 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
-import { docData } from 'rxfire/firestore'
-import firebase from './index'
 import { AuthContext } from './Auth'
-
-function authDoc({ path, activeCompany }) {
-  let fixedPath
-  if (path.charAt(0) === '/') {
-    fixedPath = path
-  } else {
-    fixedPath = `companies/${activeCompany}/${path}`
-  }
-  let ref = firebase.firestore().doc(fixedPath)
-  // const serialStr = JSON.stringify({ fixedPath })
-  // saveRef(serialStr, ref)
-  return docData(ref, 'id')
-}
+import { authDoc } from './index'
 
 export function useDoc({ path }) {
   const [data, setData] = useState(null)
