@@ -13,8 +13,8 @@ const StyledNoData = styled(Elevation)({
   margin: '1rem',
 })
 
-export const NoData = ({ label }) => (
-  <StyledNoData z={2}>
+export const NoData = ({ label, z = 2 }) => (
+  <StyledNoData z={z}>
     <p>No {label} exist</p>
   </StyledNoData>
 )

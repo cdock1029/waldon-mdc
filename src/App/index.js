@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useContext, Suspense } from 'react'
 import styled from 'react-emotion/macro'
 import { Router } from '@reach/router'
 import { DrawerAppContent } from 'rmwc'
@@ -15,6 +15,16 @@ import { AuthContext } from '../firebase/Auth'
 import {
   PropertiesProvider /*, TenantsProvider*/,
 } from '../firebase/Collection'
+import { useLocalStorage } from '../utils/useLocalStorage'
+
+const Firestore = () => {
+  const Comp = React.lazy(() => import('../TestFirestoreLoader'))
+  return (
+    <Suspense fallback={<h1>Loading..</h1>}>
+      <Comp />
+    </Suspense>
+  )
+}
 
 function App() {
   const [isOpen, toggleMenu] = useMenuToggle()
@@ -45,6 +55,7 @@ function App() {
                     </PropertyDetail>
                     <TenantDetail path="tenant/:tenantId" />
                   </Dashboard>
+                  <Firestore path="firestore" />
                   {/* <NewProperty path="new-property" />
               <NewTenant path="new-tenant" /> */}
                 </Router>
@@ -59,18 +70,14 @@ function App() {
 }
 
 function useMenuToggle() {
-  const [isOpen, setIsOpen] = useState(
-    localStorage.getItem('menu_is_open') === 'true'
-  )
+  const [isOpen, setIsOpen] = useLocalStorage({
+    key: 'menu_is_open',
+    transform: str => str === 'true',
+  })
   function toggleMenu() {
     setIsOpen(!isOpen)
   }
-  useEffect(
-    () => {
-      localStorage.setItem('menu_is_open', isOpen)
-    },
-    [isOpen]
-  )
+
   return [isOpen, toggleMenu]
 }
 

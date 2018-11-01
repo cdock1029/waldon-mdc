@@ -21,19 +21,23 @@ import { MaterialField } from '../MaterialField'
 import { Submenu } from '../Submenu'
 import { NoData } from '../NoData'
 import { PropertySchema } from '../firebase/schemas'
+import { useLocalStorage } from '../utils/useLocalStorage'
 
 const TenantList = lazy(() => import('./TenantList'))
 const NewTenantForm = lazy(() => import('./NewTenantForm'))
 
 export function Drawer({ isOpen }) {
-  const [tabIndex, setTabIndex] = useState(0)
+  const [tabIndex, setTabIndex] = useLocalStorage({
+    key: 'drawer_tab',
+    defaultValue: 0,
+    transform: str => parseInt(str) || 0,
+  })
   const [showForm, setShowForm] = useState(false)
   const properties = useContext(PropertiesContext)
   const q = useContext(QueryContext)
 
   function handleSetTabIndex(e) {
     const tabIndex = e.detail.index
-    console.log('handle tab:', tabIndex)
     setTabIndex(tabIndex)
     setShowForm(false)
   }
@@ -102,11 +106,11 @@ export function Drawer({ isOpen }) {
             </>
           )
         ) : showForm ? (
-          <Suspense fallback={<div>...</div>}>
+          <Suspense fallback={<div />}>
             <NewTenantForm toggleShowForm={toggleShowForm} />
           </Suspense>
         ) : (
-          <Suspense fallback={<div>...</div>}>
+          <Suspense fallback={<div />}>
             <TenantList t={q.t} toggleShowForm={toggleShowForm} />
           </Suspense>
         )}

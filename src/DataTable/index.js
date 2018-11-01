@@ -20,17 +20,19 @@ import {
   DataTableCell,
 } from '@rmwc/data-table'
 import '@rmwc/data-table/data-table.css'
-import { formatCents } from '../utils/money'
+import { formatCents, formatDate } from '../utils/format'
 import { NoData } from '../NoData'
 import { Flex } from '../widgets/Flex'
 import { useCollection } from '../firebase/Collection'
 import { QueryContext } from '../Location'
 
+const NUM_COLUMNS = 7
+const TABLE_MIN_WIDTH = '53rem'
 const ACTIVE = 'ACTIVE'
 const INACTIVE = 'INACTIVE'
-
-function buildIt({ q, activeTab }) {
-  let where = [['status', '==', activeTab]]
+function buildIt({ q, activeTabIndex }) {
+  const activeValue = activeTabIndex ? INACTIVE : ACTIVE
+  let where = [['status', '==', activeValue]]
   const { p: propertyId, u: unitId, t: tenantId } = q
   if (propertyId) {
     where.push([`properties.${propertyId}.exists`, '==', true])
@@ -43,22 +45,7 @@ function buildIt({ q, activeTab }) {
   return where
 }
 
-function useWhereParam() {
-  const q = useContext(QueryContext)
-  const [activeTab, setActiveTab] = useState(ACTIVE)
-  const [where, setWhere] = useState(buildIt({ q, activeTab: ACTIVE }))
-  useEffect(
-    () => {
-      setWhere(buildIt({ q, activeTab }))
-    },
-    [activeTab, q]
-  )
-
-  function toggleActiveTab() {
-    setActiveTab(activeTab === ACTIVE ? INACTIVE : ACTIVE)
-  }
-  return [where, toggleActiveTab]
-  /* const str = propertyId
+/* const str = propertyId
     ? `properties/${propertyId}${unitId ? `/units/${unitId}` : ''}`
     : tenantId
       ? `tenants/${tenantId}`
@@ -67,14 +54,24 @@ function useWhereParam() {
   console.log({ str, REF: ref })
   return [['propertyList', 'array-contains', ref]]
   */
-}
 
 export const DataTable = () => {
   const [sortDir, setSortDir] = useState(null)
   const [activated, setActivated] = useState(null)
-  const [where, toggleActiveTab] = useWhereParam()
-  console.log([...where])
-  const data = useCollection({
+  const [activeTabIndex, setActiveTabIndex] = useState(0)
+
+  const q = useContext(QueryContext)
+  const [where, setWhere] = useState(buildIt({ q, activeTabIndex }))
+  useEffect(
+    () => {
+      setActivated(null)
+      setWhere(buildIt({ q, activeTabIndex }))
+    },
+    [activeTabIndex, q]
+  )
+
+  // console.table([...where])
+  const leases = useCollection({
     path: 'leases',
     options: { where },
   })
@@ -84,15 +81,15 @@ export const DataTable = () => {
   function handleRowClick(i) {
     setActivated(activated === i ? null : i)
   }
-  if (!data) {
-    return null
-  }
-  if (!data.length) {
-    return <NoData label="Leases" />
+  function handleTabChange(e) {
+    setActiveTabIndex(e.detail.index)
   }
   return (
     <div>
-      <StyledTabBar>
+      <StyledTabBar
+        activeTabIndex={activeTabIndex}
+        onActivate={handleTabChange}
+      >
         <Tab>Active</Tab>
         <Tab>Inactive</Tab>
       </StyledTabBar>
@@ -101,7 +98,8 @@ export const DataTable = () => {
           <DataTableHead>
             <DataTableRow>
               <DataTableHeadCell>Tenants</DataTableHeadCell>
-              <DataTableHeadCell>Active</DataTableHeadCell>
+              <DataTableHeadCell>Start</DataTableHeadCell>
+              <DataTableHeadCell>End</DataTableHeadCell>
               <DataTableHeadCell sort={sortDir} onSortChange={handleSortChange}>
                 Properties
               </DataTableHeadCell>
@@ -111,16 +109,23 @@ export const DataTable = () => {
             </DataTableRow>
           </DataTableHead>
           <DataTableBody>
-            {data.map(
-              (l, i) =>
-                console.log() || (
-                  <LeaseRow
-                    key={l.id}
-                    lease={l}
-                    activated={i === activated}
-                    handleRowClick={() => handleRowClick(i)}
-                  />
-                )
+            {!leases ? null : leases.length ? (
+              leases.map((l, i) => (
+                <LeaseRow
+                  key={l.id}
+                  lease={l}
+                  activated={i === activated}
+                  handleRowClick={() => handleRowClick(i)}
+                />
+              ))
+            ) : (
+              <DataTableRow>
+                <DataTableCell colSpan={NUM_COLUMNS}>
+                  <div className="full-cell-wrap">
+                    <NoData label="Leases" z={0} />
+                  </div>
+                </DataTableCell>
+              </DataTableRow>
             )}
           </DataTableBody>
         </DataTableContent>
@@ -142,7 +147,8 @@ function LeaseRow({ activated, handleRowClick, lease }) {
             <p key={i}>{t.name}</p>
           ))}
         </DataTableCell>
-        <DataTableCell>{lease.status}</DataTableCell>
+        <DataTableCell>{formatDate(lease.startDate.toDate())}</DataTableCell>
+        <DataTableCell>{formatDate(lease.endDate.toDate())}</DataTableCell>
         <DataTableCell>
           {Object.values(lease.properties).map((p, i) => (
             <p key={i}>{p.name}</p>
@@ -150,7 +156,7 @@ function LeaseRow({ activated, handleRowClick, lease }) {
         </DataTableCell>
         <DataTableCell>
           {Object.values(lease.units).map((u, i) => (
-            <p key={i}>{/* TODO: replace with label */ u.address}</p>
+            <p key={i}>{u.name}</p>
           ))}
         </DataTableCell>
         <DataTableCell alignEnd className="money">
@@ -177,7 +183,7 @@ function Transactions({ leaseId }) {
   }
   return (
     <DataTableRow>
-      <DataTableCell colSpan="6">
+      <DataTableCell colSpan={NUM_COLUMNS}>
         <Expanded>
           <Flex
             className="titleWrap"
@@ -205,19 +211,19 @@ function Transactions({ leaseId }) {
                 <DataTableRow key={t.id} className="transactionRow">
                   <DataTableCell>
                     <ChipSet>
-                      <Chip>
-                        <ChipText>{t.type}</ChipText>
-                      </Chip>
+                      {!t.subType && (
+                        <StyledChip>
+                          <ChipText>{t.type}</ChipText>
+                        </StyledChip>
+                      )}
                       {t.subType && (
-                        <Chip>
+                        <StyledChip>
                           <ChipText>{t.subType.replace('_', ' ')}</ChipText>
-                        </Chip>
+                        </StyledChip>
                       )}
                     </ChipSet>
                   </DataTableCell>
-                  <DataTableCell>
-                    {t.date.toDate().toDateString()}
-                  </DataTableCell>
+                  <DataTableCell>{formatDate(t.date.toDate())}</DataTableCell>
                   <DataTableCell
                     alignEnd
                     className={cx('money', t.type, t.subType)}
@@ -239,6 +245,8 @@ function Transactions({ leaseId }) {
 const StyledTabBar = styled(TabBar)`
   max-width: 18rem;
   background-color: #fff;
+  box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
+    0 1px 3px 0 rgba(0, 0, 0, 0.12);
 `
 
 const StyledTable = styled(RmwcDataTable)`
@@ -251,7 +259,8 @@ const StyledTable = styled(RmwcDataTable)`
   table {
     width: 100%;
   }
-  max-width: 900px;
+  /* max-width: 60rem; */
+  min-width: ${TABLE_MIN_WIDTH};
 
   tr.leaseRow,
   tr.transactionRow {
@@ -270,6 +279,10 @@ const StyledTable = styled(RmwcDataTable)`
       color: red;
     }
   }
+  .full-cell-wrap {
+    display: flex;
+    justify-content: center;
+  }
 `
 
 const Expanded = styled.div`
@@ -277,20 +290,15 @@ const Expanded = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: 1rem;
-  /* max-height: 40rem;
-  overflow-y: scroll; */
   .titleWrap {
     flex-shrink: 0;
   }
   .title {
     margin: 1rem 0;
   }
-  /* max-height: 30rem;
-  overflow-y: scroll; */
-  /* max-height: 0px;
-  overflow: hidden;
-  transition: max-height 200ms ease-in;
-  &.expanded {
-    max-height: 100vh;
-  } */
+`
+
+const StyledChip = styled(Chip)`
+  font-size: 0.8em;
+  line-height: normal;
 `

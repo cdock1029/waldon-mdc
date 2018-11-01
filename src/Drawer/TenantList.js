@@ -3,8 +3,7 @@ import { Button, ButtonIcon, List, ListItem } from 'rmwc'
 import { Link } from '@reach/router'
 import { useCollection } from '../firebase/Collection'
 
-const TenantList = ({ t, toggleShowForm }) => {
-  console.log('rendering tenant list')
+const TenantList = memo(({ t, toggleShowForm }) => {
   const tenants = useCollection({ path: 'tenants' })
   return (
     <>
@@ -33,7 +32,7 @@ const TenantList = ({ t, toggleShowForm }) => {
       </List>
     </>
   )
-}
+})
 
 const TenantItem = memo(function TenantItemComponent({
   tenantActivated,

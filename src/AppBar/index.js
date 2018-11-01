@@ -31,12 +31,24 @@ export function AppBar({ onMenuClick }) {
               </TopAppBarSection>
               <TopAppBarSection alignEnd>
                 <React.Fragment>
-                  <TopAppBarTitle>{auth.user.email}</TopAppBarTitle>
+                  <TopAppBarActionItem
+                    icon="bookmark"
+                    onClick={() => navigate('/firestore')}
+                  />
                   <TopAppBarActionItem
                     onClick={signOut}
                     aria-label="Sign out"
                     alt="Sign out"
                     icon="exit_to_app"
+                    iconOptions={{
+                      strategy: 'custom',
+                      render: ({ content }) => (
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span>{auth.user.email}</span>
+                          <TopAppBarActionItem icon={content} />
+                        </div>
+                      ),
+                    }}
                   />
                 </React.Fragment>
               </TopAppBarSection>
