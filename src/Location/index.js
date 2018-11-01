@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react'
+import React, { createContext, useMemo } from 'react'
 import { LocationProvider } from '@reach/router'
 import qs from 'query-string'
 
@@ -7,7 +7,6 @@ export function QueryProvider({ children }) {
   return (
     <LocationProvider>
       {ctx => {
-        console.log({ ...ctx })
         return <QueryComponent {...ctx}>{children}</QueryComponent>
       }}
     </LocationProvider>
@@ -15,10 +14,9 @@ export function QueryProvider({ children }) {
 }
 
 function QueryComponent({ location: { search }, children }) {
-  const [q, setQ] = useState(qs.parse(search))
-  useEffect(
+  const q = useMemo(
     () => {
-      setQ(qs.parse(search))
+      return qs.parse(search)
     },
     [search]
   )

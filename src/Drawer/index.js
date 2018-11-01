@@ -1,10 +1,8 @@
-import React, { useState, useContext, memo, lazy, Suspense } from 'react'
+import React, { useState, useContext, lazy, Suspense } from 'react'
 import {
   Drawer as D,
   DrawerHeader,
   DrawerContent,
-  ListItem,
-  List,
   TabBar,
   Tab,
   Typography,
@@ -13,15 +11,12 @@ import {
   ThemeProvider,
 } from 'rmwc'
 import { css } from 'react-emotion/macro'
-import { Link } from '@reach/router'
-import { PropertiesContext, useCollection } from '../firebase/Collection'
 import { QueryContext } from '../Location'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
-import { Submenu } from '../Submenu'
-import { NoData } from '../NoData'
 import { PropertySchema } from '../firebase/schemas'
 import { useLocalStorage } from '../utils/useLocalStorage'
+import { PropertiesList } from './PropertiesList'
 
 const TenantList = lazy(() => import('./TenantList'))
 const NewTenantForm = lazy(() => import('./NewTenantForm'))
@@ -33,7 +28,6 @@ export function Drawer({ isOpen }) {
     transform: str => parseInt(str) || 0,
   })
   const [showForm, setShowForm] = useState(false)
-  const properties = useContext(PropertiesContext)
   const q = useContext(QueryContext)
 
   function handleSetTabIndex(e) {
@@ -90,19 +84,9 @@ export function Drawer({ isOpen }) {
                   </Button>
                 </div>
               </div>
-              <List className="DrawerList">
-                {properties
-                  ? properties.map(property => {
-                      return (
-                        <PropertyItem
-                          key={property.id}
-                          {...property}
-                          propertyActivated={q.p === property.id}
-                        />
-                      )
-                    })
-                  : null}
-              </List>
+              <Suspense fallback={<div />}>
+                <PropertiesList p={q.p} />
+              </Suspense>
             </>
           )
         ) : showForm ? (
@@ -118,53 +102,6 @@ export function Drawer({ isOpen }) {
     </D>
   )
 }
-
-const PropertyItem = memo(function PropertyItemComponent({
-  propertyActivated,
-  ...property
-}) {
-  const units = useCollection({
-    path: `properties/${property.id}/units`,
-    options: { orderBy: ['label'] },
-  })
-  return (
-    <Submenu
-      activated={propertyActivated}
-      label={property.name}
-      tag={Link}
-      to={`/property/${property.id}?p=${property.id}`}
-    >
-      {(() => {
-        if (!propertyActivated || !units) {
-          return null
-        }
-        if (!units.length) {
-          return <NoData label="Units" />
-        }
-        return units.map(unit => (
-          <UnitItem key={unit.id} {...unit} propertyId={property.id} />
-        ))
-      })()}
-    </Submenu>
-  )
-})
-
-const UnitItem = memo(function UnitItemComponent({ propertyId, ...unit }) {
-  const { u } = useContext(QueryContext)
-  return (
-    <ListItem
-      key={unit.id}
-      tag={Link}
-      to={`/property/${propertyId}/unit/${unit.id}?p=${propertyId}&u=${
-        unit.id
-      }`}
-      onClick={() => window.scrollTo(0, 0)}
-      activated={u === unit.id}
-    >
-      <span>{unit.label}</span>
-    </ListItem>
-  )
-})
 
 const styles = css`
   background-color: #e8e9eb;

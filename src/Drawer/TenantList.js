@@ -1,10 +1,11 @@
 import React, { memo } from 'react'
 import { Button, ButtonIcon, List, ListItem } from 'rmwc'
 import { Link } from '@reach/router'
-import { useCollection } from '../firebase/Collection'
+import { TenantsResource } from '../firebase/Collection'
 
-const TenantList = memo(({ t, toggleShowForm }) => {
-  const tenants = useCollection({ path: 'tenants' })
+const TenantList = ({ t, toggleShowForm }) => {
+  const tenants = TenantsResource.read()
+  // console.log('render tenantList', { tenants })
   return (
     <>
       <div
@@ -20,19 +21,17 @@ const TenantList = memo(({ t, toggleShowForm }) => {
       </div>
 
       <List>
-        {tenants
-          ? tenants.map(tenant => (
-              <TenantItem
-                key={tenant.id}
-                {...tenant}
-                tenantActivated={t === tenant.id}
-              />
-            ))
-          : null}
+        {tenants.map(tenant => (
+          <TenantItem
+            key={tenant.id}
+            {...tenant}
+            tenantActivated={t === tenant.id}
+          />
+        ))}
       </List>
     </>
   )
-})
+}
 
 const TenantItem = memo(function TenantItemComponent({
   tenantActivated,

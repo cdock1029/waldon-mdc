@@ -9,20 +9,22 @@
   }
 }
 
+$cb: cubic-bezier(0.4, 0, 0.2, 1);
+
 .submenu__children {
   overflow: hidden;
   height: 0;
-  transition: height 150ms ease-in;
+  transition: height 250ms $cb;
 }
 
 .submenu__children--open {
   height: 16rem;
   overflow-y: scroll;
-  transition: height 200ms ease-out;
+  transition: height 250ms $cb;
 }
 
 .submenu__icon {
-  transition: transform 100ms ease-in;
+  transition: transform 200ms 50ms $cb;
   user-select: none;
 }
 

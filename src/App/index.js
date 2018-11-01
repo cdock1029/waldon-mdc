@@ -12,9 +12,6 @@ import { UnitDetail } from '../UnitDetail'
 import { TenantDetail } from '../TenantDetail'
 import { QueryProvider } from '../Location'
 import { AuthContext } from '../firebase/Auth'
-import {
-  PropertiesProvider /*, TenantsProvider*/,
-} from '../firebase/Collection'
 import { useLocalStorage } from '../utils/useLocalStorage'
 
 const Firestore = () => {
@@ -40,31 +37,27 @@ function App() {
   }
   return (
     <QueryProvider>
-      <PropertiesProvider>
-        {/* <TenantsProvider> */}
-        <AppContainer>
-          <Drawer isOpen={isOpen} />
-          <ErrorBoundary>
-            <DrawerAppContent className="DrawerAppContent">
-              <AppBar onMenuClick={toggleMenu} />
-              <div className="Content">
-                <Router>
-                  <Dashboard path="/">
-                    <PropertyDetail path="property/:propertyId">
-                      <UnitDetail path="unit/:unitId" />
-                    </PropertyDetail>
-                    <TenantDetail path="tenant/:tenantId" />
-                  </Dashboard>
-                  <Firestore path="firestore" />
-                  {/* <NewProperty path="new-property" />
+      <AppContainer>
+        <Drawer isOpen={isOpen} />
+        <ErrorBoundary>
+          <DrawerAppContent className="DrawerAppContent">
+            <AppBar onMenuClick={toggleMenu} />
+            <div className="Content">
+              <Router>
+                <Dashboard path="/">
+                  <PropertyDetail path="property/:propertyId">
+                    <UnitDetail path="unit/:unitId" />
+                  </PropertyDetail>
+                  <TenantDetail path="tenant/:tenantId" />
+                </Dashboard>
+                <Firestore path="firestore" />
+                {/* <NewProperty path="new-property" />
               <NewTenant path="new-tenant" /> */}
-                </Router>
-              </div>
-            </DrawerAppContent>
-          </ErrorBoundary>
-        </AppContainer>
-        {/* </TenantsProvider> */}
-      </PropertiesProvider>
+              </Router>
+            </div>
+          </DrawerAppContent>
+        </ErrorBoundary>
+      </AppContainer>
     </QueryProvider>
   )
 }

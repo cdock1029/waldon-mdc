@@ -5,11 +5,11 @@ import './index.scss'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
 
-/*ReactDOM.createRoot(document.getElementById('root')).render(
-  <AuthProvider>
-    <App />
-  </AuthProvider>
-)*/
+// ReactDOM.createRoot(document.getElementById('root')).render(
+//   <AuthProvider>
+//     <App />
+//   </AuthProvider>
+// )
 ReactDOM.render(
   <AuthProvider>
     <App />

@@ -3,6 +3,8 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { collectionData, docData } from 'rxfire/firestore'
 import LRU from 'lru-cache'
+import { useContext, useMemo, useEffect, useState } from 'react'
+import { AuthContext } from './Auth'
 
 const config = {
   apiKey: 'AIzaSyDlWm0Ftq30kFD4LnPJ5sf9Mz8vyrcjIfM',
@@ -106,6 +108,75 @@ export function deleteDoc({ collectionPath, docId, activeCompany }) {
 
   return ref.doc(docId).delete()
   // console.log({ ref: ref.doc(docId) })
+}
+
+// const cache = new Map()
+function getObservable({ rootPath, path, orderBy }) {
+  // const key = JSON.stringify({ rootPath, path, orderBy })
+  // if (cache.has(key)) {
+  //   return cache.get(key)
+  // }
+
+  let ref = firebase.firestore()
+  if (rootPath) {
+    ref = ref.collection(rootPath)
+  }
+  if (path) {
+    ref = ref.doc(path)
+  }
+  if (orderBy) {
+    ref = ref.orderBy(...orderBy)
+  }
+  const obs = collectionData(ref, 'id')
+  // cache.set()
+  return obs
+}
+export function createFirestoreCollectionResource(authContextCallback) {
+  // let obs // = getObservable(refParams)
+  let resolveCallback
+  let value
+  let rootSub
+  function useSetup() {
+    if (typeof value !== 'undefined') {
+      return value
+    }
+    const authContext = useContext(AuthContext)
+    const obs = getObservable(authContextCallback(authContext))
+    value = new Promise(resolve => {
+      resolveCallback = resolve
+    })
+    if (rootSub) {
+      rootSub.unsubscribe()
+    }
+    rootSub = obs.subscribe(data => {
+      console.log('subscribe callback')
+      value = data
+      if (resolveCallback) {
+        console.log('resolving promise..')
+        resolveCallback(data)
+        console.log('removing callback..')
+        resolveCallback = undefined
+      }
+    })
+    return value
+  }
+
+  return {
+    read() {
+      console.log('render resource read')
+      const _value = useSetup()
+      if (_value.then) {
+        console.log('throwing...')
+        throw _value
+      }
+      console.log('returning value...')
+      return _value
+    },
+    /*clear() {
+      value = undefined
+      navigate('/')
+    },*/
+  }
 }
 
 export default firebase
