@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { AuthContext } from './Auth'
 import { authCollection, createFirestoreCollectionResource } from './index'
 
@@ -23,29 +23,28 @@ export function useCollection({ path, options }) {
   return data
 }
 
-export const PropertiesContext = React.createContext()
-export const PropertiesProvider = ({ children }) => {
-  const data = useCollection({
-    path: 'properties',
-    options: { orderBy: ['name'] },
-  })
-  return <PropertiesContext.Provider value={data} children={children} />
-}
 export const PropertiesResource = createFirestoreCollectionResource(
-  ({ claims: { activeCompany } }) => ({
+  activeCompany => ({
     rootPath: `companies/${activeCompany}/properties`,
     orderBy: ['name', 'asc'],
   })
 )
 
 export const TenantsResource = createFirestoreCollectionResource(
-  authContext => {
-    const {
-      claims: { activeCompany },
-    } = authContext
+  activeCompany => {
     return {
       rootPath: `companies/${activeCompany}/tenants`,
       orderBy: ['lastName', 'asc'],
+    }
+  }
+)
+
+// todo: doesn't work for dynamic parameters yet...
+export const UnitsResource = createFirestoreCollectionResource(
+  (activeCompany, propertyId) => {
+    console.log({ propertyId })
+    return {
+      rootPath: `companies/${activeCompany}/properties/${propertyId}/units`,
     }
   }
 )

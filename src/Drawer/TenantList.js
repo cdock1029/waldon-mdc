@@ -1,11 +1,14 @@
-import React, { memo } from 'react'
+import React, { memo, useContext } from 'react'
 import { Button, ButtonIcon, List, ListItem } from 'rmwc'
 import { Link } from '@reach/router'
 import { TenantsResource } from '../firebase/Collection'
+import { AuthContext } from '../firebase/Auth'
 
 const TenantList = ({ t, toggleShowForm }) => {
-  const tenants = TenantsResource.read()
-  // console.log('render tenantList', { tenants })
+  const {
+    claims: { activeCompany },
+  } = useContext(AuthContext)
+  const tenants = TenantsResource.read(activeCompany)
   return (
     <>
       <div

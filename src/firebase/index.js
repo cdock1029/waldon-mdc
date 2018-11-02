@@ -3,8 +3,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { collectionData, docData } from 'rxfire/firestore'
 import LRU from 'lru-cache'
-import { useContext, useMemo, useEffect, useState } from 'react'
-import { AuthContext } from './Auth'
+import { unstable_createResource as createResource } from 'react-cache'
 
 const config = {
   apiKey: 'AIzaSyDlWm0Ftq30kFD4LnPJ5sf9Mz8vyrcjIfM',
@@ -131,17 +130,16 @@ function getObservable({ rootPath, path, orderBy }) {
   // cache.set()
   return obs
 }
-export function createFirestoreCollectionResource(authContextCallback) {
+export function createFirestoreCollectionResource(callback) {
   // let obs // = getObservable(refParams)
   let resolveCallback
   let value
   let rootSub
-  function useSetup() {
+  function useSetup(args) {
     if (typeof value !== 'undefined') {
       return value
     }
-    const authContext = useContext(AuthContext)
-    const obs = getObservable(authContextCallback(authContext))
+    const obs = getObservable(callback(...args))
     value = new Promise(resolve => {
       resolveCallback = resolve
     })
@@ -162,9 +160,9 @@ export function createFirestoreCollectionResource(authContextCallback) {
   }
 
   return {
-    read() {
+    read(...args) {
       console.log('render resource read')
-      const _value = useSetup()
+      const _value = useSetup(args)
       if (_value.then) {
         console.log('throwing...')
         throw _value

@@ -3,11 +3,15 @@ import { List, ListItem } from 'rmwc'
 import { Link } from '@reach/router'
 import { Submenu } from '../Submenu'
 import { NoData } from '../NoData'
-import { PropertiesResource, useCollection } from '../firebase/Collection'
+import { PropertiesResource, UnitsResource } from '../firebase/Collection'
+import { AuthContext } from '../firebase/Auth'
 import { QueryContext } from '../Location'
 
 export function PropertiesList({ p }) {
-  const properties = PropertiesResource.read()
+  const {
+    claims: { activeCompany },
+  } = useContext(AuthContext)
+  const properties = PropertiesResource.read(activeCompany)
   return (
     <List className="DrawerList">
       {properties.map(property => {
@@ -27,10 +31,10 @@ const PropertyItem = memo(function PropertyItemComponent({
   propertyActivated,
   ...property
 }) {
-  const units = useCollection({
-    path: `properties/${property.id}/units`,
-    options: { orderBy: ['label'] },
-  })
+  const {
+    claims: { activeCompany },
+  } = useContext(AuthContext)
+  const units = UnitsResource.read(activeCompany, property.id)
   return (
     <Submenu
       activated={propertyActivated}
