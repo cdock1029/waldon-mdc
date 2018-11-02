@@ -24,14 +24,14 @@ export function useCollection({ path, options }) {
 }
 
 export const PropertiesResource = createFirestoreCollectionResource(
-  activeCompany => ({
+  ({ activeCompany }) => ({
     rootPath: `companies/${activeCompany}/properties`,
     orderBy: ['name', 'asc'],
   })
 )
 
 export const TenantsResource = createFirestoreCollectionResource(
-  activeCompany => {
+  ({ activeCompany }) => {
     return {
       rootPath: `companies/${activeCompany}/tenants`,
       orderBy: ['lastName', 'asc'],
@@ -41,7 +41,7 @@ export const TenantsResource = createFirestoreCollectionResource(
 
 // todo: doesn't work for dynamic parameters yet...
 export const UnitsResource = createFirestoreCollectionResource(
-  (activeCompany, propertyId) => {
+  ({ activeCompany, propertyId }) => {
     console.log({ propertyId })
     return {
       rootPath: `companies/${activeCompany}/properties/${propertyId}/units`,

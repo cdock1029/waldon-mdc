@@ -8,7 +8,7 @@ const TenantList = ({ t, toggleShowForm }) => {
   const {
     claims: { activeCompany },
   } = useContext(AuthContext)
-  const tenants = TenantsResource.read(activeCompany)
+  const tenants = TenantsResource.read({ activeCompany }).getValue()
   return (
     <>
       <div

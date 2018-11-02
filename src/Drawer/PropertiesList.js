@@ -1,4 +1,4 @@
-import React, { memo, useContext } from 'react'
+import React, { memo, useContext, Suspense } from 'react'
 import { List, ListItem } from 'rmwc'
 import { Link } from '@reach/router'
 import { Submenu } from '../Submenu'
@@ -11,7 +11,7 @@ export function PropertiesList({ p }) {
   const {
     claims: { activeCompany },
   } = useContext(AuthContext)
-  const properties = PropertiesResource.read(activeCompany)
+  const properties = PropertiesResource.read({ activeCompany }).getValue()
   return (
     <List className="DrawerList">
       {properties.map(property => {
@@ -31,10 +31,6 @@ const PropertyItem = memo(function PropertyItemComponent({
   propertyActivated,
   ...property
 }) {
-  const {
-    claims: { activeCompany },
-  } = useContext(AuthContext)
-  const units = UnitsResource.read(activeCompany, property.id)
   return (
     <Submenu
       activated={propertyActivated}
@@ -42,20 +38,33 @@ const PropertyItem = memo(function PropertyItemComponent({
       tag={Link}
       to={`/property/${property.id}?p=${property.id}`}
     >
-      {(() => {
-        if (!propertyActivated || !units) {
-          return null
-        }
-        if (!units.length) {
-          return <NoData label="Units" />
-        }
-        return units.map(unit => (
-          <UnitItem key={unit.id} {...unit} propertyId={property.id} />
-        ))
-      })()}
+      {propertyActivated ? (
+        <Suspense fallback={<span />}>
+          <UnitsList propertyId={property.id} />
+        </Suspense>
+      ) : null}
     </Submenu>
   )
 })
+
+function UnitsList({ propertyId }) {
+  const { activeCompany } = useContext(AuthContext).claims
+  const units = UnitsResource.read({
+    activeCompany,
+    propertyId,
+  }).getValue()
+  return (
+    <div>
+      {units.length ? (
+        units.map(unit => (
+          <UnitItem key={unit.id} {...unit} propertyId={propertyId} />
+        ))
+      ) : (
+        <NoData label="Units" />
+      )}
+    </div>
+  )
+}
 
 const UnitItem = memo(function UnitItemComponent({ propertyId, ...unit }) {
   const { u } = useContext(QueryContext)

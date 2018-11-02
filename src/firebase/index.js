@@ -110,7 +110,7 @@ export function deleteDoc({ collectionPath, docId, activeCompany }) {
 }
 
 // const cache = new Map()
-function getObservable({ rootPath, path, orderBy }) {
+function getFirestoreObservable({ rootPath, path, orderBy }) {
   // const key = JSON.stringify({ rootPath, path, orderBy })
   // if (cache.has(key)) {
   //   return cache.get(key)
@@ -130,51 +130,98 @@ function getObservable({ rootPath, path, orderBy }) {
   // cache.set()
   return obs
 }
+
+function resourceHashFunction(input) {
+  return JSON.stringify(input)
+}
 export function createFirestoreCollectionResource(callback) {
-  // let obs // = getObservable(refParams)
-  let resolveCallback
-  let value
-  let rootSub
-  function useSetup(args) {
-    if (typeof value !== 'undefined') {
-      return value
-    }
-    const obs = getObservable(callback(...args))
-    value = new Promise(resolve => {
+  // internally createResource from React. pass callback that returns promise initially, then resolves to a....
+  // observable / currentValue pair?
+
+  // callback takes "read args" and returns firestore query params
+  // query params are what keys the cache
+  // key: serialized query params,  value: {observable, currentValue}
+
+  /* 
+    (activeCompany) => {rootPath: ''}
+  */
+  function thenableFunctionPassedToReactCreateResource(input) {
+    console.log({ input })
+    const firestoreQueryParams = callback(input) // unserialized cache key
+    const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
+
+    let resolveCallback
+    let startingPromise = new Promise(resolve => {
       resolveCallback = resolve
     })
-    if (rootSub) {
-      rootSub.unsubscribe()
+
+    const valueContainer = {
+      getValue() {
+        return valueContainer._currenValue
+      },
+      // _currentValue
+      // subscription
     }
-    rootSub = obs.subscribe(data => {
+
+    valueContainer.subscription = firestoreObservable.subscribe(data => {
       console.log('subscribe callback')
-      value = data
-      if (resolveCallback) {
-        console.log('resolving promise..')
-        resolveCallback(data)
-        console.log('removing callback..')
-        resolveCallback = undefined
-      }
+      valueContainer._currenValue = data
+
+      //if (!hasPromisedResolved) {
+      console.log('resolving promise..')
+      // hasPromisedResolved = true
+      resolveCallback(valueContainer)
+      //} else {
+      // console.log('not resolving promise:', { input })
+      // }
     })
-    return value
+    return startingPromise
   }
 
-  return {
-    read(...args) {
-      console.log('render resource read')
-      const _value = useSetup(args)
-      if (_value.then) {
-        console.log('throwing...')
-        throw _value
-      }
-      console.log('returning value...')
-      return _value
-    },
-    /*clear() {
-      value = undefined
-      navigate('/')
-    },*/
-  }
+  return createResource(
+    thenableFunctionPassedToReactCreateResource,
+    resourceHashFunction
+  )
+
+  // let resolveCallback
+  // let value
+  // let rootSub
+  // function useSetup(args) {
+  //   if (typeof value !== 'undefined') {
+  //     return value
+  //   }
+  //   const obs = getFirestoreObservable(callback(...args))
+  //   value = new Promise(resolve => {
+  //     resolveCallback = resolve
+  //   })
+  //   if (rootSub) {
+  //     rootSub.unsubscribe()
+  //   }
+  //   rootSub = obs.subscribe(data => {
+  //     console.log('subscribe callback')
+  //     value = data
+  //     if (resolveCallback) {
+  //       console.log('resolving promise..')
+  //       resolveCallback(data)
+  //       console.log('removing callback..')
+  //       resolveCallback = undefined
+  //     }
+  //   })
+  //   return value
+  // }
+
+  // return {
+  //   read(...args) {
+  //     console.log('render resource read')
+  //     const _value = useSetup(args)
+  //     if (_value.then) {
+  //       console.log('throwing...')
+  //       throw _value
+  //     }
+  //     console.log('returning value...')
+  //     return _value
+  //   },
+  // }
 }
 
 export default firebase
