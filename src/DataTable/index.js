@@ -1,11 +1,4 @@
-import React, {
-  Fragment,
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-  Suspense,
-} from 'react'
+import React, { Fragment, useContext, useState, useMemo, Suspense } from 'react'
 import styled, { cx } from 'react-emotion/macro'
 import {
   Typography,
@@ -33,6 +26,7 @@ import { Flex } from '../widgets/Flex'
 import { LeasesResource, useCollection } from '../firebase/Collection'
 import { AuthContext } from '../firebase/Auth'
 import { QueryContext } from '../Location'
+import { Spinner } from '../Spinner'
 
 const NUM_COLUMNS = 7
 const TABLE_MIN_WIDTH = '53rem'
@@ -120,7 +114,7 @@ export const DataTable = () => {
             <Suspense
               fallback={
                 <EmptyTableRowWrapper>
-                  <h1>Loading...</h1>
+                  <Spinner />
                 </EmptyTableRowWrapper>
               }
             >

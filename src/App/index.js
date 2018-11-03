@@ -13,11 +13,12 @@ import { TenantDetail } from '../TenantDetail'
 import { QueryProvider } from '../Location'
 import { AuthContext } from '../firebase/Auth'
 import { useLocalStorage } from '../utils/useLocalStorage'
+import { Spinner } from '../Spinner'
 
 const Firestore = () => {
   const Comp = React.lazy(() => import('../TestFirestoreLoader'))
   return (
-    <Suspense fallback={<h1>Loading..</h1>}>
+    <Suspense fallback={<Spinner />}>
       <Comp />
     </Suspense>
   )

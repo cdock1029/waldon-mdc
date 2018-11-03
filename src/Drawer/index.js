@@ -17,6 +17,7 @@ import { MaterialField } from '../MaterialField'
 import { PropertySchema } from '../firebase/schemas'
 import { useLocalStorage } from '../utils/useLocalStorage'
 import { PropertiesList } from './PropertiesList'
+import { Spinner } from '../Spinner'
 
 const TenantList = lazy(() => import('./TenantList'))
 const NewTenantForm = lazy(() => import('./NewTenantForm'))
@@ -84,17 +85,17 @@ export function Drawer({ isOpen }) {
                   </Button>
                 </div>
               </div>
-              <Suspense fallback={<div />}>
+              <Suspense fallback={<Spinner />}>
                 <PropertiesList p={q.p} />
               </Suspense>
             </>
           )
         ) : showForm ? (
-          <Suspense fallback={<div />}>
+          <Suspense fallback={<Spinner />}>
             <NewTenantForm toggleShowForm={toggleShowForm} />
           </Suspense>
         ) : (
-          <Suspense fallback={<div />}>
+          <Suspense fallback={<Spinner />}>
             <TenantList t={q.t} toggleShowForm={toggleShowForm} />
           </Suspense>
         )}
