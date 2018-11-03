@@ -11,7 +11,7 @@ export function PropertiesList({ p }) {
   const {
     claims: { activeCompany },
   } = useContext(AuthContext)
-  const properties = PropertiesResource.read({ activeCompany }).getValue()
+  const properties = PropertiesResource.read({ activeCompany })
   return (
     <List className="DrawerList">
       {properties.map(property => {
@@ -52,7 +52,7 @@ function UnitsList({ propertyId }) {
   const units = UnitsResource.read({
     activeCompany,
     propertyId,
-  }).getValue()
+  })
   return (
     <div>
       {units.length ? (

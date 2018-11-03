@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import { AuthContext } from './Auth'
 import { authCollection, createFirestoreCollectionResource } from './index'
 
-export function useCollection({ path, options }) {
+export function useCollection({ path, ...options }) {
   const [data, setData] = useState()
   const { claims } = useContext(AuthContext)
   useEffect(
@@ -39,12 +39,20 @@ export const TenantsResource = createFirestoreCollectionResource(
   }
 )
 
-// todo: doesn't work for dynamic parameters yet...
 export const UnitsResource = createFirestoreCollectionResource(
   ({ activeCompany, propertyId }) => {
     console.log({ propertyId })
     return {
       rootPath: `companies/${activeCompany}/properties/${propertyId}/units`,
+    }
+  }
+)
+
+export const LeasesResource = createFirestoreCollectionResource(
+  ({ activeCompany, where }) => {
+    return {
+      rootPath: `companies/${activeCompany}/leases`,
+      where,
     }
   }
 )

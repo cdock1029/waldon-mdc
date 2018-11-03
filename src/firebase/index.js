@@ -4,6 +4,7 @@ import 'firebase/firestore'
 import { collectionData, docData } from 'rxfire/firestore'
 import LRU from 'lru-cache'
 import { unstable_createResource as createResource } from 'react-cache'
+import { useEffect, useState } from 'react'
 
 const config = {
   apiKey: 'AIzaSyDlWm0Ftq30kFD4LnPJ5sf9Mz8vyrcjIfM',
@@ -110,7 +111,7 @@ export function deleteDoc({ collectionPath, docId, activeCompany }) {
 }
 
 // const cache = new Map()
-function getFirestoreObservable({ rootPath, path, orderBy }) {
+function getFirestoreObservable({ rootPath, path, orderBy, where }) {
   // const key = JSON.stringify({ rootPath, path, orderBy })
   // if (cache.has(key)) {
   //   return cache.get(key)
@@ -126,6 +127,11 @@ function getFirestoreObservable({ rootPath, path, orderBy }) {
   if (orderBy) {
     ref = ref.orderBy(...orderBy)
   }
+  if (where) {
+    for (const clause of where) {
+      ref = ref.where(...clause)
+    }
+  }
   const obs = collectionData(ref, 'id')
   // cache.set()
   return obs
@@ -135,19 +141,9 @@ function resourceHashFunction(input) {
   return JSON.stringify(input)
 }
 export function createFirestoreCollectionResource(callback) {
-  // internally createResource from React. pass callback that returns promise initially, then resolves to a....
-  // observable / currentValue pair?
-
-  // callback takes "read args" and returns firestore query params
-  // query params are what keys the cache
-  // key: serialized query params,  value: {observable, currentValue}
-
-  /* 
-    (activeCompany) => {rootPath: ''}
-  */
   function thenableFunctionPassedToReactCreateResource(input) {
-    console.log({ input })
-    const firestoreQueryParams = callback(input) // unserialized cache key
+    // console.log({ input })
+    const firestoreQueryParams = callback(input)
     const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
 
     let resolveCallback
@@ -156,21 +152,21 @@ export function createFirestoreCollectionResource(callback) {
     })
 
     const valueContainer = {
-      getValue() {
-        return valueContainer._currenValue
-      },
-      // _currentValue
-      // subscription
+      observable: firestoreObservable,
+      // currentValue
     }
 
-    valueContainer.subscription = firestoreObservable.subscribe(data => {
+    firestoreObservable.subscribe(data => {
       console.log('subscribe callback')
-      valueContainer._currenValue = data
+      valueContainer.currentValue = data
 
       //if (!hasPromisedResolved) {
-      console.log('resolving promise..')
       // hasPromisedResolved = true
-      resolveCallback(valueContainer)
+      if (resolveCallback) {
+        console.log('resolving promise..')
+        resolveCallback(valueContainer)
+        resolveCallback = null
+      }
       //} else {
       // console.log('not resolving promise:', { input })
       // }
@@ -178,50 +174,39 @@ export function createFirestoreCollectionResource(callback) {
     return startingPromise
   }
 
-  return createResource(
+  const Resource = createResource(
     thenableFunctionPassedToReactCreateResource,
     resourceHashFunction
   )
 
-  // let resolveCallback
-  // let value
-  // let rootSub
-  // function useSetup(args) {
-  //   if (typeof value !== 'undefined') {
-  //     return value
-  //   }
-  //   const obs = getFirestoreObservable(callback(...args))
-  //   value = new Promise(resolve => {
-  //     resolveCallback = resolve
-  //   })
-  //   if (rootSub) {
-  //     rootSub.unsubscribe()
-  //   }
-  //   rootSub = obs.subscribe(data => {
-  //     console.log('subscribe callback')
-  //     value = data
-  //     if (resolveCallback) {
-  //       console.log('resolving promise..')
-  //       resolveCallback(data)
-  //       console.log('removing callback..')
-  //       resolveCallback = undefined
-  //     }
-  //   })
-  //   return value
-  // }
-
-  // return {
-  //   read(...args) {
-  //     console.log('render resource read')
-  //     const _value = useSetup(args)
-  //     if (_value.then) {
-  //       console.log('throwing...')
-  //       throw _value
-  //     }
-  //     console.log('returning value...')
-  //     return _value
-  //   },
-  // }
+  return {
+    read(input) {
+      console.log('Lease resource read:', JSON.stringify({ input }))
+      const valueContainer = Resource.read(input)
+      const [value, setValue] = useState(valueContainer.currentValue)
+      // setValue(valueContainer.currentValue)
+      console.log(
+        'Lease resource read:',
+        JSON.stringify({
+          currentValue: valueContainer.currentValue,
+          hookStateValue: value,
+        })
+      )
+      useEffect(
+        () => {
+          const sub = valueContainer.observable.subscribe(data => {
+            setValue(data)
+          })
+          return () => {
+            console.log('unsubbing')
+            sub.unsubscribe()
+          }
+        },
+        [JSON.stringify(input)]
+      )
+      return value
+    },
+  }
 }
 
 export default firebase

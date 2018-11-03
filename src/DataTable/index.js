@@ -1,4 +1,11 @@
-import React, { Fragment, useContext, useState, useEffect } from 'react'
+import React, {
+  Fragment,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  Suspense,
+} from 'react'
 import styled, { cx } from 'react-emotion/macro'
 import {
   Typography,
@@ -23,17 +30,17 @@ import '@rmwc/data-table/data-table.css'
 import { formatCents, formatDate } from '../utils/format'
 import { NoData } from '../NoData'
 import { Flex } from '../widgets/Flex'
-import { useCollection } from '../firebase/Collection'
+import { LeasesResource, useCollection } from '../firebase/Collection'
+import { AuthContext } from '../firebase/Auth'
 import { QueryContext } from '../Location'
 
 const NUM_COLUMNS = 7
 const TABLE_MIN_WIDTH = '53rem'
 const ACTIVE = 'ACTIVE'
 const INACTIVE = 'INACTIVE'
-function buildIt({ q, activeTabIndex }) {
+function buildIt({ p: propertyId, u: unitId, t: tenantId, activeTabIndex }) {
   const activeValue = activeTabIndex ? INACTIVE : ACTIVE
   let where = [['status', '==', activeValue]]
-  const { p: propertyId, u: unitId, t: tenantId } = q
   if (propertyId) {
     where.push([`properties.${propertyId}.exists`, '==', true])
     if (unitId) {
@@ -60,21 +67,22 @@ export const DataTable = () => {
   const [activated, setActivated] = useState(null)
   const [activeTabIndex, setActiveTabIndex] = useState(0)
 
-  const q = useContext(QueryContext)
-  const [where, setWhere] = useState(buildIt({ q, activeTabIndex }))
-  useEffect(
+  const { p, u, t } = useContext(QueryContext)
+  // const [where, setWhere] = useState(buildIt({ q, activeTabIndex }))
+  const where = useMemo(
     () => {
-      setActivated(null)
-      setWhere(buildIt({ q, activeTabIndex }))
+      // console.log('building it', [p, u, t, activeTabIndex])
+      return buildIt({ p, u, t, activeTabIndex })
     },
-    [activeTabIndex, q]
+    [p, u, t, activeTabIndex]
   )
-
-  // console.table([...where])
-  const leases = useCollection({
-    path: 'leases',
-    options: { where },
-  })
+  // useEffect(
+  //   () => {
+  //     setActivated(null)
+  //     setWhere(buildIt({ q, activeTabIndex }))
+  //   },
+  //   [activeTabIndex, q]
+  // )
   function handleSortChange(sortDir) {
     setSortDir(sortDir)
   }
@@ -109,24 +117,19 @@ export const DataTable = () => {
             </DataTableRow>
           </DataTableHead>
           <DataTableBody>
-            {!leases ? null : leases.length ? (
-              leases.map((l, i) => (
-                <LeaseRow
-                  key={l.id}
-                  lease={l}
-                  activated={i === activated}
-                  handleRowClick={() => handleRowClick(i)}
-                />
-              ))
-            ) : (
-              <DataTableRow>
-                <DataTableCell colSpan={NUM_COLUMNS}>
-                  <div className="full-cell-wrap">
-                    <NoData label="Leases" z={0} />
-                  </div>
-                </DataTableCell>
-              </DataTableRow>
-            )}
+            <Suspense
+              fallback={
+                <EmptyTableRowWrapper>
+                  <h1>Loading...</h1>
+                </EmptyTableRowWrapper>
+              }
+            >
+              <LeaseLoadingContainer
+                where={where}
+                activated={activated}
+                handleRowClick={handleRowClick}
+              />
+            </Suspense>
           </DataTableBody>
         </DataTableContent>
       </StyledTable>
@@ -134,7 +137,47 @@ export const DataTable = () => {
   )
 }
 
+function LeaseLoadingContainer({ where, activated, handleRowClick }) {
+  console.log(
+    'render LeaseLoadingContainer',
+    JSON.stringify({ where, activated })
+  )
+  const { activeCompany } = useContext(AuthContext).claims
+  const leases = LeasesResource.read({ activeCompany, where })
+  console.log('leases returned for input:', { ...where })
+  console.table(leases)
+  return (
+    <>
+      {leases.length ? (
+        leases.map((l, i) => (
+          <LeaseRow
+            key={l.id}
+            lease={l}
+            activated={i === activated}
+            handleRowClick={() => handleRowClick(i)}
+          />
+        ))
+      ) : (
+        <EmptyTableRowWrapper>
+          <NoData label="Leases" z={0} />
+        </EmptyTableRowWrapper>
+      )}
+    </>
+  )
+}
+
+function EmptyTableRowWrapper({ children }) {
+  return (
+    <DataTableRow>
+      <DataTableCell colSpan={NUM_COLUMNS}>
+        <div className="full-cell-wrap">{children}</div>
+      </DataTableCell>
+    </DataTableRow>
+  )
+}
+
 function LeaseRow({ activated, handleRowClick, lease }) {
+  console.log('render LeaseRow')
   return (
     <Fragment>
       <DataTableRow
@@ -174,9 +217,7 @@ function LeaseRow({ activated, handleRowClick, lease }) {
 function Transactions({ leaseId }) {
   const transactions = useCollection({
     path: `leases/${leaseId}/transactions`,
-    options: {
-      orderBy: ['date', 'desc'],
-    },
+    orderBy: ['date', 'desc'],
   })
   if (!transactions) {
     return null
