@@ -4,7 +4,7 @@ import 'firebase/firestore'
 import { collectionData, docData } from 'rxfire/firestore'
 import LRU from 'lru-cache'
 import { unstable_createResource as createResource } from 'react-cache'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 const config = {
   apiKey: 'AIzaSyDlWm0Ftq30kFD4LnPJ5sf9Mz8vyrcjIfM',
@@ -137,73 +137,63 @@ function getFirestoreObservable({ rootPath, path, orderBy, where }) {
   return obs
 }
 
-function resourceHashFunction(input) {
+function inputToKey(input) {
   return JSON.stringify(input)
 }
 export function createFirestoreCollectionResource(callback) {
-  function thenableFunctionPassedToReactCreateResource(input) {
-    // console.log({ input })
+  // holds... {subscription, currentValue}
+  const cache = new Map()
+
+  function useFirestoreResource(input) {
+    const [nothing, setNothing] = useState()
     const firestoreQueryParams = callback(input)
-    const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
-
-    let resolveCallback
-    let startingPromise = new Promise(resolve => {
-      resolveCallback = resolve
-    })
-
-    const valueContainer = {
-      observable: firestoreObservable,
-      // currentValue
+    const key = inputToKey(input)
+    if (!cache.has(key)) {
+      cache.set(key, {})
     }
+    let valueContainer = cache.get(key)
 
-    firestoreObservable.subscribe(data => {
-      console.log('subscribe callback')
-      valueContainer.currentValue = data
+    console.log({ key, valueContainer })
 
-      //if (!hasPromisedResolved) {
-      // hasPromisedResolved = true
-      if (resolveCallback) {
-        console.log('resolving promise..')
-        resolveCallback(valueContainer)
-        resolveCallback = null
-      }
-      //} else {
-      // console.log('not resolving promise:', { input })
-      // }
-    })
-    return startingPromise
+    if (typeof valueContainer.currentValue === 'undefined') {
+      const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
+
+      let resolveCallback
+      valueContainer.currentValue = new Promise(resolve => {
+        resolveCallback = resolve
+      })
+
+      valueContainer.subscription = firestoreObservable.subscribe(data => {
+        console.log('subscribe callback')
+        valueContainer.currentValue = data
+
+        if (resolveCallback) {
+          console.log('resolving promise..')
+          resolveCallback(valueContainer)
+          resolveCallback = null
+        } else {
+          console.log('setting nothing...')
+          setNothing(0)
+        }
+      })
+    }
+    const stateValueContainer = useMemo(
+      () => {
+        return valueContainer
+      },
+      [valueContainer.currentValue, key]
+    )
+    return [stateValueContainer.currentValue, nothing]
   }
-
-  const Resource = createResource(
-    thenableFunctionPassedToReactCreateResource,
-    resourceHashFunction
-  )
 
   return {
     read(input) {
-      console.log('Lease resource read:', JSON.stringify({ input }))
-      const valueContainer = Resource.read(input)
-      const [value, setValue] = useState(valueContainer.currentValue)
-      // setValue(valueContainer.currentValue)
-      console.log(
-        'Lease resource read:',
-        JSON.stringify({
-          currentValue: valueContainer.currentValue,
-          hookStateValue: value,
-        })
-      )
-      useEffect(
-        () => {
-          const sub = valueContainer.observable.subscribe(data => {
-            setValue(data)
-          })
-          return () => {
-            console.log('unsubbing')
-            sub.unsubscribe()
-          }
-        },
-        [JSON.stringify(input)]
-      )
+      const [value] = useFirestoreResource(input)
+      if (value.then) {
+        console.log('throwing...')
+        throw value
+      }
+      console.log('returning', { value })
       return value
     },
   }
