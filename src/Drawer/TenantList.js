@@ -1,5 +1,7 @@
 import React, { memo, useContext } from 'react'
-import { Button, ButtonIcon, List, ListItem } from 'rmwc'
+import Button from '@material/react-button'
+import MaterialIcon from '@material/react-material-icon'
+import { List, ListItem } from 'rmwc'
 import { Link } from '@reach/router'
 import { TenantsResource } from '../firebase/Collection'
 import { AuthContext } from '../firebase/Auth'
@@ -17,8 +19,11 @@ const TenantList = ({ t, toggleShowForm }) => {
           display: 'flex',
         }}
       >
-        <Button dense onClick={toggleShowForm}>
-          <ButtonIcon icon="add" />
+        <Button
+          icon={<MaterialIcon icon="add" />}
+          dense
+          onClick={toggleShowForm}
+        >
           New tenant
         </Button>
       </div>

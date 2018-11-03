@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useState, useMemo, Suspense } from 'react'
-import styled, { cx } from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 import {
   Typography,
   Button,
@@ -23,7 +23,7 @@ import '@rmwc/data-table/data-table.css'
 import { formatCents, formatDate } from '../utils/format'
 import { NoData } from '../NoData'
 import { Flex } from '../widgets/Flex'
-import { LeasesResource, useCollection } from '../firebase/Collection'
+import { LeasesResource, TransactionsResource } from '../firebase/Collection'
 import { AuthContext } from '../firebase/Auth'
 import { QueryContext } from '../Location'
 import { Spinner } from '../Spinner'
@@ -62,21 +62,13 @@ export const DataTable = () => {
   const [activeTabIndex, setActiveTabIndex] = useState(0)
 
   const { p, u, t } = useContext(QueryContext)
-  // const [where, setWhere] = useState(buildIt({ q, activeTabIndex }))
   const where = useMemo(
     () => {
-      // console.log('building it', [p, u, t, activeTabIndex])
       return buildIt({ p, u, t, activeTabIndex })
     },
     [p, u, t, activeTabIndex]
   )
-  // useEffect(
-  //   () => {
-  //     setActivated(null)
-  //     setWhere(buildIt({ q, activeTabIndex }))
-  //   },
-  //   [activeTabIndex, q]
-  // )
+
   function handleSortChange(sortDir) {
     setSortDir(sortDir)
   }
@@ -87,7 +79,7 @@ export const DataTable = () => {
     setActiveTabIndex(e.detail.index)
   }
   return (
-    <div>
+    <div className="wrapper-div">
       <StyledTabBar
         activeTabIndex={activeTabIndex}
         onActivate={handleTabChange}
@@ -140,22 +132,22 @@ function LeaseLoadingContainer({ where, activated, handleRowClick }) {
   const leases = LeasesResource.read({ activeCompany, where })
   console.log('leases returned for input:', { ...where })
   console.table(leases)
+
   return (
     <>
-      {leases.length ? (
-        leases.map((l, i) => (
-          <LeaseRow
-            key={l.id}
-            lease={l}
-            activated={i === activated}
-            handleRowClick={() => handleRowClick(i)}
-          />
-        ))
-      ) : (
-        <EmptyTableRowWrapper>
+      {leases.map((l, i) => (
+        <LeaseRow
+          key={l.id}
+          lease={l}
+          activated={i === activated}
+          handleRowClick={() => handleRowClick(i)}
+        />
+      ))}
+      <EmptyTableRowWrapper>
+        {/* TODO: pagination row */ leases.length ? null : (
           <NoData label="Leases" z={0} />
-        </EmptyTableRowWrapper>
-      )}
+        )}
+      </EmptyTableRowWrapper>
     </>
   )
 }
@@ -164,7 +156,7 @@ function EmptyTableRowWrapper({ children }) {
   return (
     <DataTableRow>
       <DataTableCell colSpan={NUM_COLUMNS}>
-        <div className="full-cell-wrap">{children}</div>
+        <FullCellWrapper>{children}</FullCellWrapper>
       </DataTableCell>
     </DataTableRow>
   )
@@ -203,19 +195,24 @@ function LeaseRow({ activated, handleRowClick, lease }) {
           {formatCents(lease.balance)}
         </DataTableCell>
       </DataTableRow>
-      {activated && <Transactions leaseId={lease.id} />}
+      {activated && (
+        <Suspense
+          fallback={
+            <EmptyTableRowWrapper>
+              <Spinner />
+            </EmptyTableRowWrapper>
+          }
+        >
+          <Transactions leaseId={lease.id} />
+        </Suspense>
+      )}
     </Fragment>
   )
 }
 
 function Transactions({ leaseId }) {
-  const transactions = useCollection({
-    path: `leases/${leaseId}/transactions`,
-    orderBy: ['date', 'desc'],
-  })
-  if (!transactions) {
-    return null
-  }
+  const { activeCompany } = useContext(AuthContext).claims
+  const transactions = TransactionsResource.read({ activeCompany, leaseId })
   return (
     <DataTableRow>
       <DataTableCell colSpan={NUM_COLUMNS}>
@@ -261,7 +258,7 @@ function Transactions({ leaseId }) {
                   <DataTableCell>{formatDate(t.date.toDate())}</DataTableCell>
                   <DataTableCell
                     alignEnd
-                    className={cx('money', t.type, t.subType)}
+                    className={`money${t.type || ''} ${t.subType || ''}`}
                   >
                     {formatCents(
                       `${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`
@@ -296,6 +293,8 @@ const StyledTable = styled(RmwcDataTable)`
   }
   /* max-width: 60rem; */
   min-width: ${TABLE_MIN_WIDTH};
+  min-height: 25rem;
+  background-color: #fff;
 
   tr.leaseRow,
   tr.transactionRow {
@@ -314,10 +313,11 @@ const StyledTable = styled(RmwcDataTable)`
       color: red;
     }
   }
-  .full-cell-wrap {
-    display: flex;
-    justify-content: center;
-  }
+`
+
+const FullCellWrapper = styled.div`
+  display: flex;
+  justify-content: center;
 `
 
 const Expanded = styled.div`

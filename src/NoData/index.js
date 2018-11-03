@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 import { Elevation } from 'rmwc'
 
 const StyledNoData = styled(Elevation)({

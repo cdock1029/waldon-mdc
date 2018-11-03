@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { cx } from 'react-emotion'
 import { ListItem, ListItemMeta } from 'rmwc'
 import './styles.scss'
 
@@ -39,15 +38,13 @@ export class Submenu extends React.Component {
           <span>{label}</span>
           <ListItemMeta
             icon="chevron_right"
-            className={cx('submenu__icon', {
-              'submenu__icon--open': isOpen,
-            })}
+            className={`submenu__icon${isOpen ? ' submenu__icon--open' : ''}`}
           />
         </ListItem>
         <div
-          className={cx('submenu__children', {
-            'submenu__children--open': isOpen,
-          })}
+          className={`submenu__children${
+            isOpen ? ' submenu__children--open' : ''
+          }`}
         >
           {children}
         </div>

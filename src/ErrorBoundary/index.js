@@ -1,5 +1,5 @@
 import React from 'react'
-import { css } from 'react-emotion'
+import styled from 'styled-components/macro'
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -18,18 +18,18 @@ export class ErrorBoundary extends React.Component {
     const { hasError, error, info } = this.state
     if (hasError) {
       return (
-        <div className={styles}>
+        <ErrorWrap>
           <pre>{error.message}</pre>
           <br />
           <div>{JSON.stringify(info, null, 2)}</div>
-        </div>
+        </ErrorWrap>
       )
     }
     return this.props.children
   }
 }
 
-const styles = css`
+const ErrorWrap = styled.div`
   color: darkred;
   display: flex;
   flex-direction: column;

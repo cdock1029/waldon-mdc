@@ -1,19 +1,23 @@
 import React from 'react'
-import styled, { css } from 'react-emotion/macro'
-import { Typography, Button, ButtonIcon } from 'rmwc'
+import styled from 'styled-components/macro'
+import { Typography } from 'rmwc'
+import Button from '@material/react-button'
+import MaterialIcon from '@material/react-material-icon'
 import { DataTable } from '../DataTable'
 
 export class Dashboard extends React.Component {
+  componentWillUnmount() {
+    console.log('unmounting dashboard')
+  }
   render() {
     const { children } = this.props
     return (
-      <div className={styles}>
+      <DashboardWrapper>
         <div className="Dashboard-Header">{children}</div>
         <div className="Dashboard-Data">
           <LeaseTableHeader>
             <Typography use="headline5">Leases</Typography>
-            <Button>
-              <ButtonIcon icon="add" />
+            <Button type="button" icon={<MaterialIcon icon="add" />}>
               New lease
             </Button>
           </LeaseTableHeader>
@@ -21,13 +25,12 @@ export class Dashboard extends React.Component {
             <DataTable />
           </div>
         </div>
-      </div>
+      </DashboardWrapper>
     )
   }
 }
 
-const styles = css`
-  label: Dashboard;
+const DashboardWrapper = styled.div`
   display: flex;
   flex-direction: column;
   /* height: 100%; */
@@ -35,7 +38,7 @@ const styles = css`
     height: auto;
   }
   .Dashboard-Header {
-    min-height: 10rem;
+    min-height: 11.5rem;
   }
   .Dashboard-Data {
     flex: 1;

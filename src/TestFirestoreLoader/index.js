@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import { css } from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 import { TodosResource } from '../firebase/Collection'
 import { formatDate } from '../utils/format'
 
@@ -23,7 +23,7 @@ export function TestFirestoreLoader() {
 const Todo = memo(function _Todo({ text, completed, createdAt }) {
   return (
     <li>
-      <div className={todoStyles}>
+      <StyledTodo>
         <div>
           <p>{text}</p>
         </div>
@@ -33,12 +33,12 @@ const Todo = memo(function _Todo({ text, completed, createdAt }) {
         <div>
           <p>{completed ? 'Done' : 'Not done'}</p>
         </div>
-      </div>
+      </StyledTodo>
     </li>
   )
 })
 
-const todoStyles = css`
+const StyledTodo = styled.div`
   display: flex;
   & > div {
     flex: 1;

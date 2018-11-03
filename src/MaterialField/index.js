@@ -1,14 +1,14 @@
 import React from 'react'
 import { Field } from 'formik'
 import { TextField, TextFieldHelperText } from 'rmwc'
-import { css, cx } from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 
 export const MaterialField = ({ label, className, ...rest }) => {
   return (
     <Field {...rest}>
       {({ field, form: { touched, errors } }) => {
         return (
-          <div className={cx(fieldStyles, className)}>
+          <FieldWrapper className={className}>
             <TextField
               label={label}
               autoComplete="off"
@@ -20,14 +20,14 @@ export const MaterialField = ({ label, className, ...rest }) => {
                 ? errors[field.name]
                 : null}
             </TextFieldHelperText>
-          </div>
+          </FieldWrapper>
         )
       }}
     </Field>
   )
 }
 
-const fieldStyles = css`
+const FieldWrapper = styled.div`
   .materialTextField + .materialHelperText {
     color: red;
     max-width: 10.5rem;

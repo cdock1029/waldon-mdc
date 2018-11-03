@@ -1,49 +1,32 @@
-import { useState, useEffect, useContext } from 'react'
-import { AuthContext } from './Auth'
-import { authCollection, createFirestoreCollectionResource } from './index'
-
-export function useCollection({ path, ...options }) {
-  const [data, setData] = useState()
-  const { claims } = useContext(AuthContext)
-  useEffect(
-    () => {
-      if (claims) {
-        const sub = authCollection({
-          path,
-          options,
-          activeCompany: claims.activeCompany,
-        }).subscribe(setData)
-        return () => {
-          sub.unsubscribe()
-        }
-      }
-    },
-    [path, JSON.stringify(options), claims]
-  )
-  return data
-}
+import { createFirestoreCollectionResource } from './index'
 
 export const PropertiesResource = createFirestoreCollectionResource(
-  ({ activeCompany }) => ({
-    rootPath: `companies/${activeCompany}/properties`,
-    orderBy: ['name', 'asc'],
-  })
+  ({ activeCompany, propertyId }) => {
+    const args = {
+      rootPath: `companies/${activeCompany}/properties`,
+      path: propertyId,
+      orderBy: propertyId ? undefined : ['name', 'asc'],
+    }
+    return args
+  }
 )
 
 export const TenantsResource = createFirestoreCollectionResource(
-  ({ activeCompany }) => {
+  ({ activeCompany, tenantId }) => {
     return {
       rootPath: `companies/${activeCompany}/tenants`,
-      orderBy: ['lastName', 'asc'],
+      path: tenantId,
+      orderBy: tenantId ? undefined : ['lastName', 'asc'],
     }
   }
 )
 
 export const UnitsResource = createFirestoreCollectionResource(
-  ({ activeCompany, propertyId }) => {
+  ({ activeCompany, propertyId, unitId }) => {
     console.log({ propertyId })
     return {
       rootPath: `companies/${activeCompany}/properties/${propertyId}/units`,
+      path: unitId,
     }
   }
 )
@@ -53,6 +36,15 @@ export const LeasesResource = createFirestoreCollectionResource(
     return {
       rootPath: `companies/${activeCompany}/leases`,
       where,
+    }
+  }
+)
+
+export const TransactionsResource = createFirestoreCollectionResource(
+  ({ activeCompany, leaseId }) => {
+    return {
+      rootPath: `companies/${activeCompany}/leases/${leaseId}/transactions`,
+      orderBy: ['date', 'asc'],
     }
   }
 )

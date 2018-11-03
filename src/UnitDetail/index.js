@@ -1,16 +1,25 @@
-import React, { useState } from 'react'
-import { css } from 'react-emotion'
-import { Button, IconButton, Typography } from 'rmwc'
+import React, { useState, Suspense } from 'react'
+import styled from 'styled-components/macro'
+import { Typography } from 'rmwc'
+import Button from '@material/react-button'
+import IconButton from '@material/react-icon-button'
+import MaterialIcon from '@material/react-material-icon'
 import { navigate } from '@reach/router'
-import { useDoc } from '../firebase/Doc'
+import { UnitsResource } from '../firebase/Collection'
 import { deleteDoc } from '../firebase'
 import { UnitSchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
+import { useActiveCompany } from '../firebase/Auth'
 
 export function UnitDetail({ propertyId, unitId }) {
   const [showUnitForm, setShowUnitForm] = useState(false)
-  const data = useDoc({ path: `properties/${propertyId}/units/${unitId}` })
+  const activeCompany = useActiveCompany()
+  const unit = UnitsResource.read({
+    activeCompany,
+    propertyId,
+    unitId,
+  })
   function toggleShowUnitForm() {
     setShowUnitForm(!showUnitForm)
   }
@@ -30,12 +39,14 @@ export function UnitDetail({ propertyId, unitId }) {
       }
     }
   }
-  return !data ? null : (
-    <div className={styles}>
+  return (
+    <UnitDetailWrapper>
       <div className="header">
         <div className="title-bar unit">
-          <Typography use="headline6">{data.label}</Typography>
-          <IconButton icon="edit" type="button" onClick={toggleShowUnitForm} />
+          <Typography use="headline6">{unit.label}</Typography>
+          <IconButton type="button" onClick={toggleShowUnitForm}>
+            <MaterialIcon icon="edit" />
+          </IconButton>
         </div>
       </div>
       {showUnitForm && (
@@ -43,7 +54,7 @@ export function UnitDetail({ propertyId, unitId }) {
           <EntityForm
             collectionPath={`properties/${propertyId}/units`}
             docId={unitId}
-            initialValues={{ label: data.label }}
+            initialValues={{ label: unit.label }}
             validationSchema={UnitSchema}
             onCancel={toggleShowUnitForm}
           >
@@ -61,11 +72,11 @@ export function UnitDetail({ propertyId, unitId }) {
           </EntityForm>
         </div>
       )}
-    </div>
+    </UnitDetailWrapper>
   )
 }
 
-const styles = css`
+const UnitDetailWrapper = styled.div`
   .header {
     display: flex;
     justify-content: space-between;
@@ -105,3 +116,8 @@ const styles = css`
     }
   } */
 `
+export default props => (
+  <Suspense fallback={null}>
+    <UnitDetail {...props} />
+  </Suspense>
+)

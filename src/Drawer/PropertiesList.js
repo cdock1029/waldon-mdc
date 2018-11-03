@@ -53,6 +53,7 @@ function UnitsList({ propertyId }) {
     activeCompany,
     propertyId,
   })
+  // TODO: sort units
   return (
     <div>
       {units.length ? (

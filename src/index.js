@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { StrictMode } from 'react'
 import ReactDOM from 'react-dom'
 import { AuthProvider } from './firebase/Auth'
 import './index.scss'
@@ -11,9 +11,11 @@ import * as serviceWorker from './serviceWorker'
 //   </AuthProvider>
 // )
 ReactDOM.render(
-  <AuthProvider>
-    <App />
-  </AuthProvider>,
+  <StrictMode>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </StrictMode>,
   document.getElementById('root')
 )
 

@@ -10,7 +10,7 @@ import {
   ButtonIcon,
   ThemeProvider,
 } from 'rmwc'
-import { css } from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 import { QueryContext } from '../Location'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
@@ -40,7 +40,7 @@ export function Drawer({ isOpen }) {
     setShowForm(!showForm)
   }
   return (
-    <D dismissible open={isOpen} className={styles}>
+    <StyledDrawer dismissible open={isOpen}>
       <DrawerHeader className="DrawerHeader">
         <ThemeProvider options={{ primary: 'white', onSurface: 'white' }} wrap>
           <TabBar
@@ -100,11 +100,11 @@ export function Drawer({ isOpen }) {
           </Suspense>
         )}
       </DrawerContent>
-    </D>
+    </StyledDrawer>
   )
 }
 
-const styles = css`
+const StyledDrawer = styled(D)`
   background-color: #e8e9eb;
   .DrawerHeader {
     display: flex;

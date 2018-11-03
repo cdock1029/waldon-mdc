@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react'
+import React, { createContext, useState, useEffect, useContext } from 'react'
 import { user as rxUser } from 'rxfire/auth'
 import firebase from './index'
 
@@ -21,6 +21,11 @@ function useAuth() {
       firebase.auth().signOut()
     },
   }
+}
+
+export function useActiveCompany() {
+  const { activeCompany } = useContext(AuthContext).claims
+  return activeCompany
 }
 
 export const AuthContext = createContext()

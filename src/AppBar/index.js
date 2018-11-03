@@ -8,7 +8,7 @@ import {
   TopAppBarActionItem,
   TopAppBarTitle,
 } from 'rmwc'
-import { css } from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 import { navigate } from '@reach/router'
 import { AuthContext } from '../firebase/Auth'
 
@@ -19,7 +19,7 @@ export function AppBar({ onMenuClick }) {
   }
   return (
     <>
-      <TopAppBar className={styles}>
+      <StyledTopAppBar>
         <TopAppBarRow>
           {auth.user ? (
             <React.Fragment>
@@ -36,7 +36,6 @@ export function AppBar({ onMenuClick }) {
                     onClick={() => navigate('/firestore')}
                   />
                   <TopAppBarActionItem
-                    onClick={signOut}
                     aria-label="Sign out"
                     alt="Sign out"
                     icon="exit_to_app"
@@ -45,7 +44,10 @@ export function AppBar({ onMenuClick }) {
                       render: ({ content }) => (
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <span>{auth.user.email}</span>
-                          <TopAppBarActionItem icon={content} />
+                          <TopAppBarActionItem
+                            icon={content}
+                            onClick={signOut}
+                          />
                         </div>
                       ),
                     }}
@@ -55,13 +57,13 @@ export function AppBar({ onMenuClick }) {
             </React.Fragment>
           ) : null}
         </TopAppBarRow>
-      </TopAppBar>
+      </StyledTopAppBar>
       <TopAppBarFixedAdjust />
     </>
   )
 }
 
-const styles = css`
+const StyledTopAppBar = styled(TopAppBar)`
   background-color: #282c34;
   position: absolute;
   z-index: 7;

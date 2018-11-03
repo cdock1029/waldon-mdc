@@ -1,5 +1,5 @@
-import React, { useContext, Suspense } from 'react'
-import styled from 'react-emotion/macro'
+import React, { useContext, Suspense, ConcurrentMode } from 'react'
+import styled from 'styled-components/macro'
 import { Router } from '@reach/router'
 import { DrawerAppContent } from 'rmwc'
 import { AppBar } from '../AppBar'
@@ -7,9 +7,9 @@ import { Drawer } from '../Drawer'
 import { Login } from '../Login'
 import { Dashboard } from '../Dashboard'
 import { ErrorBoundary } from '../ErrorBoundary'
-import { PropertyDetail } from '../PropertyDetail'
+import PropertyDetail from '../PropertyDetail'
 import { UnitDetail } from '../UnitDetail'
-import { TenantDetail } from '../TenantDetail'
+import TenantDetail from '../TenantDetail'
 import { QueryProvider } from '../Location'
 import { AuthContext } from '../firebase/Auth'
 import { useLocalStorage } from '../utils/useLocalStorage'
@@ -37,29 +37,34 @@ function App() {
     return <Login />
   }
   return (
-    <QueryProvider>
-      <AppContainer>
-        <Drawer isOpen={isOpen} />
-        <ErrorBoundary>
-          <DrawerAppContent className="DrawerAppContent">
-            <AppBar onMenuClick={toggleMenu} />
-            <div className="Content">
-              <Router>
-                <Dashboard path="/">
-                  <PropertyDetail path="property/:propertyId">
-                    <UnitDetail path="unit/:unitId" />
-                  </PropertyDetail>
-                  <TenantDetail path="tenant/:tenantId" />
-                </Dashboard>
-                <Firestore path="firestore" />
-                {/* <NewProperty path="new-property" />
+    <ConcurrentMode>
+      <QueryProvider>
+        <AppContainer>
+          <Drawer isOpen={isOpen} />
+          <ErrorBoundary>
+            <DrawerAppContent className="DrawerAppContent">
+              <AppBar onMenuClick={toggleMenu} />
+              <div className="Content">
+                <Router>
+                  <Dashboard path="/" key="dashboard">
+                    <PropertyDetail
+                      path="property/:propertyId"
+                      key="property-detail"
+                    >
+                      <UnitDetail path="unit/:unitId" />
+                    </PropertyDetail>
+                    <TenantDetail path="tenant/:tenantId" />
+                  </Dashboard>
+                  <Firestore path="firestore" />
+                  {/* <NewProperty path="new-property" />
               <NewTenant path="new-tenant" /> */}
-              </Router>
-            </div>
-          </DrawerAppContent>
-        </ErrorBoundary>
-      </AppContainer>
-    </QueryProvider>
+                </Router>
+              </div>
+            </DrawerAppContent>
+          </ErrorBoundary>
+        </AppContainer>
+      </QueryProvider>
+    </ConcurrentMode>
   )
 }
 

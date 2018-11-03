@@ -3,7 +3,7 @@ import { Formik, Form } from 'formik'
 import { Button, Elevation } from 'rmwc'
 import { Padding } from '../widgets/Padding'
 import { saveDoc } from '../firebase'
-import styled, { css } from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 
 const FormWrapper = styled.div({
   label: 'FormWrapper',
@@ -64,7 +64,7 @@ export class EntityForm extends React.Component {
             <Padding padding="1rem">
               <Elevation className="form-elevation-card" z={elevation}>
                 <FormWrapper>
-                  <Form className={newEntityStyles}>
+                  <StyledForm>
                     {children}
                     <div className="Buttons">
                       <Button type="button" onClick={onCancel}>
@@ -86,7 +86,7 @@ export class EntityForm extends React.Component {
                         {status}
                       </div>
                     )}
-                  </Form>
+                  </StyledForm>
                 </FormWrapper>
               </Elevation>
             </Padding>
@@ -97,8 +97,7 @@ export class EntityForm extends React.Component {
   }
 }
 
-const newEntityStyles = css`
-  label: NewEntity;
+const StyledForm = styled(Form)`
   display: inline-flex;
   flex-direction: column;
 

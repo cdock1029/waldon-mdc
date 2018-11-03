@@ -1,8 +1,12 @@
 import React, { useState } from 'react'
-import { css } from 'react-emotion'
-import { Button, IconButton, Typography } from 'rmwc'
+import styled from 'styled-components/macro'
+import { Typography } from 'rmwc'
+import Button from '@material/react-button'
+import IconButton from '@material/react-icon-button'
+import MaterialIcon from '@material/react-material-icon'
 import { navigate } from '@reach/router'
-import { useDoc } from '../firebase/Doc'
+import { TenantsResource } from '../firebase/Collection'
+import { useActiveCompany } from '../firebase/Auth'
 import { deleteDoc } from '../firebase'
 import { TenantSchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
@@ -10,7 +14,9 @@ import { MaterialField } from '../MaterialField'
 
 export function TenantDetail({ tenantId }) {
   const [showTenantForm, setShowTenantForm] = useState(false)
-  const data = useDoc({ path: `tenants/${tenantId}` })
+  const activeCompany = useActiveCompany()
+  const tenant = TenantsResource.read({ activeCompany, tenantId })
+  console.log({ TENANT: tenant })
   function toggleShowTenantForm() {
     setShowTenantForm(!showTenantForm)
   }
@@ -26,21 +32,21 @@ export function TenantDetail({ tenantId }) {
       }
     }
   }
-  return !data ? null : (
-    <div className={styles}>
+  return (
+    <TenantsDetailWrapper>
       <div className="header">
         <div className="title">
           <div className="title-bar">
             <Typography use="headline4">
-              {data.firstName} {data.lastName}
+              {tenant.firstName} {tenant.lastName}
             </Typography>
-            <IconButton
-              type="button"
-              icon="edit"
-              onClick={toggleShowTenantForm}
-            />
+            <IconButton type="button" onClick={toggleShowTenantForm}>
+              <MaterialIcon icon="edit" />
+            </IconButton>
           </div>
-          {data.email && <Typography use="subtitle1">{data.email}</Typography>}
+          {tenant.email && (
+            <Typography use="subtitle1">{tenant.email}</Typography>
+          )}
         </div>
       </div>
       {showTenantForm && (
@@ -48,7 +54,7 @@ export function TenantDetail({ tenantId }) {
           <EntityForm
             collectionPath="tenants"
             docId={tenantId}
-            initialValues={{ ...data }}
+            initialValues={{ ...tenant }}
             validationSchema={TenantSchema}
             onCancel={toggleShowTenantForm}
           >
@@ -72,11 +78,11 @@ export function TenantDetail({ tenantId }) {
           </EntityForm>
         </div>
       )}
-    </div>
+    </TenantsDetailWrapper>
   )
 }
 
-const styles = css`
+const TenantsDetailWrapper = styled.div`
   .header {
     display: flex;
     justify-content: space-between;
@@ -118,3 +124,8 @@ const styles = css`
     }
   }
 `
+export default props => (
+  <React.Suspense fallback={null}>
+    <TenantDetail {...props} />
+  </React.Suspense>
+)

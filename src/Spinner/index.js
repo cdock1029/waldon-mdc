@@ -1,23 +1,24 @@
 import React from 'react'
-import { css } from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 
 export function Spinner() {
   return (
-    <div className={styles}>
-      <div className="double-bounce1" />
-      <div className="double-bounce2" />
-    </div>
+    // <SpinnerWrapper>
+    //   <div className="double-bounce1" />
+    //   <div className="double-bounce2" />
+    // </SpinnerWrapper>
+    <h4>Loading..</h4>
   )
 }
 export default Spinner
 
-const styles = css`
+const SpinnerWrapper = styled.div`
   label: Spinner;
   width: 40px;
   height: 40px;
 
   position: relative;
-  margin: 100px auto;
+  margin: 80px auto;
 
   .double-bounce1,
   .double-bounce2 {

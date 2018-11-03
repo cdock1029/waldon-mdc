@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import styled from 'react-emotion/macro'
+import styled from 'styled-components/macro'
 import firebase from '../firebase'
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import firebaseui from 'firebaseui'

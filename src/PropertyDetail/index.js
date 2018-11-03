@@ -1,7 +1,11 @@
-import React, { useState } from 'react'
-import { css } from 'react-emotion/macro'
-import { Button, ButtonIcon, IconButton, Typography } from 'rmwc'
-import { useDoc } from '../firebase/Doc'
+import React, { useState, useContext, useEffect, Suspense } from 'react'
+import styled from 'styled-components/macro'
+import { Typography } from 'rmwc'
+import Button from '@material/react-button'
+import IconButton from '@material/react-icon-button'
+import MaterialIcon from '@material/react-material-icon'
+import { PropertiesResource } from '../firebase/Collection'
+import { AuthContext } from '../firebase/Auth'
 import { UnitSchema, PropertySchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
@@ -9,32 +13,36 @@ import { MaterialField } from '../MaterialField'
 export function PropertyDetail({ propertyId, children }) {
   const [showUnitForm, setShowUnitForm] = useState(false)
   const [showPropertyForm, setShowPropertyForm] = useState(false)
+  const { activeCompany } = useContext(AuthContext).claims
+  useEffect(() => {
+    return () => console.log('unmounting property-detail')
+  }, [])
 
-  // todo: should throw a promise....
-  const data = useDoc({ path: `properties/${propertyId}` })
+  const property = PropertiesResource.read({
+    activeCompany,
+    propertyId,
+  })
   function toggleShowUnitForm() {
     setShowUnitForm(!showUnitForm)
   }
   function toggleShowPropertyForm() {
     setShowPropertyForm(!showPropertyForm)
   }
-  // todo: should be handled by suspense...
-  if (!data) {
-    return null
-  }
   return (
-    <div className={styles}>
+    <PropertyDetailWrapper>
       <div className="header">
         <div className="title-bar property">
-          <Typography use="headline4">{data.name}</Typography>
-          <IconButton
-            icon="edit"
-            type="button"
-            onClick={toggleShowPropertyForm}
-          />
+          <Typography use="headline4">{property.name}</Typography>
+          <IconButton type="button" onClick={toggleShowPropertyForm}>
+            <MaterialIcon icon="edit" />
+          </IconButton>
         </div>
-        <Button type="button" dense onClick={toggleShowUnitForm}>
-          <ButtonIcon icon="add" />
+        <Button
+          type="button"
+          icon={<MaterialIcon icon="add" />}
+          dense
+          onClick={toggleShowUnitForm}
+        >
           New sub-unit
         </Button>
       </div>
@@ -60,7 +68,7 @@ export function PropertyDetail({ propertyId, children }) {
           <EntityForm
             collectionPath="properties"
             docId={propertyId}
-            initialValues={{ name: data.name }}
+            initialValues={{ name: property.name }}
             validationSchema={PropertySchema}
             onCancel={toggleShowPropertyForm}
           >
@@ -77,11 +85,11 @@ export function PropertyDetail({ propertyId, children }) {
         </div>
       )}
       {children}
-    </div>
+    </PropertyDetailWrapper>
   )
 }
 
-const styles = css`
+const PropertyDetailWrapper = styled.div`
   .header {
     display: flex;
     justify-content: space-between;
@@ -98,3 +106,9 @@ const styles = css`
     }
   }
 `
+
+export default props => (
+  <Suspense fallback={null}>
+    <PropertyDetail {...props} />
+  </Suspense>
+)
