@@ -1,54 +1,89 @@
-import * as React from 'react'
-import { ListItem, ListItemMeta } from 'rmwc'
-import './styles.scss'
+import React, { useState, useEffect } from 'react'
+import styled from 'styled-components/macro'
+import { ListItem, ListItemMeta, ListItemText } from '@material/react-list'
+import MaterialIcon from '@material/react-material-icon'
 
-export class Submenu extends React.Component {
-  static defaultProps = {
-    activated: false,
+export function Submenu({ text, children, onClick, activated = false }) {
+  const [isOpen, setIsOpen] = useState(false)
+  useEffect(
+    () => {
+      if (activated) {
+        requestAnimationFrame(() => {
+          if (!isOpen) {
+            setIsOpen(true)
+          }
+        })
+      } else if (isOpen) {
+        requestAnimationFrame(() => {
+          setIsOpen(false)
+        })
+      }
+    },
+    [activated]
+  )
+  function toggleForWhenAlreadyActivated() {
+    setIsOpen(!isOpen)
   }
-  state = {
-    isOpen: false,
-  }
-  componentDidMount() {
-    if (this.props.activated) {
-      setTimeout(() => {
-        this.setState(() => ({ isOpen: true }))
-      }, 0)
-    }
-  }
-  componentDidUpdate(prevProps, prevState) {
-    if (this.props.activated !== prevProps.activated) {
-      this.setState(() => ({ isOpen: this.props.activated }))
-    }
-  }
-  handleListItemClick = () => {
-    this.setState(({ isOpen }) => ({ isOpen: !isOpen }))
-  }
-  render() {
-    const { children, label, activated, ...rest } = this.props
-    const { isOpen } = this.state
-    return (
-      <div className="submenu">
-        <ListItem
-          className="submenu-list-item"
-          activated={activated}
-          onClick={this.handleListItemClick}
-          {...rest}
-        >
-          <span>{label}</span>
-          <ListItemMeta
-            icon="chevron_right"
-            className={`submenu__icon${isOpen ? ' submenu__icon--open' : ''}`}
-          />
-        </ListItem>
-        <div
-          className={`submenu__children${
-            isOpen ? ' submenu__children--open' : ''
-          }`}
-        >
-          {children}
-        </div>
+  return (
+    <SubmenuWrapper>
+      <ListItem
+        className={`submenu-list-item${activated ? activatedClass : ''}`}
+        onClick={() => {
+          onClick()
+          toggleForWhenAlreadyActivated()
+        }}
+      >
+        <ListItemText primaryText={text} />
+        <ListItemMeta
+          meta={<MaterialIcon icon="chevron_right" />}
+          className={`submenu__icon${isOpen ? ' submenu__icon--open' : ''}`}
+        />
+      </ListItem>
+      <div
+        className={`submenu__children${
+          isOpen ? ' submenu__children--open' : ''
+        }`}
+      >
+        {children}
       </div>
-    )
-  }
+    </SubmenuWrapper>
+  )
 }
+
+const activatedClass = ' mdc-list-item--activated'
+
+const cb = 'cubic-bezier(0.4, 0, 0.2, 1)'
+const SubmenuWrapper = styled.div`
+  float: left;
+  width: 100%;
+  .submenu-list-item {
+    cursor: pointer;
+  }
+
+  .submenu__children {
+    overflow: hidden;
+    height: 0;
+    transition: height 250ms ${cb};
+  }
+
+  .submenu__children--open {
+    height: 16rem;
+    overflow-y: scroll;
+    transition: height 250ms ${cb};
+  }
+
+  .submenu__icon {
+    transition: transform 200ms 50ms ${cb};
+    user-select: none;
+  }
+
+  .submenu__icon--open {
+    transform: rotate(90deg);
+  }
+
+  .submenu__children .mdc-list-item > span:before {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+  }
+`

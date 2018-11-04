@@ -5,6 +5,7 @@
   "dependencies": {
     "@material/react-button": "^0.6.1",
     "@material/react-icon-button": "^0.6.1",
+    "@material/react-list": "^0.6.1",
     "@material/react-material-icon": "^0.6.1",
     "@material/react-text-field": "^0.6.1",
     "@material/ripple": "^0.41.0",

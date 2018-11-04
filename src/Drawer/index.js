@@ -6,10 +6,10 @@ import {
   TabBar,
   Tab,
   Typography,
-  Button,
-  ButtonIcon,
   ThemeProvider,
 } from 'rmwc'
+import Button from '@material/react-button'
+import MaterialIcon from '@material/react-material-icon'
 import styled from 'styled-components/macro'
 import { QueryContext } from '../Location'
 import { EntityForm } from '../EntityForm'
@@ -79,8 +79,11 @@ export function Drawer({ isOpen }) {
                     // justifyContent: 'flex-end',
                   }}
                 >
-                  <Button dense onClick={toggleShowForm}>
-                    <ButtonIcon icon="add" />
+                  <Button
+                    dense
+                    icon={<MaterialIcon icon="add" />}
+                    onClick={toggleShowForm}
+                  >
                     New property
                   </Button>
                 </div>

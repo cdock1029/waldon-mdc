@@ -1,6 +1,6 @@
-import React, { memo, useContext, Suspense } from 'react'
-import { List, ListItem } from 'rmwc'
-import { Link } from '@reach/router'
+import React, { memo, useContext, useState, Suspense } from 'react'
+import List, { ListItem, ListItemText } from '@material/react-list'
+import { navigate } from '@reach/router'
 import { Submenu } from '../Submenu'
 import { NoData } from '../NoData'
 import { PropertiesResource, UnitsResource } from '../firebase/Collection'
@@ -12,13 +12,19 @@ export function PropertiesList({ p }) {
     claims: { activeCompany },
   } = useContext(AuthContext)
   const properties = PropertiesResource.read({ activeCompany })
+  const [selectedIndex, setSelectedIndex] = useState()
+  function selectItem(i) {
+    setSelectedIndex(i)
+  }
+  console.log({ selectedIndex })
   return (
-    <List className="DrawerList">
-      {properties.map(property => {
+    <List singleSelection className="DrawerList" selectedIndex={selectedIndex}>
+      {properties.map((property, index) => {
         return (
           <PropertyItem
             key={property.id}
             {...property}
+            selectItem={() => selectItem(index)}
             propertyActivated={p === property.id}
           />
         )
@@ -29,36 +35,53 @@ export function PropertiesList({ p }) {
 
 const PropertyItem = memo(function PropertyItemComponent({
   propertyActivated,
+  selectItem,
   ...property
 }) {
+  const [activatedUnitIndex, setActivatedUnitIndex] = useState()
+  function handleUnitClick(i) {
+    setActivatedUnitIndex(i)
+  }
   return (
     <Submenu
       activated={propertyActivated}
-      label={property.name}
-      tag={Link}
-      to={`/property/${property.id}?p=${property.id}`}
+      text={property.name}
+      onClick={() => {
+        navigate(`/property/${property.id}?p=${property.id}`)
+        selectItem()
+        handleUnitClick(null)
+      }}
     >
       {propertyActivated ? (
         <Suspense fallback={<span />}>
-          <UnitsList propertyId={property.id} />
+          <UnitsList
+            propertyId={property.id}
+            activatedUnitIndex={activatedUnitIndex}
+            handleUnitClick={handleUnitClick}
+          />
         </Suspense>
       ) : null}
     </Submenu>
   )
 })
 
-function UnitsList({ propertyId }) {
+function UnitsList({ propertyId, activatedUnitIndex, handleUnitClick }) {
   const { activeCompany } = useContext(AuthContext).claims
   const units = UnitsResource.read({
     activeCompany,
     propertyId,
   })
-  // TODO: sort units
   return (
     <div>
       {units.length ? (
-        units.map(unit => (
-          <UnitItem key={unit.id} {...unit} propertyId={propertyId} />
+        units.map((unit, index) => (
+          <UnitItem
+            key={unit.id}
+            {...unit}
+            activated={activatedUnitIndex === index}
+            propertyId={propertyId}
+            handleUnitClick={() => handleUnitClick(index)}
+          />
         ))
       ) : (
         <NoData label="Units" />
@@ -67,19 +90,26 @@ function UnitsList({ propertyId }) {
   )
 }
 
-const UnitItem = memo(function UnitItemComponent({ propertyId, ...unit }) {
-  const { u } = useContext(QueryContext)
+const UnitItem = memo(function UnitItemComponent({
+  activated,
+  handleUnitClick,
+  propertyId,
+  ...unit
+}) {
   return (
     <ListItem
       key={unit.id}
-      tag={Link}
-      to={`/property/${propertyId}/unit/${unit.id}?p=${propertyId}&u=${
-        unit.id
-      }`}
-      onClick={() => window.scrollTo(0, 0)}
-      activated={u === unit.id}
+      className={activated ? activatedClass : undefined}
+      onClick={() => {
+        navigate(
+          `/property/${propertyId}/unit/${unit.id}?p=${propertyId}&u=${unit.id}`
+        )
+        handleUnitClick()
+        //window.scrollTo(0, 0)
+      }}
     >
-      <span>{unit.label}</span>
+      <ListItemText primaryText={unit.label} />
     </ListItem>
   )
 })
+const activatedClass = ' mdc-list-item--activated'
