@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useContext,
   Suspense,
+  forwardRef,
 } from 'react'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
@@ -26,6 +27,22 @@ export function PropertiesList({ toggleShowForm }) {
   const activeCompany = useActiveCompany()
   const properties = PropertiesResource.read({ activeCompany })
   const { p } = useContext(QueryContext)
+  const [visuallySelectedProperty, setVisuallySelectedProperty] = useState(p)
+  useEffect(
+    () => {
+      if (!p && visuallySelectedProperty) {
+        console.log('unsetting selected')
+        setVisuallySelectedProperty(undefined)
+      }
+    },
+    [p]
+  )
+
+  function handleItemClick(propertyId) {
+    setVisuallySelectedProperty(propertyId)
+    navigate(`/property/${propertyId}?p=${propertyId}`)
+  }
+
   return (
     <>
       <div className="DrawerControls">
@@ -50,8 +67,11 @@ export function PropertiesList({ toggleShowForm }) {
           return (
             <PropertyItem
               key={property.id}
+              /* ...property */
               {...property}
               activated={p === property.id}
+              selected={visuallySelectedProperty === property.id}
+              handleItemClick={() => handleItemClick(property.id)}
             />
           )
         })}
@@ -62,38 +82,36 @@ export function PropertiesList({ toggleShowForm }) {
 
 function propertyItemsAreEqual(prevProps, nextProps) {
   const areEqual =
-    prevProps.id === nextProps.id &&
     prevProps.name === nextProps.name &&
-    prevProps.activated === nextProps.activated
+    prevProps.activated === nextProps.activated &&
+    prevProps.selected === nextProps.selected
   return areEqual
 }
-const PropertyItem = memo(function PropertyItemComponent({
-  activated,
-  ...property
-}) {
-  const [isActivated, setIsActivated] = useState(activated)
-  if (isActivated !== activated) {
-    setIsActivated(activated)
-  }
-
-  console.log('render propertyItem', property.id)
-  return (
-    <Submenu
-      activated={isActivated}
-      text={property.name}
-      selectItem={() => {
-        navigate(`/property/${property.id}?p=${property.id}`)
-      }}
-    >
-      {activated ? (
-        <Suspense fallback={<span />}>
-          <UnitsList propertyId={property.id} />
-        </Suspense>
-      ) : null}
-    </Submenu>
-  )
-},
-propertyItemsAreEqual)
+const PropertyItem = memo(
+  forwardRef(({ activated, selected, handleItemClick, ...property }, ref) => {
+    const [isActivated, setIsActivated] = useState(activated)
+    if (isActivated !== activated) {
+      setIsActivated(activated)
+    }
+    console.log('render propertyItem', property.id)
+    return (
+      <Submenu
+        ref={ref}
+        activated={isActivated}
+        selected={selected}
+        text={property.name}
+        handleItemClick={handleItemClick}
+      >
+        {isActivated ? (
+          <Suspense fallback={<span />}>
+            <UnitsList propertyId={property.id} />
+          </Suspense>
+        ) : null}
+      </Submenu>
+    )
+  }),
+  propertyItemsAreEqual
+)
 
 const UnitsList = memo(
   function UnitsListComponent({ propertyId }) {
@@ -103,7 +121,17 @@ const UnitsList = memo(
       propertyId,
     })
     const { u } = useContext(QueryContext)
-    const [visuallySelectedUnit, setVisuallySelectedUnit] = useState()
+    const [visuallySelectedUnit, setVisuallySelectedUnit] = useState(u)
+
+    useEffect(
+      () => {
+        if (!u && visuallySelectedUnit) {
+          console.log('unsetting selected')
+          setVisuallySelectedUnit(undefined)
+        }
+      },
+      [u]
+    )
 
     function handleItemClick(unitId) {
       setVisuallySelectedUnit(unitId)
@@ -112,7 +140,6 @@ const UnitsList = memo(
       )
     }
 
-    console.log('render unitList u:', u)
     return (
       <div>
         {units.length ? (
@@ -143,6 +170,7 @@ const UnitItem = function UnitItemComponent({
   ...unit
 }) {
   const [isActivated, setIsActivated] = useState(activated)
+  // console.log({ activated, unit: unit.id })
   if (isActivated !== activated) {
     setIsActivated(activated)
   }
@@ -158,5 +186,5 @@ const UnitItem = function UnitItemComponent({
     </ListItem>
   )
 }
-const activatedClass = 'mdc-list-item--activated '
-const selectedClass = 'mdc-list-item--selected '
+const activatedClass = 'mdc-list-item--activated'
+const selectedClass = 'mdc-list-item--selected'
