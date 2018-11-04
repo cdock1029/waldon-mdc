@@ -116,8 +116,8 @@ const UnitDetailWrapper = styled.div`
     }
   } */
 `
-export default props => (
-  <Suspense fallback={null}>
-    <UnitDetail {...props} />
-  </Suspense>
-)
+// export default props => (
+//   <Suspense fallback={null}>
+//     <UnitDetail {...props} />
+//   </Suspense>
+// )

@@ -1,7 +1,6 @@
 import React, {
   memo,
   useState,
-  useMemo,
   useEffect,
   useContext,
   Suspense,
@@ -11,17 +10,11 @@ import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
 import List, { ListItem, ListItemText } from '@material/react-list'
 import { navigate } from '@reach/router'
-import qs from 'query-string'
 import { Submenu } from '../Submenu'
 import { NoData } from '../NoData'
 import { PropertiesResource, UnitsResource } from '../firebase/Collection'
 import { useActiveCompany } from '../firebase/Auth'
 import { QueryContext } from '../Location'
-
-function getQueryParam(param) {
-  const q = qs.parse(window.location.search)
-  return q[param]
-}
 
 export function PropertiesList({ toggleShowForm }) {
   const activeCompany = useActiveCompany()
@@ -31,7 +24,6 @@ export function PropertiesList({ toggleShowForm }) {
   useEffect(
     () => {
       if (!p && visuallySelectedProperty) {
-        console.log('unsetting selected')
         setVisuallySelectedProperty(undefined)
       }
     },
@@ -93,7 +85,6 @@ const PropertyItem = memo(
     if (isActivated !== activated) {
       setIsActivated(activated)
     }
-    console.log('render propertyItem', property.id)
     return (
       <Submenu
         ref={ref}
@@ -126,7 +117,6 @@ const UnitsList = memo(
     useEffect(
       () => {
         if (!u && visuallySelectedUnit) {
-          console.log('unsetting selected')
           setVisuallySelectedUnit(undefined)
         }
       },

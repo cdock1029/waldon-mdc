@@ -108,7 +108,7 @@ const PropertyDetailWrapper = styled.div`
 `
 
 export default props => (
-  <Suspense fallback={null}>
+  <Suspense fallback={<h1>....</h1>}>
     <PropertyDetail {...props} />
   </Suspense>
 )

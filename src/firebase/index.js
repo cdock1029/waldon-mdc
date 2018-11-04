@@ -104,19 +104,15 @@ const cache = LRU({
 })
 export function createFirestoreCollectionResource(callback) {
   function useFirestoreResource(input) {
-    const [nothing, setNothing] = useState()
+    const [nothing, setNothing] = useState(0)
     const firestoreQueryParams = callback(input)
     const key = paramsToKey(firestoreQueryParams)
     console.log({ key })
     if (!cache.has(key)) {
-      console.log('miss')
+      // console.log('miss')
       cache.set(key, {})
-    } else {
-      console.log('hit')
     }
     let valueContainer = cache.get(key)
-
-    console.log({ key, valueContainer })
 
     if (typeof valueContainer.currentValue === 'undefined') {
       const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
@@ -136,12 +132,14 @@ export function createFirestoreCollectionResource(callback) {
           resolveCallback = null
         } else {
           // console.log('setting nothing...')
-          setNothing(0)
+          console.log('new data')
+          setNothing(1)
         }
       })
     }
     const stateValueContainer = useMemo(
       () => {
+        console.log('memo rerun data')
         return valueContainer
       },
       [valueContainer.currentValue, key]

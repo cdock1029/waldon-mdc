@@ -14,23 +14,10 @@ function areEqual(prevProps, nextProps) {
 export const Submenu = memo(
   forwardRef(
     ({ text, children, handleItemClick, activated, selected }, ref) => {
-      const [isOpen, setIsOpen] = useState(activated)
-      useEffect(
-        () => {
-          if (activated) {
-            requestAnimationFrame(() => {
-              if (!isOpen) {
-                setIsOpen(true)
-              }
-            })
-          } else if (isOpen) {
-            requestAnimationFrame(() => {
-              setIsOpen(false)
-            })
-          }
-        },
-        [activated]
-      )
+      const [isOpen, setIsOpen] = useState(selected)
+      if (!selected && isOpen) {
+        setIsOpen(false)
+      }
       function toggleListOpen() {
         setIsOpen(!isOpen)
       }
@@ -78,7 +65,7 @@ const SubmenuWrapper = styled.div`
   .submenu__children {
     overflow: hidden;
     height: 0;
-    transition: height 200ms ${cb};
+    transition: height 250ms ${cb};
   }
 
   .submenu__children--open {
@@ -88,7 +75,7 @@ const SubmenuWrapper = styled.div`
   }
 
   .submenu__icon {
-    transition: transform 200ms 50ms ${cb};
+    transition: transform 350ms ${cb};
     user-select: none;
   }
 
