@@ -1,16 +1,21 @@
-import React, { memo, useContext } from 'react'
+import React, { memo, useState } from 'react'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
-import { List, ListItem } from 'rmwc'
-import { Link } from '@reach/router'
+// import { List, ListItem } from 'rmwc'
+import List, { ListItem, ListItemText } from '@material/react-list'
+import { navigate } from '@reach/router'
 import { TenantsResource } from '../firebase/Collection'
-import { AuthContext } from '../firebase/Auth'
+import { useActiveCompany } from '../firebase/Auth'
+import { useQueryParams } from '../Location'
 
-const TenantList = ({ t, toggleShowForm }) => {
-  const {
-    claims: { activeCompany },
-  } = useContext(AuthContext)
+const TenantList = ({ toggleShowForm }) => {
+  const activeCompany = useActiveCompany()
   const tenants = TenantsResource.read({ activeCompany }) //.getValue()
+  const { t } = useQueryParams([])
+  const [activated, setActivated] = useState(t)
+  function handleSelectItem(id) {
+    setActivated(id)
+  }
   return (
     <>
       <div
@@ -33,7 +38,8 @@ const TenantList = ({ t, toggleShowForm }) => {
           <TenantItem
             key={tenant.id}
             {...tenant}
-            tenantActivated={t === tenant.id}
+            tenantActivated={activated === tenant.id}
+            handleSelectItem={() => handleSelectItem(tenant.id)}
           />
         ))}
       </List>
@@ -43,17 +49,22 @@ const TenantList = ({ t, toggleShowForm }) => {
 
 const TenantItem = memo(function TenantItemComponent({
   tenantActivated,
+  handleSelectItem,
   ...tenant
 }) {
   return (
     <ListItem
-      tag={Link}
-      to={`/tenant/${tenant.id}?t=${tenant.id}`}
-      activated={tenantActivated}
+      className={tenantActivated ? activatedClass : undefined}
+      onClick={() => {
+        handleSelectItem()
+        navigate(`/tenant/${tenant.id}?t=${tenant.id}`)
+      }}
     >
-      {tenant.firstName} {tenant.lastName}
+      <ListItemText primaryText={`${tenant.firstName} ${tenant.lastName}`} />
     </ListItem>
   )
 })
+
+const activatedClass = ' mdc-list-item--activated'
 
 export default TenantList

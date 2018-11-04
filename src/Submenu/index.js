@@ -1,10 +1,22 @@
-import React, { useState, useEffect } from 'react'
+import React, { memo, useState, useEffect } from 'react'
 import styled from 'styled-components/macro'
 import { ListItem, ListItemMeta, ListItemText } from '@material/react-list'
 import MaterialIcon from '@material/react-material-icon'
 
-export function Submenu({ text, children, onClick, activated = false }) {
-  const [isOpen, setIsOpen] = useState(false)
+function areEqual(prevProps, nextProps) {
+  return (
+    prevProps.text === nextProps.text &&
+    prevProps.activated === nextProps.activated
+  )
+}
+
+export const Submenu = memo(function SubMenu({
+  text,
+  children,
+  selectItem,
+  activated = false,
+}) {
+  const [isOpen, setIsOpen] = useState(activated)
   useEffect(
     () => {
       if (activated) {
@@ -21,16 +33,17 @@ export function Submenu({ text, children, onClick, activated = false }) {
     },
     [activated]
   )
-  function toggleForWhenAlreadyActivated() {
+  function toggleListOpen() {
     setIsOpen(!isOpen)
   }
   return (
     <SubmenuWrapper>
       <ListItem
-        className={`submenu-list-item${activated ? activatedClass : ''}`}
+        title={text}
+        className={activated ? activatedClass : undefined}
         onClick={() => {
-          onClick()
-          toggleForWhenAlreadyActivated()
+          toggleListOpen()
+          selectItem()
         }}
       >
         <ListItemText primaryText={text} />
@@ -48,7 +61,8 @@ export function Submenu({ text, children, onClick, activated = false }) {
       </div>
     </SubmenuWrapper>
   )
-}
+},
+areEqual)
 
 const activatedClass = ' mdc-list-item--activated'
 
@@ -56,14 +70,11 @@ const cb = 'cubic-bezier(0.4, 0, 0.2, 1)'
 const SubmenuWrapper = styled.div`
   float: left;
   width: 100%;
-  .submenu-list-item {
-    cursor: pointer;
-  }
 
   .submenu__children {
     overflow: hidden;
     height: 0;
-    transition: height 250ms ${cb};
+    transition: height 200ms ${cb};
   }
 
   .submenu__children--open {

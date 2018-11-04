@@ -1,26 +1,15 @@
-import React, { useState, useContext, lazy, Suspense } from 'react'
-import {
-  Drawer as D,
-  DrawerHeader,
-  DrawerContent,
-  TabBar,
-  Tab,
-  Typography,
-  ThemeProvider,
-} from 'rmwc'
-import Button from '@material/react-button'
-import MaterialIcon from '@material/react-material-icon'
+import React, { useState, lazy, Suspense } from 'react'
+import { Drawer as D, DrawerHeader, DrawerContent } from 'rmwc'
+import Tab from '@material/react-tab'
+import TabBar from '@material/react-tab-bar'
 import styled from 'styled-components/macro'
-import { QueryContext } from '../Location'
-import { EntityForm } from '../EntityForm'
-import { MaterialField } from '../MaterialField'
-import { PropertySchema } from '../firebase/schemas'
 import { useLocalStorage } from '../utils/useLocalStorage'
 import { PropertiesList } from './PropertiesList'
 import { Spinner } from '../Spinner'
 
 const TenantList = lazy(() => import('./TenantList'))
 const NewTenantForm = lazy(() => import('./NewTenantForm'))
+const NewPropertyForm = lazy(() => import('./NewPropertyForm'))
 
 export function Drawer({ isOpen }) {
   const [tabIndex, setTabIndex] = useLocalStorage({
@@ -29,10 +18,9 @@ export function Drawer({ isOpen }) {
     transform: str => parseInt(str) || 0,
   })
   const [showForm, setShowForm] = useState(false)
-  const q = useContext(QueryContext)
 
-  function handleSetTabIndex(e) {
-    const tabIndex = e.detail.index
+  function handleSetTabIndex(tabIndex) {
+    // const tabIndex = e.detail.index
     setTabIndex(tabIndex)
     setShowForm(false)
   }
@@ -42,56 +30,29 @@ export function Drawer({ isOpen }) {
   return (
     <StyledDrawer dismissible open={isOpen}>
       <DrawerHeader className="DrawerHeader">
-        <ThemeProvider options={{ primary: 'white', onSurface: 'white' }} wrap>
-          <TabBar
-            className="darkTabBar"
-            activeTabIndex={tabIndex}
-            onActivate={handleSetTabIndex}
-          >
-            <Tab>Properties</Tab>
-            <Tab>Tenants</Tab>
-          </TabBar>
-        </ThemeProvider>
+        <TabBar
+          className="darkTabBar"
+          activeIndex={tabIndex}
+          handleActiveIndexUpdate={handleSetTabIndex}
+        >
+          <Tab>
+            <span className="mdc-tab__text-label">Properties</span>
+          </Tab>
+          <Tab>
+            <span className="mdc-tab__text-label">Tenants</span>
+          </Tab>
+        </TabBar>
       </DrawerHeader>
       <DrawerContent className="DrawerContent">
         {tabIndex === 0 ? (
           showForm ? (
-            <EntityForm
-              collectionPath="properties"
-              initialValues={{ name: '' }}
-              validationSchema={PropertySchema}
-              onCancel={toggleShowForm}
-            >
-              <div className="title">
-                <Typography use="headline5">New property</Typography>
-              </div>
-              <div>
-                <MaterialField name="name" label="Property name" />
-              </div>
-            </EntityForm>
+            <Suspense fallback={<Spinner />}>
+              <NewPropertyForm toggleShowForm={toggleShowForm} />
+            </Suspense>
           ) : (
-            <>
-              <div className="DrawerControls">
-                <div
-                  style={{
-                    padding: '1rem',
-                    display: 'flex',
-                    // justifyContent: 'flex-end',
-                  }}
-                >
-                  <Button
-                    dense
-                    icon={<MaterialIcon icon="add" />}
-                    onClick={toggleShowForm}
-                  >
-                    New property
-                  </Button>
-                </div>
-              </div>
-              <Suspense fallback={<Spinner />}>
-                <PropertiesList p={q.p} />
-              </Suspense>
-            </>
+            <Suspense fallback={<Spinner />}>
+              <PropertiesList toggleShowForm={toggleShowForm} />
+            </Suspense>
           )
         ) : showForm ? (
           <Suspense fallback={<Spinner />}>
@@ -99,7 +60,7 @@ export function Drawer({ isOpen }) {
           </Suspense>
         ) : (
           <Suspense fallback={<Spinner />}>
-            <TenantList t={q.t} toggleShowForm={toggleShowForm} />
+            <TenantList toggleShowForm={toggleShowForm} />
           </Suspense>
         )}
       </DrawerContent>
@@ -109,10 +70,13 @@ export function Drawer({ isOpen }) {
 
 const StyledDrawer = styled(D)`
   background-color: #e8e9eb;
+  li.mdc-list-item {
+    cursor: pointer;
+  }
   .DrawerHeader {
     display: flex;
     align-items: flex-end;
-    background-color: #282c34;
+    /* background-color: #282c34; */
     padding: 0;
   }
   .DrawerContent {

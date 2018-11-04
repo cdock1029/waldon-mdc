@@ -1,115 +1,162 @@
-import React, { memo, useContext, useState, Suspense } from 'react'
+import React, {
+  memo,
+  useState,
+  useMemo,
+  useEffect,
+  useContext,
+  Suspense,
+} from 'react'
+import Button from '@material/react-button'
+import MaterialIcon from '@material/react-material-icon'
 import List, { ListItem, ListItemText } from '@material/react-list'
 import { navigate } from '@reach/router'
+import qs from 'query-string'
 import { Submenu } from '../Submenu'
 import { NoData } from '../NoData'
 import { PropertiesResource, UnitsResource } from '../firebase/Collection'
-import { AuthContext } from '../firebase/Auth'
+import { useActiveCompany } from '../firebase/Auth'
 import { QueryContext } from '../Location'
 
-export function PropertiesList({ p }) {
-  const {
-    claims: { activeCompany },
-  } = useContext(AuthContext)
+function getQueryParam(param) {
+  const q = qs.parse(window.location.search)
+  return q[param]
+}
+
+export function PropertiesList({ toggleShowForm }) {
+  const activeCompany = useActiveCompany()
   const properties = PropertiesResource.read({ activeCompany })
-  const [selectedIndex, setSelectedIndex] = useState()
-  function selectItem(i) {
-    setSelectedIndex(i)
-  }
-  console.log({ selectedIndex })
+  const { p } = useContext(QueryContext)
   return (
-    <List singleSelection className="DrawerList" selectedIndex={selectedIndex}>
-      {properties.map((property, index) => {
-        return (
-          <PropertyItem
-            key={property.id}
-            {...property}
-            selectItem={() => selectItem(index)}
-            propertyActivated={p === property.id}
-          />
-        )
-      })}
-    </List>
+    <>
+      <div className="DrawerControls">
+        <div
+          style={{
+            padding: '1rem',
+            display: 'flex',
+            // justifyContent: 'flex-end',
+          }}
+        >
+          <Button
+            dense
+            icon={<MaterialIcon icon="add" />}
+            onClick={toggleShowForm}
+          >
+            New property
+          </Button>
+        </div>
+      </div>
+      <List className="DrawerList">
+        {properties.map(property => {
+          return (
+            <PropertyItem
+              key={property.id}
+              {...property}
+              activated={p === property.id}
+            />
+          )
+        })}
+      </List>
+    </>
   )
 }
 
+function propertyItemsAreEqual(prevProps, nextProps) {
+  const areEqual =
+    prevProps.id === nextProps.id &&
+    prevProps.name === nextProps.name &&
+    prevProps.activated === nextProps.activated
+  return areEqual
+}
 const PropertyItem = memo(function PropertyItemComponent({
-  propertyActivated,
-  selectItem,
+  activated,
   ...property
 }) {
-  const [activatedUnitIndex, setActivatedUnitIndex] = useState()
-  function handleUnitClick(i) {
-    setActivatedUnitIndex(i)
+  const [isActivated, setIsActivated] = useState(activated)
+  if (isActivated !== activated) {
+    setIsActivated(activated)
   }
+
+  console.log('render propertyItem', property.id)
   return (
     <Submenu
-      activated={propertyActivated}
+      activated={isActivated}
       text={property.name}
-      onClick={() => {
+      selectItem={() => {
         navigate(`/property/${property.id}?p=${property.id}`)
-        selectItem()
-        handleUnitClick(null)
       }}
     >
-      {propertyActivated ? (
+      {activated ? (
         <Suspense fallback={<span />}>
-          <UnitsList
-            propertyId={property.id}
-            activatedUnitIndex={activatedUnitIndex}
-            handleUnitClick={handleUnitClick}
-          />
+          <UnitsList propertyId={property.id} />
         </Suspense>
       ) : null}
     </Submenu>
   )
-})
+},
+propertyItemsAreEqual)
 
-function UnitsList({ propertyId, activatedUnitIndex, handleUnitClick }) {
-  const { activeCompany } = useContext(AuthContext).claims
-  const units = UnitsResource.read({
-    activeCompany,
-    propertyId,
-  })
-  return (
-    <div>
-      {units.length ? (
-        units.map((unit, index) => (
-          <UnitItem
-            key={unit.id}
-            {...unit}
-            activated={activatedUnitIndex === index}
-            propertyId={propertyId}
-            handleUnitClick={() => handleUnitClick(index)}
-          />
-        ))
-      ) : (
-        <NoData label="Units" />
-      )}
-    </div>
-  )
-}
+const UnitsList = memo(
+  function UnitsListComponent({ propertyId }) {
+    const activeCompany = useActiveCompany()
+    const units = UnitsResource.read({
+      activeCompany,
+      propertyId,
+    })
+    const { u } = useContext(QueryContext)
+    const [visuallySelectedUnit, setVisuallySelectedUnit] = useState()
 
-const UnitItem = memo(function UnitItemComponent({
+    function handleItemClick(unitId) {
+      setVisuallySelectedUnit(unitId)
+      navigate(
+        `/property/${propertyId}/unit/${unitId}?p=${propertyId}&u=${unitId}`
+      )
+    }
+
+    console.log('render unitList u:', u)
+    return (
+      <div>
+        {units.length ? (
+          units.map((unit, i) => (
+            <UnitItem
+              key={unit.id}
+              {...unit}
+              activated={u === unit.id}
+              selected={visuallySelectedUnit === unit.id}
+              propertyId={propertyId}
+              handleItemClick={() => handleItemClick(unit.id)}
+            />
+          ))
+        ) : (
+          <NoData label="Units" />
+        )}
+      </div>
+    )
+  },
+  (prevProps, nextProps) => prevProps.propertyId === nextProps.propertyId
+)
+
+const UnitItem = function UnitItemComponent({
   activated,
-  handleUnitClick,
+  selected,
   propertyId,
+  handleItemClick,
   ...unit
 }) {
+  const [isActivated, setIsActivated] = useState(activated)
+  if (isActivated !== activated) {
+    setIsActivated(activated)
+  }
   return (
     <ListItem
       key={unit.id}
-      className={activated ? activatedClass : undefined}
-      onClick={() => {
-        navigate(
-          `/property/${propertyId}/unit/${unit.id}?p=${propertyId}&u=${unit.id}`
-        )
-        handleUnitClick()
-        //window.scrollTo(0, 0)
-      }}
+      className={
+        isActivated ? activatedClass : selected ? selectedClass : undefined
+      }
+      onClick={handleItemClick}
     >
       <ListItemText primaryText={unit.label} />
     </ListItem>
   )
-})
-const activatedClass = ' mdc-list-item--activated'
+}
+const activatedClass = 'mdc-list-item--activated '
+const selectedClass = 'mdc-list-item--selected '
