@@ -3,7 +3,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { collectionData, docData } from 'rxfire/firestore'
 import { unstable_createResource as createResource } from 'react-cache'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 const config = {
   apiKey: 'AIzaSyDlWm0Ftq30kFD4LnPJ5sf9Mz8vyrcjIfM',
@@ -100,7 +100,6 @@ export function createFirestoreCollectionResource(
   defaultComparator = (a, b) => false
 ) {
   function fetcher(input) {
-    console.log('first fetch for input:', JSON.stringify(input))
     const firestoreQueryParams = buildParamsCallback(input)
     const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
 
@@ -113,7 +112,6 @@ export function createFirestoreCollectionResource(
       currentValue: undefined,
       observable: firestoreObservable,
       subscription: firestoreObservable.subscribe(data => {
-        console.log('subscribe callback input', JSON.stringify(input), data)
         valueContainer.currentValue = data
         if (resolveCallback) {
           resolveCallback(valueContainer)
@@ -135,82 +133,40 @@ export function createFirestoreCollectionResource(
 
   return {
     read(input, areObjectsEqual) {
-      const valueContainer = Resource.read(input) // throws if not ready
-      console.log(
-        'input:',
-        JSON.stringify(input),
-        'pre useState currentValue',
-        { currentValue: valueContainer.currentValue }
-      )
+      const valueContainer = Resource.read(input)
+
       const [currValueContainer, setCurrValueContainer] = useState(
         valueContainer
       )
-      console.log(
-        'currValueContainer === valueContainer ?',
-        currValueContainer === valueContainer
-      )
-      if (currValueContainer !== valueContainer) {
-        console.log('currValueContainer !=== valueContainer')
-        setCurrValueContainer(valueContainer)
-      } else {
-        console.log('no setting quick set')
-      }
 
+      if (currValueContainer !== valueContainer) {
+        setCurrValueContainer(valueContainer)
+      }
       useEffect(
         () => {
-          // setup our own listener for when data changes behind the scenes, will re-render.
-          // TODO: can we get rid of unnecessary double render? since this always setsState
-          // when we first subscribe. compare newData === currValue ?
           const sub = valueContainer.observable.subscribe(newData => {
-            console.log(
-              'inner read function subscribe callback newData === valueContainer.currentValue ?',
-              newData === valueContainer.currentValue,
-              'newData === currValue ?',
-              newData === currValueContainer.currentValue
-            )
-            let comparator = areObjectsEqual || defaultComparator
-            if (
-              !areEqual(newData, currValueContainer.currentValue, comparator)
-            ) {
-              console.log(
-                'in subscrib cb. not equal, setting new data:',
-                newData,
-                'currentValue:',
-                currValueContainer.currentValue,
-                JSON.stringify({
-                  input,
-                })
-              )
-              currValueContainer.currentValue = newData
-              setCurrValueContainer(currValueContainer)
-            } else {
-              console.log(
-                'objects equal, not setting',
-                currValueContainer.currentValue
-              )
-            }
+            currValueContainer.currentValue = newData
+            setCurrValueContainer(currValueContainer)
           })
           return () => {
-            console.log('un subscribing')
             sub.unsubscribe()
           }
         },
         [JSON.stringify(input)]
       )
 
-      // return currValue
       return currValueContainer.currentValue
     },
   }
 }
 
-function areEqual(a, b, comparator) {
-  if (Array.isArray(a) && Array.isArray(b)) {
-    console.log('is array')
-    return listsEqual(a, b, comparator)
-  }
-  console.log('not array', { a: a.id, b: b.id })
-  return comparator(a, b)
-}
+// function areEqual(a, b, comparator) {
+//   if (Array.isArray(a) && Array.isArray(b)) {
+//     console.log('is array')
+//     return listsEqual(a, b, comparator)
+//   }
+//   console.log('not array', { a: a.id, b: b.id })
+//   return comparator(a, b)
+// }
 
 export default firebase
