@@ -1,4 +1,4 @@
-import React, { memo, useState, forwardRef } from 'react'
+import React, { memo, useState, useEffect, forwardRef } from 'react'
 import styled from 'styled-components/macro'
 import { ListItem, ListItemMeta, ListItemText } from '@material/react-list'
 import MaterialIcon from '@material/react-material-icon'
@@ -15,12 +15,19 @@ export const Submenu = memo(
   forwardRef(
     ({ text, children, handleItemClick, activated, selected }, ref) => {
       const [isOpen, setIsOpen] = useState(selected)
-      if (!selected && isOpen) {
-        setIsOpen(false)
-      }
-      function toggleListOpen() {
-        setIsOpen(!isOpen)
-      }
+
+      useEffect(
+        () => {
+          if (isOpen && !activated) {
+            console.log('Y: effect when open true, activated false', {
+              text,
+            })
+            setIsOpen(false)
+          }
+        },
+        [activated]
+      )
+
       return (
         <SubmenuWrapper>
           <ListItem
@@ -30,7 +37,7 @@ export const Submenu = memo(
               activated ? activatedClass : selected ? selectedClass : undefined
             }
             onClick={() => {
-              toggleListOpen()
+              setIsOpen(open => !open)
               handleItemClick()
             }}
           >

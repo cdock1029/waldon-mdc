@@ -20,20 +20,6 @@ export function PropertiesList({ toggleShowForm }) {
   const activeCompany = useActiveCompany()
   const properties = PropertiesResource.read({ activeCompany })
   const { p } = useContext(QueryContext)
-  const [visuallySelectedProperty, setVisuallySelectedProperty] = useState(p)
-  useEffect(
-    () => {
-      if (!p && visuallySelectedProperty) {
-        setVisuallySelectedProperty(undefined)
-      }
-    },
-    [p]
-  )
-
-  function handleItemClick(propertyId) {
-    setVisuallySelectedProperty(propertyId)
-    navigate(`/property/${propertyId}?p=${propertyId}`)
-  }
 
   return (
     <>
@@ -62,8 +48,6 @@ export function PropertiesList({ toggleShowForm }) {
               /* ...property */
               {...property}
               activated={p === property.id}
-              selected={visuallySelectedProperty === property.id}
-              handleItemClick={() => handleItemClick(property.id)}
             />
           )
         })}
@@ -80,20 +64,32 @@ function propertyItemsAreEqual(prevProps, nextProps) {
   return areEqual
 }
 const PropertyItem = memo(
-  forwardRef(({ activated, selected, handleItemClick, ...property }, ref) => {
-    const [isActivated, setIsActivated] = useState(activated)
-    if (isActivated !== activated) {
-      setIsActivated(activated)
+  forwardRef(({ activated, ...property }, ref) => {
+    const [selected, setSelectd] = useState(activated)
+    useEffect(
+      () => {
+        if (selected !== activated) {
+          setSelectd(activated)
+        }
+      },
+      [activated]
+    )
+
+    function handleItemClick() {
+      setSelectd(true)
+      setTimeout(() => {
+        navigate(`/property/${property.id}?p=${property.id}`)
+      }, 0)
     }
     return (
       <Submenu
         ref={ref}
-        activated={isActivated}
+        activated={activated}
         selected={selected}
         text={property.name}
         handleItemClick={handleItemClick}
       >
-        {isActivated ? (
+        {activated ? (
           <Suspense fallback={<div>....</div>} maxDuration={1000}>
             <UnitsList propertyId={property.id} />
           </Suspense>
@@ -112,23 +108,6 @@ const UnitsList = memo(
       propertyId,
     })
     const { u } = useContext(QueryContext)
-    const [visuallySelectedUnit, setVisuallySelectedUnit] = useState(u)
-
-    useEffect(
-      () => {
-        if (!u && visuallySelectedUnit) {
-          setVisuallySelectedUnit(undefined)
-        }
-      },
-      [u]
-    )
-
-    function handleItemClick(unitId) {
-      setVisuallySelectedUnit(unitId)
-      navigate(
-        `/property/${propertyId}/unit/${unitId}?p=${propertyId}&u=${unitId}`
-      )
-    }
 
     return (
       <div>
@@ -138,9 +117,7 @@ const UnitsList = memo(
               key={unit.id}
               {...unit}
               activated={u === unit.id}
-              selected={visuallySelectedUnit === unit.id}
               propertyId={propertyId}
-              handleItemClick={() => handleItemClick(unit.id)}
             />
           ))
         ) : (
@@ -152,25 +129,38 @@ const UnitsList = memo(
   (prevProps, nextProps) => prevProps.propertyId === nextProps.propertyId
 )
 
-const UnitItem = forwardRef(
-  ({ activated, selected, propertyId, handleItemClick, ...unit }, ref) => {
-    const [isActivated, setIsActivated] = useState(activated)
-    if (isActivated !== activated) {
-      setIsActivated(activated)
-    }
-    return (
-      <ListItem
-        ref={ref}
-        key={unit.id}
-        className={
-          isActivated ? activatedClass : selected ? selectedClass : undefined
-        }
-        onClick={handleItemClick}
-      >
-        <ListItemText primaryText={unit.label} />
-      </ListItem>
-    )
+const UnitItem = forwardRef(({ activated, propertyId, ...unit }, ref) => {
+  const [isSelected, setIsSelected] = useState(activated)
+
+  useEffect(
+    () => {
+      if (isSelected !== activated) {
+        setIsSelected(activated)
+      }
+    },
+    [activated]
+  )
+
+  function handleItemClick() {
+    setIsSelected(true)
+    setTimeout(() => {
+      navigate(
+        `/property/${propertyId}/unit/${unit.id}?p=${propertyId}&u=${unit.id}`
+      )
+    }, 0)
   }
-)
+  return (
+    <ListItem
+      ref={ref}
+      key={unit.id}
+      className={
+        activated ? activatedClass : isSelected ? selectedClass : undefined
+      }
+      onClick={handleItemClick}
+    >
+      <ListItemText primaryText={unit.label} />
+    </ListItem>
+  )
+})
 const activatedClass = 'mdc-list-item--activated'
 const selectedClass = 'mdc-list-item--selected'
