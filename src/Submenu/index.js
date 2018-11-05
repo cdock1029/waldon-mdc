@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect, forwardRef } from 'react'
+import React, { memo, useState, forwardRef } from 'react'
 import styled from 'styled-components/macro'
 import { ListItem, ListItemMeta, ListItemText } from '@material/react-list'
 import MaterialIcon from '@material/react-material-icon'

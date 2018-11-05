@@ -1,4 +1,4 @@
-import React, { useContext, Suspense, ConcurrentMode } from 'react'
+import React, { useContext, Suspense, ConcurrentMode, memo } from 'react'
 import styled from 'styled-components/macro'
 import { Router } from '@reach/router'
 import { DrawerAppContent } from 'rmwc'
@@ -97,11 +97,23 @@ const AppContainer = styled.div`
     }
   }
 `
-const Loading = styled.div`
+const Loading = memo(({ children }) => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      paddingTop: '5rem',
+    }}
+  >
+    {children}
+  </div>
+))
+/*styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 5rem;
-`
+`*/
 
 export default App

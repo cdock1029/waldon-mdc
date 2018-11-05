@@ -3,17 +3,15 @@ import styled from 'styled-components/macro'
 
 export function Spinner() {
   return (
-    // <SpinnerWrapper>
-    //   <div className="double-bounce1" />
-    //   <div className="double-bounce2" />
-    // </SpinnerWrapper>
-    <h4>Loading..</h4>
+    <SpinnerWrapper>
+      <div className="double-bounce1" />
+      <div className="double-bounce2" />
+    </SpinnerWrapper>
   )
 }
 export default Spinner
 
 const SpinnerWrapper = styled.div`
-  label: Spinner;
   width: 40px;
   height: 40px;
 

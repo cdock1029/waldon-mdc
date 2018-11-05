@@ -94,7 +94,7 @@ const PropertyItem = memo(
         handleItemClick={handleItemClick}
       >
         {isActivated ? (
-          <Suspense fallback={<span />}>
+          <Suspense fallback={<div>....</div>} maxDuration={1000}>
             <UnitsList propertyId={property.id} />
           </Suspense>
         ) : null}
@@ -152,29 +152,25 @@ const UnitsList = memo(
   (prevProps, nextProps) => prevProps.propertyId === nextProps.propertyId
 )
 
-const UnitItem = function UnitItemComponent({
-  activated,
-  selected,
-  propertyId,
-  handleItemClick,
-  ...unit
-}) {
-  const [isActivated, setIsActivated] = useState(activated)
-  // console.log({ activated, unit: unit.id })
-  if (isActivated !== activated) {
-    setIsActivated(activated)
+const UnitItem = forwardRef(
+  ({ activated, selected, propertyId, handleItemClick, ...unit }, ref) => {
+    const [isActivated, setIsActivated] = useState(activated)
+    if (isActivated !== activated) {
+      setIsActivated(activated)
+    }
+    return (
+      <ListItem
+        ref={ref}
+        key={unit.id}
+        className={
+          isActivated ? activatedClass : selected ? selectedClass : undefined
+        }
+        onClick={handleItemClick}
+      >
+        <ListItemText primaryText={unit.label} />
+      </ListItem>
+    )
   }
-  return (
-    <ListItem
-      key={unit.id}
-      className={
-        isActivated ? activatedClass : selected ? selectedClass : undefined
-      }
-      onClick={handleItemClick}
-    >
-      <ListItemText primaryText={unit.label} />
-    </ListItem>
-  )
-}
+)
 const activatedClass = 'mdc-list-item--activated'
 const selectedClass = 'mdc-list-item--selected'

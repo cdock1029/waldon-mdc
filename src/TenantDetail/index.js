@@ -12,11 +12,19 @@ import { TenantSchema } from '../firebase/schemas'
 import { EntityForm } from '../EntityForm'
 import { MaterialField } from '../MaterialField'
 
+// TODO: updatedAt covers all ??? (cloud function required?)
+function areTenantsEqual(a, b) {
+  return (
+    a.id === b.id && a.firstName === b.firstName && a.lastName === b.lastName
+  )
+}
 export function TenantDetail({ tenantId }) {
   const [showTenantForm, setShowTenantForm] = useState(false)
   const activeCompany = useActiveCompany()
-  const tenant = TenantsResource.read({ activeCompany, tenantId })
-  console.log({ TENANT: tenant })
+  const tenant = TenantsResource.read(
+    { activeCompany, tenantId },
+    areTenantsEqual
+  )
   function toggleShowTenantForm() {
     setShowTenantForm(!showTenantForm)
   }

@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useMemo,
-  useContext,
-  useState,
-  useEffect,
-} from 'react'
+import React, { createContext, useMemo, useContext } from 'react'
 import { LocationProvider } from '@reach/router'
 import qs from 'query-string'
 

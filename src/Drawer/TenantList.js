@@ -63,17 +63,17 @@ const TenantList = memo(
   () => true
 )
 
-function areTenantItemsEqual(prev, next) {
-  return (
-    prev.id === next.id &&
-    prev.selected === next.selected &&
-    prev.activated === next.activated &&
-    prev.firstName === next.firstName &&
-    prev.lastName === next.lastName
-  )
-}
-const TenantItem = memo(
-  forwardRef(({ activated, selected, handleItemClick, ...tenant }, ref) => {
+// function areTenantItemsEqual(prev, next) {
+//   return (
+//     prev.id === next.id &&
+//     prev.selected === next.selected &&
+//     prev.activated === next.activated &&
+//     prev.firstName === next.firstName &&
+//     prev.lastName === next.lastName
+//   )
+// }
+const TenantItem = forwardRef(
+  ({ activated, selected, handleItemClick, ...tenant }, ref) => {
     return (
       <ListItem
         ref={ref}
@@ -85,8 +85,7 @@ const TenantItem = memo(
         <ListItemText primaryText={`${tenant.firstName} ${tenant.lastName}`} />
       </ListItem>
     )
-  }),
-  areTenantItemsEqual
+  }
 )
 
 const activatedClass = 'mdc-list-item--activated'

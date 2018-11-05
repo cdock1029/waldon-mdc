@@ -2,9 +2,8 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/firestore'
 import { collectionData, docData } from 'rxfire/firestore'
-import LRU from 'lru-cache'
 import { unstable_createResource as createResource } from 'react-cache'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 
 const config = {
   apiKey: 'AIzaSyDlWm0Ftq30kFD4LnPJ5sf9Mz8vyrcjIfM',
@@ -66,11 +65,6 @@ export function deleteDoc({ collectionPath, docId, activeCompany }) {
 }
 
 function getFirestoreObservable({ rootPath, path, orderBy, where }) {
-  // const key = JSON.stringify({ rootPath, path, orderBy })
-  // if (cache.has(key)) {
-  //   return cache.get(key)
-  // }
-
   let ref = firebase.firestore()
   if (rootPath) {
     ref = ref.collection(rootPath)
@@ -87,77 +81,99 @@ function getFirestoreObservable({ rootPath, path, orderBy, where }) {
     }
   }
   const obs = path ? docData(ref, 'id') : collectionData(ref, 'id')
-  // cache.set()
   return obs
 }
 
-function paramsToKey(input) {
-  return JSON.stringify(input)
+function listsEqual(a, b, comparator) {
+  if (a.length === 0 && b.length === 0) {
+    return true
+  }
+  return (
+    a.length === b.length &&
+    comparator(a[0], b[0]) &&
+    listsEqual(a.slice(1), b.slice(1), comparator)
+  )
 }
 
-const cache = LRU({
-  max: 200,
-  dispose: (key, container) => {
-    console.log('purging:', key)
-    container.subscription.unsubscribe()
-  },
-})
-export function createFirestoreCollectionResource(callback) {
-  function useFirestoreResource(input) {
-    const [nothing, setNothing] = useState(0)
-    const firestoreQueryParams = callback(input)
-    const key = paramsToKey(firestoreQueryParams)
-    console.log({ key })
-    if (!cache.has(key)) {
-      // console.log('miss')
-      cache.set(key, {})
-    }
-    let valueContainer = cache.get(key)
+export function createFirestoreCollectionResource(
+  buildParamsCallback,
+  defaultComparator = (a, b) => false
+) {
+  function fetcher(input) {
+    const firestoreQueryParams = buildParamsCallback(input)
+    const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
 
-    if (typeof valueContainer.currentValue === 'undefined') {
-      const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
+    let resolveCallback
+    const initialValue = new Promise(resolve => {
+      resolveCallback = resolve
+    })
 
-      let resolveCallback
-      valueContainer.currentValue = new Promise(resolve => {
-        resolveCallback = resolve
-      })
-
-      valueContainer.subscription = firestoreObservable.subscribe(data => {
-        // console.log('subscribe callback')
+    let valueContainer = {
+      currentValue: undefined,
+      observable: firestoreObservable,
+      subscription: firestoreObservable.subscribe(data => {
         valueContainer.currentValue = data
-
         if (resolveCallback) {
-          // console.log('resolving promise..')
           resolveCallback(valueContainer)
           resolveCallback = null
-        } else {
-          // console.log('setting nothing...')
-          console.log('new data')
-          setNothing(1)
         }
-      })
+      }),
     }
-    const stateValueContainer = useMemo(
-      () => {
-        console.log('memo rerun data')
-        return valueContainer
-      },
-      [valueContainer.currentValue, key]
-    )
-    return [stateValueContainer.currentValue, nothing]
+
+    return initialValue
   }
 
+  const Resource = createResource(
+    fetcher,
+    input =>
+      JSON.stringify(
+        input
+      ) /* handle special types like Resource, Timestamp etc */
+  )
+
   return {
-    read(input) {
-      const [value] = useFirestoreResource(input)
-      if (value.then) {
-        // console.log('throwing...')
-        throw value
-      }
-      // console.log('returning', { value })
-      return value
+    read(input, areObjectsEqual) {
+      const valueContainer = Resource.read(input) // throws if not ready
+      const [currValue, setCurrValue] = useState(valueContainer.currentValue) // start with whats in cache
+      useEffect(
+        () => {
+          // setup our own listener for when data changes behind the scenes, will re-render.
+          // TODO: can we get rid of unnecessary double render? since this always setsState
+          // when we first subscribe. compare newData === currValue ?
+          const sub = valueContainer.observable.subscribe(newData => {
+            let comparator = areObjectsEqual || defaultComparator
+            if (!areEqual(newData, currValue, comparator)) {
+              // console.log(
+              //   'in subscrib cb. not equal, setting data:',
+              //   JSON.stringify({ currValue, newData, input })
+              // )
+              setCurrValue(newData)
+            } // else {
+            //   console.log(
+            //     'objects equal, not setting',
+            //     JSON.stringify(currValue)
+            //   )
+            // }
+          })
+          return () => {
+            console.log('un subscribing', currValue ? currValue.id : 'no data')
+            sub.unsubscribe()
+          }
+        },
+        [JSON.stringify(input)]
+      )
+      return currValue
     },
   }
+}
+
+function areEqual(a, b, comparator) {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    console.log('is array')
+    return listsEqual(a, b, comparator)
+  }
+  console.log('not array', { a: a.id, b: b.id })
+  return comparator(a, b)
 }
 
 export default firebase
