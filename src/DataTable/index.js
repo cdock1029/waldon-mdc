@@ -1,15 +1,8 @@
 import React, { Fragment, useContext, useState, useMemo, Suspense } from 'react'
 import styled from 'styled-components/macro'
-import {
-  Typography,
-  Button,
-  ButtonIcon,
-  ChipSet,
-  Chip,
-  ChipText,
-  TabBar,
-  Tab,
-} from 'rmwc'
+import { Typography, Button, ButtonIcon, ChipSet, Chip, ChipText } from 'rmwc'
+import Tab from '@material/react-tab'
+import TabBar from '@material/react-tab-bar'
 import {
   DataTable as RmwcDataTable,
   DataTableContent,
@@ -75,14 +68,14 @@ export const DataTable = () => {
   function handleRowClick(i) {
     setActivated(activated === i ? null : i)
   }
-  function handleTabChange(e) {
-    setActiveTabIndex(e.detail.index)
+  function handleTabChange(index) {
+    setActiveTabIndex(index)
   }
   return (
     <div className="wrapper-div">
       <StyledTabBar
-        activeTabIndex={activeTabIndex}
-        onActivate={handleTabChange}
+        activeIndex={activeTabIndex}
+        handleActiveIndexUpdate={handleTabChange}
       >
         <Tab>Active</Tab>
         <Tab>Inactive</Tab>
@@ -130,7 +123,7 @@ function LeaseLoadingContainer({ where, activated, handleRowClick }) {
   )
   const { activeCompany } = useContext(AuthContext).claims
   const leases = LeasesResource.read({ activeCompany, where })
-  console.log('leases returned for input:', { ...where })
+  console.log('leases returned for input:', leases)
   console.table(leases)
 
   return (

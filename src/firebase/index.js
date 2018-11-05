@@ -100,6 +100,7 @@ export function createFirestoreCollectionResource(
   defaultComparator = (a, b) => false
 ) {
   function fetcher(input) {
+    console.log('first fetch for input:', JSON.stringify(input))
     const firestoreQueryParams = buildParamsCallback(input)
     const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
 
@@ -112,6 +113,7 @@ export function createFirestoreCollectionResource(
       currentValue: undefined,
       observable: firestoreObservable,
       subscription: firestoreObservable.subscribe(data => {
+        console.log('subscribe callback input', JSON.stringify(input), data)
         valueContainer.currentValue = data
         if (resolveCallback) {
           resolveCallback(valueContainer)
@@ -134,35 +136,70 @@ export function createFirestoreCollectionResource(
   return {
     read(input, areObjectsEqual) {
       const valueContainer = Resource.read(input) // throws if not ready
-      const [currValue, setCurrValue] = useState(valueContainer.currentValue) // start with whats in cache
+      console.log(
+        'input:',
+        JSON.stringify(input),
+        'pre useState currentValue',
+        { currentValue: valueContainer.currentValue }
+      )
+      const [currValueContainer, setCurrValueContainer] = useState(
+        valueContainer
+      )
+      console.log(
+        'currValueContainer === valueContainer ?',
+        currValueContainer === valueContainer
+      )
+      if (currValueContainer !== valueContainer) {
+        console.log('currValueContainer !=== valueContainer')
+        setCurrValueContainer(valueContainer)
+      } else {
+        console.log('no setting quick set')
+      }
+
       useEffect(
         () => {
           // setup our own listener for when data changes behind the scenes, will re-render.
           // TODO: can we get rid of unnecessary double render? since this always setsState
           // when we first subscribe. compare newData === currValue ?
           const sub = valueContainer.observable.subscribe(newData => {
+            console.log(
+              'inner read function subscribe callback newData === valueContainer.currentValue ?',
+              newData === valueContainer.currentValue,
+              'newData === currValue ?',
+              newData === currValueContainer.currentValue
+            )
             let comparator = areObjectsEqual || defaultComparator
-            if (!areEqual(newData, currValue, comparator)) {
-              // console.log(
-              //   'in subscrib cb. not equal, setting data:',
-              //   JSON.stringify({ currValue, newData, input })
-              // )
-              setCurrValue(newData)
-            } // else {
-            //   console.log(
-            //     'objects equal, not setting',
-            //     JSON.stringify(currValue)
-            //   )
-            // }
+            if (
+              !areEqual(newData, currValueContainer.currentValue, comparator)
+            ) {
+              console.log(
+                'in subscrib cb. not equal, setting new data:',
+                newData,
+                'currentValue:',
+                currValueContainer.currentValue,
+                JSON.stringify({
+                  input,
+                })
+              )
+              currValueContainer.currentValue = newData
+              setCurrValueContainer(currValueContainer)
+            } else {
+              console.log(
+                'objects equal, not setting',
+                currValueContainer.currentValue
+              )
+            }
           })
           return () => {
-            console.log('un subscribing', currValue ? currValue.id : 'no data')
+            console.log('un subscribing')
             sub.unsubscribe()
           }
         },
         [JSON.stringify(input)]
       )
-      return currValue
+
+      // return currValue
+      return currValueContainer.currentValue
     },
   }
 }

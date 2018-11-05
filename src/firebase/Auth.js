@@ -18,7 +18,13 @@ function useAuth() {
   return {
     ...auth,
     signOut() {
-      firebase.auth().signOut()
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          console.log('reloading')
+          window.location.reload()
+        })
     },
   }
 }

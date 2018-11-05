@@ -3,7 +3,7 @@ import styled from 'styled-components/macro'
 import { Typography } from 'rmwc'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
-// import { DataTable } from '../DataTable'
+import { DataTable } from '../DataTable'
 
 export class Dashboard extends React.Component {
   componentWillUnmount() {
@@ -21,7 +21,9 @@ export class Dashboard extends React.Component {
               New lease
             </Button>
           </LeaseTableHeader>
-          <div className="DataTable-wrapper">{/* <DataTable /> */}</div>
+          <div className="DataTable-wrapper">
+            <DataTable />
+          </div>
         </div>
       </DashboardWrapper>
     )
