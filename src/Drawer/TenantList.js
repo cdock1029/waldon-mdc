@@ -13,19 +13,12 @@ const TenantList = memo(
     const tenants = TenantsResource.read({ activeCompany })
     const { t } = useContext(QueryContext)
 
-    const [visuallySelectedTenant, setVisuallySelectedTenant] = useState(t)
-    useEffect(() => {
-      if (!t && visuallySelectedTenant) {
-        setVisuallySelectedTenant(undefined)
-      }
-    })
-    function handleItemClick(tenantId) {
-      setVisuallySelectedTenant(tenantId)
-      const route = `/tenant/${tenantId}?t=${tenantId}`
-      if (route !== window.location.pathname + window.location.search) {
-        navigate(route)
-      }
-    }
+    // function handleItemClick(tenantId) {
+    //   const route = `/tenant/${tenantId}?t=${tenantId}`
+    //   if (route !== window.location.pathname + window.location.search) {
+    //     navigate(route)
+    //   }
+    // }
 
     return (
       <>
@@ -50,8 +43,6 @@ const TenantList = memo(
               key={tenant.id}
               {...tenant}
               activated={t === tenant.id}
-              selected={visuallySelectedTenant === tenant.id}
-              handleItemClick={() => handleItemClick(tenant.id)}
             />
           ))}
         </List>
@@ -61,29 +52,52 @@ const TenantList = memo(
   () => true
 )
 
-// function areTenantItemsEqual(prev, next) {
-//   return (
-//     prev.id === next.id &&
-//     prev.selected === next.selected &&
-//     prev.activated === next.activated &&
-//     prev.firstName === next.firstName &&
-//     prev.lastName === next.lastName
-//   )
-// }
-const TenantItem = forwardRef(
-  ({ activated, selected, handleItemClick, ...tenant }, ref) => {
+function areTenantItemsEqual(prev, next) {
+  return (
+    prev.id === next.id &&
+    prev.activated === next.activated &&
+    prev.firstName === next.firstName &&
+    prev.lastName === next.lastName
+  )
+}
+const TenantItem = memo(
+  forwardRef(({ activated, ...tenant }, ref) => {
+    const [visuallySelected, setVisuallySelected] = useState(activated)
+    useEffect(
+      () => {
+        if (activated !== visuallySelected) {
+          setVisuallySelected(activated)
+        }
+      },
+      [activated]
+    )
+
+    function handleItemClick() {
+      setVisuallySelected(true)
+      const route = `/tenant/${tenant.id}?t=${tenant.id}`
+      if (route !== window.location.pathname + window.location.search) {
+        setTimeout(() => {
+          navigate(route)
+        }, 0)
+      }
+    }
     return (
       <ListItem
         ref={ref}
         className={
-          activated ? activatedClass : selected ? selectedClass : undefined
+          activated
+            ? activatedClass
+            : visuallySelected
+              ? selectedClass
+              : undefined
         }
         onClick={handleItemClick}
       >
         <ListItemText primaryText={`${tenant.firstName} ${tenant.lastName}`} />
       </ListItem>
     )
-  }
+  }),
+  areTenantItemsEqual
 )
 
 const activatedClass = 'mdc-list-item--activated'

@@ -13,16 +13,16 @@ import TenantDetail from '../TenantDetail'
 import { QueryProvider } from '../Location'
 import { AuthContext } from '../firebase/Auth'
 import { useLocalStorage } from '../utils/useLocalStorage'
-import { Spinner } from '../Spinner'
+import Firestore from '../TestFirestoreLoader'
 
-const Firestore = () => {
-  const Comp = React.lazy(() => import('../TestFirestoreLoader'))
-  return (
-    <Suspense fallback={<Spinner />}>
-      <Comp />
-    </Suspense>
-  )
-}
+// const Firestore = () => {
+//   const Comp = React.lazy(() => import('../TestFirestoreLoader'))
+//   return (
+//     <Suspense fallback={<Spinner />}>
+//       <Comp />
+//     </Suspense>
+//   )
+// }
 
 function App() {
   const [isOpen, toggleMenu] = useMenuToggle()
@@ -56,8 +56,6 @@ function App() {
                     <TenantDetail path="tenant/:tenantId" />
                   </Dashboard>
                   <Firestore path="firestore" />
-                  {/* <NewProperty path="new-property" />
-              <NewTenant path="new-tenant" /> */}
                 </Router>
               </div>
             </DrawerAppContent>

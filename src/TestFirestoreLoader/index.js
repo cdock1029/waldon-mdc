@@ -1,7 +1,8 @@
-import React, { memo } from 'react'
+import React, { Suspense } from 'react'
 import styled from 'styled-components/macro'
 import { TodosResource } from '../firebase/Collection'
 import { formatDate } from '../utils/format'
+import { Spinner } from '../Spinner'
 
 export function TestFirestoreLoader() {
   const todos = TodosResource.read()
@@ -20,7 +21,7 @@ export function TestFirestoreLoader() {
   )
 }
 
-const Todo = memo(function _Todo({ text, completed, createdAt }) {
+const Todo = ({ text, completed, createdAt }) => {
   return (
     <li>
       <StyledTodo>
@@ -36,7 +37,7 @@ const Todo = memo(function _Todo({ text, completed, createdAt }) {
       </StyledTodo>
     </li>
   )
-})
+}
 
 const StyledTodo = styled.div`
   display: flex;
@@ -50,4 +51,8 @@ const StyledTodo = styled.div`
   }
 `
 
-export default TestFirestoreLoader
+export default () => (
+  <Suspense fallback={<Spinner />}>
+    <TestFirestoreLoader />
+  </Suspense>
+)
