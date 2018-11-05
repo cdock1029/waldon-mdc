@@ -1,6 +1,9 @@
 import React, { Fragment, useContext, useState, useMemo, Suspense } from 'react'
 import styled from 'styled-components/macro'
-import { Typography, Button, ButtonIcon, ChipSet, Chip, ChipText } from 'rmwc'
+import { Typography } from 'rmwc'
+import Button from '@material/react-button'
+import MaterialIcon from '@material/react-material-icon'
+import { ChipSet, Chip } from '@material/react-chips'
 import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import {
@@ -38,16 +41,6 @@ function buildIt({ p: propertyId, u: unitId, t: tenantId, activeTabIndex }) {
   }
   return where
 }
-
-/* const str = propertyId
-    ? `properties/${propertyId}${unitId ? `/units/${unitId}` : ''}`
-    : tenantId
-      ? `tenants/${tenantId}`
-      : ''
-  const ref = getDocRef(str)[0]
-  console.log({ str, REF: ref })
-  return [['propertyList', 'array-contains', ref]]
-  */
 
 export const DataTable = () => {
   const [sortDir, setSortDir] = useState(null)
@@ -117,14 +110,8 @@ export const DataTable = () => {
 }
 
 function LeaseLoadingContainer({ where, activated, handleRowClick }) {
-  console.log(
-    'render LeaseLoadingContainer',
-    JSON.stringify({ where, activated })
-  )
   const { activeCompany } = useContext(AuthContext).claims
   const leases = LeasesResource.read({ activeCompany, where })
-  console.log('leases returned for input:', leases)
-  console.table(leases)
 
   return (
     <>
@@ -218,10 +205,7 @@ function Transactions({ leaseId }) {
             <Typography className="title" use="headline6">
               Transactions
             </Typography>
-            <Button>
-              <ButtonIcon icon="add" />
-              New transaction
-            </Button>
+            <Button icon={<MaterialIcon icon="add" />}>New transaction</Button>
           </Flex>
           <DataTableContent>
             <DataTableHead>
@@ -232,21 +216,26 @@ function Transactions({ leaseId }) {
               </DataTableRow>
             </DataTableHead>
             <DataTableBody>
-              {transactions.map(t => (
+              {transactions.map((t, i) => (
                 <DataTableRow key={t.id} className="transactionRow">
                   <DataTableCell>
-                    <ChipSet>
+                    <h6>todo chipset</h6>
+                    {/* <ChipSet>
                       {!t.subType && (
-                        <StyledChip>
-                          <ChipText>{t.type}</ChipText>
-                        </StyledChip>
+                        <Chip
+                          id={`type${i}`}
+                          label={t.type}
+                          style={chipStyles}
+                        />
                       )}
                       {t.subType && (
-                        <StyledChip>
-                          <ChipText>{t.subType.replace('_', ' ')}</ChipText>
-                        </StyledChip>
+                        <Chip
+                          id={`subtype${i}`}
+                          label={t.subType.replace('_', ' ')}
+                          style={chipStyles}
+                        />
                       )}
-                    </ChipSet>
+                    </ChipSet> */}
                   </DataTableCell>
                   <DataTableCell>{formatDate(t.date.toDate())}</DataTableCell>
                   <DataTableCell
@@ -275,8 +264,6 @@ const StyledTabBar = styled(TabBar)`
 `
 
 const StyledTable = styled(RmwcDataTable)`
-  label: StyledTable;
-
   box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
     0 1px 3px 0 rgba(0, 0, 0, 0.12);
   border: none;
@@ -314,7 +301,6 @@ const FullCellWrapper = styled.div`
 `
 
 const Expanded = styled.div`
-  label: Expanded;
   display: flex;
   flex-direction: column;
   margin-left: 1rem;
@@ -330,3 +316,7 @@ const StyledChip = styled(Chip)`
   font-size: 0.8em;
   line-height: normal;
 `
+const chipStyles = {
+  fontSize: '0.8em',
+  lineHeight: 'normal',
+}

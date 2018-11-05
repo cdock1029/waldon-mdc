@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@material/react-button": "^0.6.1",
+    "@material/react-chips": "^0.6.1",
     "@material/react-icon-button": "^0.6.1",
     "@material/react-list": "^0.6.1",
     "@material/react-material-icon": "^0.6.1",

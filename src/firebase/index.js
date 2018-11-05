@@ -84,21 +84,7 @@ function getFirestoreObservable({ rootPath, path, orderBy, where }) {
   return obs
 }
 
-function listsEqual(a, b, comparator) {
-  if (a.length === 0 && b.length === 0) {
-    return true
-  }
-  return (
-    a.length === b.length &&
-    comparator(a[0], b[0]) &&
-    listsEqual(a.slice(1), b.slice(1), comparator)
-  )
-}
-
-export function createFirestoreCollectionResource(
-  buildParamsCallback,
-  defaultComparator = (a, b) => false
-) {
+export function createFirestoreCollectionResource(buildParamsCallback) {
   function fetcher(input) {
     const firestoreQueryParams = buildParamsCallback(input)
     const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
@@ -108,14 +94,32 @@ export function createFirestoreCollectionResource(
       resolveCallback = resolve
     })
 
+    const listenersSet = new Set()
+    function subscribeToUpdates(callback) {
+      listenersSet.add(callback)
+
+      return () => {
+        listenersSet.delete(callback)
+      }
+    }
     let valueContainer = {
       currentValue: undefined,
       observable: firestoreObservable,
       subscription: firestoreObservable.subscribe(data => {
         valueContainer.currentValue = data
+        valueContainer.subscribeToUpdates = subscribeToUpdates
         if (resolveCallback) {
           resolveCallback(valueContainer)
           resolveCallback = null
+        } else {
+          // subsequent updates
+          console.log(
+            'calling back listeners .. internally size:',
+            listenersSet.size
+          )
+          listenersSet.forEach(callback => {
+            callback(valueContainer)
+          })
         }
       }),
     }
@@ -132,9 +136,8 @@ export function createFirestoreCollectionResource(
   )
 
   return {
-    read(input, areObjectsEqual) {
+    read(input) {
       const valueContainer = Resource.read(input)
-
       const [currValueContainer, setCurrValueContainer] = useState(
         valueContainer
       )
@@ -142,15 +145,13 @@ export function createFirestoreCollectionResource(
       if (currValueContainer !== valueContainer) {
         setCurrValueContainer(valueContainer)
       }
+
       useEffect(
         () => {
-          const sub = valueContainer.observable.subscribe(newData => {
-            currValueContainer.currentValue = newData
-            setCurrValueContainer(currValueContainer)
+          const unsub = valueContainer.subscribeToUpdates(container => {
+            setCurrValueContainer(container)
           })
-          return () => {
-            sub.unsubscribe()
-          }
+          return unsub
         },
         [JSON.stringify(input)]
       )
@@ -159,14 +160,5 @@ export function createFirestoreCollectionResource(
     },
   }
 }
-
-// function areEqual(a, b, comparator) {
-//   if (Array.isArray(a) && Array.isArray(b)) {
-//     console.log('is array')
-//     return listsEqual(a, b, comparator)
-//   }
-//   console.log('not array', { a: a.id, b: b.id })
-//   return comparator(a, b)
-// }
 
 export default firebase

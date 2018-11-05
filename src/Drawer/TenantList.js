@@ -12,7 +12,6 @@ const TenantList = memo(
     const activeCompany = useActiveCompany()
     const tenants = TenantsResource.read({ activeCompany })
     const { t } = useContext(QueryContext)
-    console.log('tenants length', tenants.length)
 
     const [visuallySelectedTenant, setVisuallySelectedTenant] = useState(t)
     useEffect(() => {
@@ -24,7 +23,6 @@ const TenantList = memo(
       setVisuallySelectedTenant(tenantId)
       const route = `/tenant/${tenantId}?t=${tenantId}`
       if (route !== window.location.pathname + window.location.search) {
-        console.log('navigating')
         navigate(route)
       }
     }
