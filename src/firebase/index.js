@@ -113,10 +113,6 @@ export function createFirestoreCollectionResource(buildParamsCallback) {
           resolveCallback = null
         } else {
           // subsequent updates
-          console.log(
-            'calling back listeners .. internally size:',
-            listenersSet.size
-          )
           listenersSet.forEach(callback => {
             callback(valueContainer)
           })
@@ -130,9 +126,7 @@ export function createFirestoreCollectionResource(buildParamsCallback) {
   const Resource = createResource(
     fetcher,
     input =>
-      JSON.stringify(
-        input
-      ) /* handle special types like Resource, Timestamp etc */
+      JSON.stringify(input) /* todo: customize for other types like Reference */
   )
 
   return {
