@@ -13,13 +13,6 @@ const TenantList = memo(
     const tenants = TenantsResource.read({ activeCompany })
     const { t } = useContext(QueryContext)
 
-    // function handleItemClick(tenantId) {
-    //   const route = `/tenant/${tenantId}?t=${tenantId}`
-    //   if (route !== window.location.pathname + window.location.search) {
-    //     navigate(route)
-    //   }
-    // }
-
     return (
       <>
         <div

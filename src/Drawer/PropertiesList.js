@@ -68,7 +68,7 @@ const PropertyItem = memo(
     const [selected, setSelectd] = useState(activated)
     useEffect(
       () => {
-        if (selected !== activated) {
+        if (activated !== selected) {
           setSelectd(activated)
         }
       },
@@ -143,11 +143,11 @@ const UnitItem = forwardRef(({ activated, propertyId, ...unit }, ref) => {
 
   function handleItemClick() {
     setIsSelected(true)
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       navigate(
         `/property/${propertyId}/unit/${unit.id}?p=${propertyId}&u=${unit.id}`
       )
-    }, 0)
+    })
   }
   return (
     <ListItem

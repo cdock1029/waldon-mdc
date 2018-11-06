@@ -38,7 +38,9 @@ export const Submenu = memo(
             }
             onClick={() => {
               setIsOpen(open => !open)
-              handleItemClick()
+              requestAnimationFrame(() => {
+                handleItemClick()
+              })
             }}
           >
             <ListItemText primaryText={text} />
