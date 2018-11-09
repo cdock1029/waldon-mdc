@@ -69,9 +69,9 @@ const TenantItem = memo(
       setVisuallySelected(true)
       const route = `/tenant/${tenant.id}?t=${tenant.id}`
       if (route !== window.location.pathname + window.location.search) {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           navigate(route)
-        }, 0)
+        })
       }
     }
     return (

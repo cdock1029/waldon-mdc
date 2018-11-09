@@ -77,9 +77,9 @@ const PropertyItem = memo(
 
     function handleItemClick() {
       setSelectd(true)
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         navigate(`/property/${property.id}?p=${property.id}`)
-      }, 0)
+      })
     }
     return (
       <Submenu

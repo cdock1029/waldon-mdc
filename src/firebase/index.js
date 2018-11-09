@@ -3,7 +3,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import { collectionData, docData } from 'rxfire/firestore'
 import { unstable_createResource as createResource } from 'react-cache'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 
 const config = {
   apiKey: 'AIzaSyDlWm0Ftq30kFD4LnPJ5sf9Mz8vyrcjIfM',
@@ -86,6 +86,7 @@ function getFirestoreObservable({ rootPath, path, orderBy, where }) {
 
 export function createFirestoreCollectionResource(buildParamsCallback) {
   function fetcher(input) {
+    console.log('new input received:', JSON.stringify(input))
     const firestoreQueryParams = buildParamsCallback(input)
     const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
 
@@ -119,6 +120,13 @@ export function createFirestoreCollectionResource(buildParamsCallback) {
         }
       }),
     }
+    let authUnsub = firebase.auth().onAuthStateChanged(user => {
+      if (!user) {
+        console.log('unsubbing on logout')
+        valueContainer.subscription.unsubscribe()
+        authUnsub()
+      }
+    })
 
     return initialValue
   }

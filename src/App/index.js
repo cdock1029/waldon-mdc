@@ -1,41 +1,20 @@
-import React, { useContext, Suspense, ConcurrentMode, memo } from 'react'
+import React, { ConcurrentMode } from 'react'
 import styled from 'styled-components/macro'
 import { Router } from '@reach/router'
 import { DrawerAppContent } from 'rmwc'
 import { AppBar } from '../AppBar'
 import { Drawer } from '../Drawer'
-import { Login } from '../Login'
 import { Dashboard } from '../Dashboard'
 import { ErrorBoundary } from '../ErrorBoundary'
 import PropertyDetail from '../PropertyDetail'
 import { UnitDetail } from '../UnitDetail'
 import TenantDetail from '../TenantDetail'
 import { QueryProvider } from '../Location'
-import { AuthContext } from '../firebase/Auth'
 import { useLocalStorage } from '../utils/useLocalStorage'
 import Firestore from '../TestFirestoreLoader'
 
-// const Firestore = () => {
-//   const Comp = React.lazy(() => import('../TestFirestoreLoader'))
-//   return (
-//     <Suspense fallback={<Spinner />}>
-//       <Comp />
-//     </Suspense>
-//   )
-// }
-
 function App() {
   const [isOpen, toggleMenu] = useMenuToggle()
-  const auth = useContext(AuthContext)
-  if (typeof auth.user === 'undefined') {
-    return (
-      <Loading>
-        <h3>Loading..</h3>
-      </Loading>
-    )
-  } else if (auth.user === null) {
-    return <Login />
-  }
   return (
     <ConcurrentMode>
       <QueryProvider>
@@ -95,23 +74,4 @@ const AppContainer = styled.div`
     }
   }
 `
-const Loading = memo(({ children }) => (
-  <div
-    style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      paddingTop: '5rem',
-    }}
-  >
-    {children}
-  </div>
-))
-/*styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 5rem;
-`*/
-
 export default App

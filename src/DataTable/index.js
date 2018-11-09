@@ -3,7 +3,7 @@ import styled from 'styled-components/macro'
 import { Typography } from 'rmwc'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
-import { ChipSet, Chip } from '@material/react-chips'
+// import { ChipSet, Chip } from '@material/react-chips'
 import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import {
@@ -43,7 +43,7 @@ function buildIt({ p: propertyId, u: unitId, t: tenantId, activeTabIndex }) {
 }
 
 export const DataTable = () => {
-  const [sortDir, setSortDir] = useState(null)
+  // const [sortDir, setSortDir] = useState(null)
   const [activated, setActivated] = useState(null)
   const [activeTabIndex, setActiveTabIndex] = useState(0)
 
@@ -55,9 +55,9 @@ export const DataTable = () => {
     [p, u, t, activeTabIndex]
   )
 
-  function handleSortChange(sortDir) {
-    setSortDir(sortDir)
-  }
+  // function handleSortChange(sortDir) {
+  //   setSortDir(sortDir)
+  // }
   function handleRowClick(i) {
     setActivated(activated === i ? null : i)
   }
@@ -77,13 +77,17 @@ export const DataTable = () => {
         <DataTableContent>
           <DataTableHead>
             <DataTableRow>
-              <DataTableHeadCell>Tenants</DataTableHeadCell>
-              <DataTableHeadCell>Start</DataTableHeadCell>
-              <DataTableHeadCell>End</DataTableHeadCell>
-              <DataTableHeadCell sort={sortDir} onSortChange={handleSortChange}>
+              <DataTableHeadCell
+                alignStart
+                /*sort={sortDir}
+                onSortChange={handleSortChange}*/
+              >
                 Properties
               </DataTableHeadCell>
               <DataTableHeadCell>Units</DataTableHeadCell>
+              <DataTableHeadCell>Tenants</DataTableHeadCell>
+              <DataTableHeadCell>Start</DataTableHeadCell>
+              <DataTableHeadCell>End</DataTableHeadCell>
               <DataTableHeadCell alignEnd>Rent</DataTableHeadCell>
               <DataTableHeadCell alignEnd>Balance</DataTableHeadCell>
             </DataTableRow>
@@ -152,13 +156,6 @@ function LeaseRow({ activated, handleRowClick, lease }) {
         onClick={handleRowClick}
       >
         <DataTableCell>
-          {Object.values(lease.tenants).map((t, i) => (
-            <p key={i}>{t.name}</p>
-          ))}
-        </DataTableCell>
-        <DataTableCell>{formatDate(lease.startDate.toDate())}</DataTableCell>
-        <DataTableCell>{formatDate(lease.endDate.toDate())}</DataTableCell>
-        <DataTableCell>
           {Object.values(lease.properties).map((p, i) => (
             <p key={i}>{p.name}</p>
           ))}
@@ -168,6 +165,14 @@ function LeaseRow({ activated, handleRowClick, lease }) {
             <p key={i}>{u.name}</p>
           ))}
         </DataTableCell>
+        <DataTableCell>
+          {Object.values(lease.tenants).map((t, i) => (
+            <p key={i}>{t.name}</p>
+          ))}
+        </DataTableCell>
+        <DataTableCell>{formatDate(lease.startDate.toDate())}</DataTableCell>
+        <DataTableCell>{formatDate(lease.endDate.toDate())}</DataTableCell>
+
         <DataTableCell alignEnd className="money">
           {formatCents(lease.rent)}
         </DataTableCell>
@@ -312,11 +317,11 @@ const Expanded = styled.div`
   }
 `
 
-const StyledChip = styled(Chip)`
-  font-size: 0.8em;
-  line-height: normal;
-`
-const chipStyles = {
-  fontSize: '0.8em',
-  lineHeight: 'normal',
-}
+// const StyledChip = styled(Chip)`
+//   font-size: 0.8em;
+//   line-height: normal;
+// `
+// const chipStyles = {
+//   fontSize: '0.8em',
+//   lineHeight: 'normal',
+// }

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Formik, Form } from 'formik'
-import { Button, Elevation } from 'rmwc'
+import { Elevation } from 'rmwc'
+import Button from '@material/react-button'
 import { Padding } from '../widgets/Padding'
 import { saveDoc } from '../firebase'
 import styled from 'styled-components/macro'
@@ -60,6 +61,7 @@ export class EntityForm extends React.Component {
         }}
       >
         {({ status, setStatus, isValid, isSubmitting }) => {
+          console.log('isValid:', isValid)
           return (
             <Padding padding="1rem">
               <Elevation className="form-elevation-card" z={elevation}>

@@ -8,8 +8,7 @@ export const PropertiesResource = createFirestoreCollectionResource(
       orderBy: propertyId ? undefined : ['name', 'asc'],
     }
     return args
-  },
-  (a, b) => a.id === b.id && a.name === b.name
+  }
 )
 
 export const TenantsResource = createFirestoreCollectionResource(
@@ -19,9 +18,7 @@ export const TenantsResource = createFirestoreCollectionResource(
       path: tenantId,
       orderBy: tenantId ? undefined : ['lastName', 'asc'],
     }
-  },
-  (a, b) =>
-    a.id === b.id && a.firstName === b.firstName && a.lastName === b.lastName
+  }
 )
 
 export const UnitsResource = createFirestoreCollectionResource(
@@ -31,8 +28,7 @@ export const UnitsResource = createFirestoreCollectionResource(
       rootPath: `companies/${activeCompany}/properties/${propertyId}/units`,
       path: unitId,
     }
-  },
-  (a, b) => a.id === b.id && a.label === b.label
+  }
 )
 
 export const LeasesResource = createFirestoreCollectionResource(
