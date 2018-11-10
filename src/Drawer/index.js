@@ -1,5 +1,5 @@
 import React, { useState, lazy, Suspense } from 'react'
-import { Drawer as D, DrawerHeader, DrawerContent } from 'rmwc'
+import Drawr, { DrawerHeader, DrawerContent } from '@material/react-drawer'
 import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import styled from 'styled-components/macro'
@@ -69,7 +69,7 @@ export function Drawer({ isOpen }) {
   )
 }
 
-const StyledDrawer = styled(D)`
+const StyledDrawer = styled(Drawr)`
   background-color: #e8e9eb;
   li.mdc-list-item {
     cursor: pointer;
@@ -77,10 +77,10 @@ const StyledDrawer = styled(D)`
   .DrawerHeader {
     display: flex;
     align-items: flex-end;
-    /* background-color: #282c34; */
     padding: 0;
   }
   .DrawerContent {
+    flex: auto;
     overflow-y: hidden;
     display: flex;
     flex-direction: column;

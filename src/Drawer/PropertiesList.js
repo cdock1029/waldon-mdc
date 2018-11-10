@@ -24,6 +24,17 @@ export function PropertiesList({ toggleShowForm }) {
 
   const [quickItems, setQuickItems] = useState({ open: p, selected: p })
 
+  useEffect(
+    () => {
+      scheduleCallback(() => {
+        if (!p && quickItems.selected) {
+          setQuickItems({ open: null, selected: null })
+        }
+      })
+    },
+    [p]
+  )
+
   function handleItemClick(propertyId) {
     setQuickItems(({ open }) => ({
       selected: propertyId,

@@ -1,4 +1,4 @@
-import React, { memo, useState, useContext, forwardRef } from 'react'
+import React, { memo, useState, useEffect, useContext, forwardRef } from 'react'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
 import List, { ListItem, ListItemText } from '@material/react-list'
@@ -14,6 +14,17 @@ const TenantList = memo(
     const tenants = TenantsResource.read({ activeCompany })
     const { t } = useContext(QueryContext)
     const [selected, setSelected] = useState(t)
+
+    useEffect(
+      () => {
+        scheduleCallback(() => {
+          if (!t && selected) {
+            setSelected()
+          }
+        })
+      },
+      [t]
+    )
 
     function handleItemClick(tenantId) {
       if (selected !== tenantId) {

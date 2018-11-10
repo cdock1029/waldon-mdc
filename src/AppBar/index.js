@@ -1,13 +1,6 @@
 import React, { useContext } from 'react'
-import {
-  TopAppBar,
-  TopAppBarFixedAdjust,
-  TopAppBarRow,
-  TopAppBarSection,
-  TopAppBarNavigationIcon,
-  TopAppBarActionItem,
-  TopAppBarTitle,
-} from 'rmwc'
+import TopAppBar from '@material/react-top-app-bar'
+import MaterialIcon from '@material/react-material-icon'
 import styled from 'styled-components/macro'
 import { navigate } from '@reach/router'
 import { AuthContext } from '../firebase/Auth'
@@ -17,49 +10,26 @@ export function AppBar({ onMenuClick }) {
   function signOut() {
     auth.signOut()
   }
+  function navigateHome() {
+    navigate('/')
+  }
+  function navigateFirestore() {
+    navigate('/firestore')
+  }
   return (
-    <>
-      <StyledTopAppBar>
-        <TopAppBarRow>
-          {auth.user ? (
-            <React.Fragment>
-              <TopAppBarSection alignStart>
-                <TopAppBarNavigationIcon onClick={onMenuClick} icon="menu" />
-                <TopAppBarTitle onClick={() => navigate('/')}>
-                  WPM
-                </TopAppBarTitle>
-              </TopAppBarSection>
-              <TopAppBarSection alignEnd>
-                <React.Fragment>
-                  <TopAppBarActionItem
-                    icon="bookmark"
-                    onClick={() => navigate('/firestore')}
-                  />
-                  <TopAppBarActionItem
-                    aria-label="Sign out"
-                    alt="Sign out"
-                    icon="exit_to_app"
-                    iconOptions={{
-                      strategy: 'custom',
-                      render: ({ content }) => (
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <span>{auth.user.email}</span>
-                          <TopAppBarActionItem
-                            icon={content}
-                            onClick={signOut}
-                          />
-                        </div>
-                      ),
-                    }}
-                  />
-                </React.Fragment>
-              </TopAppBarSection>
-            </React.Fragment>
-          ) : null}
-        </TopAppBarRow>
-      </StyledTopAppBar>
-      <TopAppBarFixedAdjust />
-    </>
+    <StyledTopAppBar
+      title={<span onClick={navigateHome}>WPM</span>}
+      navigationIcon={<MaterialIcon icon="menu" onClick={onMenuClick} />}
+      actionItems={[
+        <MaterialIcon icon="bookmark" onClick={navigateFirestore} />,
+        <MaterialIcon
+          aria-label="Sign out"
+          alt="Sign out"
+          icon="exit_to_app"
+          onClick={signOut}
+        />,
+      ]}
+    />
   )
 }
 

@@ -1,7 +1,8 @@
 import React from 'react'
 import styled from 'styled-components/macro'
 import { Router } from '@reach/router'
-import { DrawerAppContent } from 'rmwc'
+import { TopAppBarFixedAdjust } from '@material/react-top-app-bar'
+import { DrawerAppContent } from '@material/react-drawer'
 import { AppBar } from '../AppBar'
 import { Drawer } from '../Drawer'
 import { Dashboard } from '../Dashboard'
@@ -17,28 +18,30 @@ function App() {
   const [isOpen, toggleMenu] = useMenuToggle()
   return (
     <QueryProvider>
-      <AppContainer>
-        <Drawer isOpen={isOpen} />
-        <ErrorBoundary>
+      <ErrorBoundary>
+        <AppContainer>
+          <Drawer isOpen={isOpen} />
           <DrawerAppContent className="DrawerAppContent">
             <AppBar onMenuClick={toggleMenu} />
-            <div className="Content">
-              <Router>
-                <Dashboard path="/" key="dashboard">
-                  <PropertyDetail
-                    path="property/:propertyId"
-                    key="property-detail"
-                  >
-                    <UnitDetail path="unit/:unitId" />
-                  </PropertyDetail>
-                  <TenantDetail path="tenant/:tenantId" />
-                </Dashboard>
-                <Firestore path="firestore" />
-              </Router>
-            </div>
+            <TopAppBarFixedAdjust>
+              <div className="Content">
+                <Router>
+                  <Dashboard path="/" key="dashboard">
+                    <PropertyDetail
+                      path="property/:propertyId"
+                      key="property-detail"
+                    >
+                      <UnitDetail path="unit/:unitId" />
+                    </PropertyDetail>
+                    <TenantDetail path="tenant/:tenantId" />
+                  </Dashboard>
+                  <Firestore path="firestore" />
+                </Router>
+              </div>
+            </TopAppBarFixedAdjust>
           </DrawerAppContent>
-        </ErrorBoundary>
-      </AppContainer>
+        </AppContainer>
+      </ErrorBoundary>
     </QueryProvider>
   )
 }
