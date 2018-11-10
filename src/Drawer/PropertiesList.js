@@ -22,6 +22,21 @@ export function PropertiesList({ toggleShowForm }) {
   const properties = PropertiesResource.read({ activeCompany })
   const { p } = useContext(QueryContext)
 
+  const [quickItems, setQuickItems] = useState({ open: p, selected: p })
+
+  function handleItemClick(propertyId) {
+    setQuickItems(({ open }) => ({
+      selected: propertyId,
+      open: open === propertyId ? null : propertyId,
+    }))
+    scheduleCallback(() => {
+      const route = `/property/${propertyId}?p=${propertyId}`
+      if (route !== window.location.pathname + window.location.search) {
+        navigate(route)
+      }
+    })
+  }
+
   return (
     <>
       <div className="DrawerControls">
@@ -46,9 +61,11 @@ export function PropertiesList({ toggleShowForm }) {
           return (
             <PropertyItem
               key={property.id}
-              /* ...property */
               {...property}
               activated={p === property.id}
+              selected={quickItems.selected === property.id}
+              isOpen={quickItems.open === property.id}
+              handleItemClick={() => handleItemClick(property.id)}
             />
           )
         })}
@@ -61,49 +78,31 @@ function propertyItemsAreEqual(prevProps, nextProps) {
   const areEqual =
     prevProps.name === nextProps.name &&
     prevProps.activated === nextProps.activated &&
-    prevProps.selected === nextProps.selected
+    prevProps.selected === nextProps.selected &&
+    prevProps.isOpen === nextProps.isOpen
   return areEqual
 }
 const PropertyItem = memo(
-  forwardRef(({ activated, ...property }, ref) => {
-    const [selected, setSelectd] = useState(activated)
-    useEffect(
-      () => {
-        if (activated !== selected) {
-          setSelectd(activated)
-        }
-      },
-      [activated]
-    )
-
-    function handleItemClick() {
-      if (!selected) {
-        setSelectd(true)
-      }
-      scheduleCallback(() => {
-        const route = `/property/${property.id}?p=${property.id}`
-        if (route !== window.location.pathname + window.location.search) {
-          navigate(route)
-        }
-        navigate(route)
-      })
+  forwardRef(
+    ({ activated, selected, isOpen, handleItemClick, ...property }, ref) => {
+      return (
+        <Submenu
+          ref={ref}
+          activated={activated}
+          selected={selected}
+          text={property.name}
+          handleItemClick={handleItemClick}
+          isOpen={isOpen}
+        >
+          {activated ? (
+            <Suspense fallback={<div>....</div>} maxDuration={1000}>
+              <UnitsList propertyId={property.id} />
+            </Suspense>
+          ) : null}
+        </Submenu>
+      )
     }
-    return (
-      <Submenu
-        ref={ref}
-        activated={activated}
-        selected={selected}
-        text={property.name}
-        handleItemClick={handleItemClick}
-      >
-        {activated ? (
-          <Suspense fallback={<div>....</div>} maxDuration={1000}>
-            <UnitsList propertyId={property.id} />
-          </Suspense>
-        ) : null}
-      </Submenu>
-    )
-  }),
+  ),
   propertyItemsAreEqual
 )
 

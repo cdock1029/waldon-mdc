@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect, forwardRef } from 'react'
+import React, { memo, forwardRef } from 'react'
 import styled from 'styled-components/macro'
 import { ListItem, ListItemMeta, ListItemText } from '@material/react-list'
 import MaterialIcon from '@material/react-material-icon'
@@ -7,25 +7,14 @@ function areEqual(prevProps, nextProps) {
   return (
     prevProps.text === nextProps.text &&
     prevProps.activated === nextProps.activated &&
-    prevProps.selected === nextProps.selected
+    prevProps.selected === nextProps.selected &&
+    prevProps.isOpen === nextProps.isOpen
   )
 }
 
 export const Submenu = memo(
   forwardRef(
-    ({ text, children, handleItemClick, activated, selected }, ref) => {
-      const [isOpen, setIsOpen] = useState(selected)
-
-      // todo: do this immediately somehow..
-      useEffect(
-        () => {
-          if (isOpen && !activated) {
-            setIsOpen(false)
-          }
-        },
-        [activated]
-      )
-
+    ({ text, children, handleItemClick, activated, selected, isOpen }, ref) => {
       return (
         <SubmenuWrapper>
           <ListItem
@@ -34,12 +23,7 @@ export const Submenu = memo(
             className={
               activated ? activatedClass : selected ? selectedClass : undefined
             }
-            onClick={() => {
-              setIsOpen(open => !open)
-              requestAnimationFrame(() => {
-                handleItemClick()
-              })
-            }}
+            onClick={handleItemClick}
           >
             <ListItemText primaryText={text} />
             <ListItemMeta
