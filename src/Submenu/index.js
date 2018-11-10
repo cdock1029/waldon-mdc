@@ -48,7 +48,8 @@ export const Submenu = memo(
 const activatedClass = 'mdc-list-item--activated'
 const selectedClass = 'mdc-list-item--selected'
 
-const cb = 'cubic-bezier(0.4, 0, 0.2, 1)'
+// const cb = 'cubic-bezier(0.4, 0, 0.2, 1)'
+const cb = 'ease'
 const SubmenuWrapper = styled.div`
   float: left;
   width: 100%;
@@ -62,11 +63,10 @@ const SubmenuWrapper = styled.div`
   .submenu__children--open {
     height: 16rem;
     overflow-y: scroll;
-    transition: height 250ms ${cb};
   }
 
   .submenu__icon {
-    transition: transform 350ms ${cb};
+    transition: transform 200ms 125ms /*delay*/ ${cb};
     user-select: none;
   }
 

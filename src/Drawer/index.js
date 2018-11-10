@@ -20,9 +20,10 @@ export function Drawer({ isOpen }) {
   const [showForm, setShowForm] = useState(false)
 
   function handleSetTabIndex(tabIndex) {
-    // const tabIndex = e.detail.index
     setTabIndex(tabIndex)
-    setShowForm(false)
+    if (showForm) {
+      setShowForm(false)
+    }
   }
   function toggleShowForm() {
     setShowForm(!showForm)

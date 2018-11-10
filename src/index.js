@@ -1,4 +1,4 @@
-import React, { StrictMode } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.scss'
 import firebase from './firebase'
@@ -7,12 +7,6 @@ import App from './App'
 import * as serviceWorker from './serviceWorker'
 import { Login } from './Login'
 import { Loading } from './Loading'
-
-// ReactDOM.createRoot(document.getElementById('root')).render(
-//   <AuthProvider>
-//     <App />
-//   </AuthProvider>
-// )
 
 const root = document.getElementById('root')
 
