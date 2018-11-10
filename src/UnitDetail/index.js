@@ -24,14 +24,11 @@ export function UnitDetail({ propertyId, unitId }) {
     setShowUnitForm(!showUnitForm)
   }
   async function handleDelete() {
-    console.log('handling delete unit')
     const result = window.confirm('Confirm DELETE?')
     if (result) {
-      console.log({ result, propertyId, unitId })
       try {
         await deleteDoc({
-          collectionPath: `properties/${propertyId}/units`,
-          docId: unitId,
+          path: `/companies/${activeCompany}/properties/${propertyId}/units/${unitId}`,
         })
         navigate(`/property/${propertyId}?p=${propertyId}`)
       } catch (e) {
@@ -52,8 +49,8 @@ export function UnitDetail({ propertyId, unitId }) {
       {showUnitForm && (
         <div className="darken">
           <EntityForm
-            collectionPath={`properties/${propertyId}/units`}
-            docId={unitId}
+            rootPath={`/companies/${activeCompany}/properties/${propertyId}/units`}
+            path={unitId}
             initialValues={{ label: unit.label }}
             validationSchema={UnitSchema}
             onCancel={toggleShowUnitForm}

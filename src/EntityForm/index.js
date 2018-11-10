@@ -24,79 +24,76 @@ const FormWrapper = styled.div({
   },
 })
 
-export class EntityForm extends React.Component {
-  render() {
-    const {
-      collectionPath,
-      initialValues,
-      validationSchema,
-      children,
-      onCancel,
-      docId,
-      elevation = 6,
-    } = this.props
-    return (
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={async (values, { setSubmitting, setStatus }) => {
-          setSubmitting(true)
-          try {
-            await saveDoc({
-              collectionPath,
-              data: Object.entries(values).reduce((acc, [key, val]) => {
-                if (val || val === 0) {
-                  acc[key] = val
-                }
-                return acc
-              }, {}),
-              docId,
-            })
-            onCancel()
-          } catch (e) {
-            setStatus(e.message)
-          } finally {
-            setSubmitting(false)
-          }
-        }}
-      >
-        {({ status, setStatus, isValid, isSubmitting }) => {
-          console.log('isValid:', isValid)
-          return (
-            <Padding padding="1rem">
-              <Elevation className="form-elevation-card" z={elevation}>
-                <FormWrapper>
-                  <StyledForm>
-                    {children}
-                    <div className="Buttons">
-                      <Button type="button" onClick={onCancel}>
-                        Cancel
-                      </Button>
-                      <Button
-                        raised
-                        type="submit"
-                        disabled={!isValid || isSubmitting}
-                      >
-                        Save
-                      </Button>
+export function EntityForm({
+  collectionPath,
+  initialValues,
+  validationSchema,
+  children,
+  onCancel,
+  docId,
+  elevation = 6,
+}) {
+  return (
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={async (values, { setSubmitting, setStatus }) => {
+        setSubmitting(true)
+        try {
+          await saveDoc({
+            collectionPath,
+            data: Object.entries(values).reduce((acc, [key, val]) => {
+              if (val || val === 0) {
+                acc[key] = val
+              }
+              return acc
+            }, {}),
+            docId,
+          })
+          onCancel()
+        } catch (e) {
+          setStatus(e.message)
+        } finally {
+          setSubmitting(false)
+        }
+      }}
+    >
+      {({ status, setStatus, isValid, isSubmitting }) => {
+        console.log('isValid:', isValid)
+        return (
+          <Padding padding="1rem">
+            <Elevation className="form-elevation-card" z={elevation}>
+              <FormWrapper>
+                <StyledForm>
+                  {children}
+                  <div className="Buttons">
+                    <Button type="button" onClick={onCancel}>
+                      Cancel
+                    </Button>
+                    <Button
+                      raised
+                      type="submit"
+                      disabled={!isValid || isSubmitting}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                  {status && (
+                    <div
+                      className="status"
+                      onClick={() => setStatus(undefined)}
+                    >
+                      {status}
                     </div>
-                    {status && (
-                      <div
-                        className="status"
-                        onClick={() => setStatus(undefined)}
-                      >
-                        {status}
-                      </div>
-                    )}
-                  </StyledForm>
-                </FormWrapper>
-              </Elevation>
-            </Padding>
-          )
-        }}
-      </Formik>
-    )
-  }
+                  )}
+                </StyledForm>
+              </FormWrapper>
+            </Elevation>
+          </Padding>
+        )
+      }}
+    </Formik>
+  )
 }
 
 const StyledForm = styled(Form)`

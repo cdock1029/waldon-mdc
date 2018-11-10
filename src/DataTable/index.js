@@ -147,7 +147,6 @@ function EmptyTableRowWrapper({ children }) {
 }
 
 function LeaseRow({ activated, handleRowClick, lease }) {
-  console.log('render LeaseRow')
   return (
     <Fragment>
       <DataTableRow

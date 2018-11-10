@@ -1,13 +1,15 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Typography } from 'rmwc'
 import { EntityForm } from '../EntityForm'
 import { TenantSchema } from '../firebase/schemas'
 import { MaterialField } from '../MaterialField'
+import { AuthContext } from '../firebase/Auth'
 
 export default function NewTenantForm({ toggleShowForm }) {
+  const { activeCompany } = useContext(AuthContext).claims
   return (
     <EntityForm
-      collectionPath="tenants"
+      rootPath={`/companies/${activeCompany}/tenants`}
       initialValues={{ firstName: '', lastName: '', email: '' }}
       validationSchema={TenantSchema}
       onCancel={toggleShowForm}

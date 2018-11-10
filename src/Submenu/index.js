@@ -16,12 +16,10 @@ export const Submenu = memo(
     ({ text, children, handleItemClick, activated, selected }, ref) => {
       const [isOpen, setIsOpen] = useState(selected)
 
+      // todo: do this immediately somehow..
       useEffect(
         () => {
           if (isOpen && !activated) {
-            console.log('Y: effect when open true, activated false', {
-              text,
-            })
             setIsOpen(false)
           }
         },

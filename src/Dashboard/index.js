@@ -5,29 +5,23 @@ import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
 import { DataTable } from '../DataTable'
 
-export class Dashboard extends React.Component {
-  componentWillUnmount() {
-    console.log('unmounting dashboard')
-  }
-  render() {
-    const { children } = this.props
-    return (
-      <DashboardWrapper>
-        <div className="Dashboard-Header">{children}</div>
-        <div className="Dashboard-Data">
-          <LeaseTableHeader>
-            <Typography use="headline5">Leases</Typography>
-            <Button type="button" icon={<MaterialIcon icon="add" />}>
-              New lease
-            </Button>
-          </LeaseTableHeader>
-          <div className="DataTable-wrapper">
-            <DataTable />
-          </div>
+export function Dashboard({ children }) {
+  return (
+    <DashboardWrapper>
+      <div className="Dashboard-Header">{children}</div>
+      <div className="Dashboard-Data">
+        <LeaseTableHeader>
+          <Typography use="headline5">Leases</Typography>
+          <Button type="button" icon={<MaterialIcon icon="add" />}>
+            New lease
+          </Button>
+        </LeaseTableHeader>
+        <div className="DataTable-wrapper">
+          <DataTable />
         </div>
-      </DashboardWrapper>
-    )
-  }
+      </div>
+    </DashboardWrapper>
+  )
 }
 
 const DashboardWrapper = styled.div`

@@ -1,23 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components/macro'
 import firebase from '../firebase'
-// import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
-// import firebaseui from 'firebaseui'
-
-/*const uiConfig = {
-  signInFlow: 'popup',
-  callbacks: {
-    signInSuccessWithAutResult: (authResult, redirectUrl) => {
-      console.log('success!: ', authResult, redirectUrl)
-      return false
-    },
-    signInFailure: e => {
-      console.log('*Sign in Error:*', e.message, e)
-    },
-  },
-  credentialHelper: firebaseui.auth.CredentialHelper.NONE,
-  signInOptions: [firebase.auth.EmailAuthProvider.PROVIDER_ID],
-}*/
 
 export function Login() {
   useEffect(() => {
@@ -28,7 +11,6 @@ export function Login() {
   }, [])
   return (
     <LoginPage>
-      {/* <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} /> */}
       <SimpleLogin />
     </LoginPage>
   )

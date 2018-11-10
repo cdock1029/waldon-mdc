@@ -3,6 +3,7 @@ import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
 import List, { ListItem, ListItemText } from '@material/react-list'
 import { navigate } from '@reach/router'
+import { unstable_scheduleCallback as scheduleCallback } from 'scheduler'
 import { TenantsResource } from '../firebase/Collection'
 import { useActiveCompany } from '../firebase/Auth'
 import { QueryContext } from '../Location'
@@ -67,12 +68,12 @@ const TenantItem = memo(
 
     function handleItemClick() {
       setVisuallySelected(true)
-      const route = `/tenant/${tenant.id}?t=${tenant.id}`
-      if (route !== window.location.pathname + window.location.search) {
-        requestAnimationFrame(() => {
+      scheduleCallback(() => {
+        const route = `/tenant/${tenant.id}?t=${tenant.id}`
+        if (route !== window.location.pathname + window.location.search) {
           navigate(route)
-        })
-      }
+        }
+      })
     }
     return (
       <ListItem

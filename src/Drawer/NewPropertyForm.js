@@ -1,13 +1,15 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Typography } from 'rmwc'
 import { EntityForm } from '../EntityForm'
 import { PropertySchema } from '../firebase/schemas'
 import { MaterialField } from '../MaterialField'
+import { AuthContext } from '../firebase/Auth'
 
 export function NewPropertyForm({ toggleShowForm }) {
+  const { activeCompany } = useContext(AuthContext).claims
   return (
     <EntityForm
-      collectionPath="properties"
+      rootPath={`/companies/${activeCompany}/properties`}
       initialValues={{ name: '' }}
       validationSchema={PropertySchema}
       onCancel={toggleShowForm}

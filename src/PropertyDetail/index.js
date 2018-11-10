@@ -14,9 +14,6 @@ export function PropertyDetail({ propertyId, children }) {
   const [showUnitForm, setShowUnitForm] = useState(false)
   const [showPropertyForm, setShowPropertyForm] = useState(false)
   const { activeCompany } = useContext(AuthContext).claims
-  useEffect(() => {
-    return () => console.log('unmounting property-detail')
-  }, [])
 
   const property = PropertiesResource.read({
     activeCompany,
@@ -49,7 +46,7 @@ export function PropertyDetail({ propertyId, children }) {
       {showUnitForm && (
         <div className="darken">
           <EntityForm
-            collectionPath={`properties/${propertyId}/units`}
+            collectionPath={`/companies/${activeCompany}/properties/${propertyId}/units`}
             initialValues={{ label: '' }}
             validationSchema={UnitSchema}
             onCancel={toggleShowUnitForm}
@@ -66,8 +63,8 @@ export function PropertyDetail({ propertyId, children }) {
       {showPropertyForm && (
         <div className="darken">
           <EntityForm
-            collectionPath="properties"
-            docId={propertyId}
+            rootPath="properties"
+            path={propertyId}
             initialValues={{ name: property.name }}
             validationSchema={PropertySchema}
             onCancel={toggleShowPropertyForm}

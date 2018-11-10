@@ -23,7 +23,6 @@ export const TenantsResource = createFirestoreCollectionResource(
 
 export const UnitsResource = createFirestoreCollectionResource(
   ({ activeCompany, propertyId, unitId }) => {
-    console.log({ propertyId })
     return {
       rootPath: `companies/${activeCompany}/properties/${propertyId}/units`,
       path: unitId,

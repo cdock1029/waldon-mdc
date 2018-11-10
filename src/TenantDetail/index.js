@@ -31,9 +31,10 @@ export function TenantDetail({ tenantId }) {
   async function handleDelete() {
     const result = window.confirm('Confirm DELETE?')
     if (result) {
-      console.log({ result, tenantId })
       try {
-        await deleteDoc({ collectionPath: 'tenants', docId: tenantId })
+        await deleteDoc({
+          path: `/companies/${activeCompany}/tenants/${tenantId}`,
+        })
         navigate('/')
       } catch (e) {
         alert(e.message)
@@ -60,8 +61,8 @@ export function TenantDetail({ tenantId }) {
       {showTenantForm && (
         <div className="backdrop darken">
           <EntityForm
-            collectionPath="tenants"
-            docId={tenantId}
+            rootPath={`/companies/${activeCompany}/tenants`}
+            path={tenantId}
             initialValues={{ ...tenant }}
             validationSchema={TenantSchema}
             onCancel={toggleShowTenantForm}

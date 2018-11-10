@@ -25,11 +25,9 @@ function QueryComponent({ location: { search }, children }) {
 }
 
 export function useQueryParams(paramsArr) {
-  console.log('useQueryParams')
   const q = useContext(QueryContext)
   const params = useMemo(
     () => {
-      console.log('running memo query function')
       let result = []
       for (let p of paramsArr) {
         result.push(q[p])

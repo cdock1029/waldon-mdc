@@ -18,50 +18,21 @@ firebase.firestore().settings({ timestampsInSnapshots: true })
 
 const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp()
 
-function fixPath({ path, activeCompany }) {
-  let fixedPath
-  if (path.charAt(0) === '/') {
-    fixedPath = path
-  } else {
-    fixedPath = `companies/${activeCompany}/${path}`
-  }
-  return fixedPath
-}
-export function serialize({ fixedPath, where, orderBy }) {
-  if (where) {
-    for (let item of where) {
-      if (item[2] instanceof firebase.firestore.DocumentReference) {
-        item[2] = item[2].path
-      }
-    }
-  }
-  return JSON.stringify({
-    fixedPath,
-    where,
-    orderBy,
-  })
-}
-
-export function saveDoc({ collectionPath, data, docId, activeCompany }) {
-  const fixedPath = fixPath({ path: collectionPath, activeCompany })
-  let ref = firebase.firestore().collection(fixedPath)
+export function saveDoc({ rootPath, path, data }) {
+  let ref = firebase.firestore().collection(rootPath)
 
   const docData = {
     updatedAt: serverTimestamp(),
-    ...(docId ? {} : { createdAt: serverTimestamp() }),
+    ...(path ? {} : { createdAt: serverTimestamp() }),
     ...data,
   }
-  /* docId: if updating an existing doc */
-  ref = docId ? ref.doc(docId) : ref.doc()
+  ref = path ? ref.doc(path) : ref.doc()
   return ref.set(docData)
 }
 
-export function deleteDoc({ collectionPath, docId, activeCompany }) {
-  const fixedPath = fixPath({ path: collectionPath, activeCompany })
-  let ref = firebase.firestore().collection(fixedPath)
-
-  return ref.doc(docId).delete()
-  // console.log({ ref: ref.doc(docId) })
+export function deleteDoc({ path }) {
+  let ref = firebase.firestore().doc(path)
+  return ref.delete()
 }
 
 function getFirestoreObservable({ rootPath, path, orderBy, where }) {
@@ -86,7 +57,6 @@ function getFirestoreObservable({ rootPath, path, orderBy, where }) {
 
 export function createFirestoreCollectionResource(buildParamsCallback) {
   function fetcher(input) {
-    console.log('new input received:', JSON.stringify(input))
     const firestoreQueryParams = buildParamsCallback(input)
     const firestoreObservable = getFirestoreObservable(firestoreQueryParams)
 
@@ -122,7 +92,6 @@ export function createFirestoreCollectionResource(buildParamsCallback) {
     }
     let authUnsub = firebase.auth().onAuthStateChanged(user => {
       if (!user) {
-        console.log('unsubbing on logout')
         valueContainer.subscription.unsubscribe()
         authUnsub()
       }

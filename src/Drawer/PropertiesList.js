@@ -9,6 +9,7 @@ import React, {
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
 import List, { ListItem, ListItemText } from '@material/react-list'
+import { unstable_scheduleCallback as scheduleCallback } from 'scheduler'
 import { navigate } from '@reach/router'
 import { Submenu } from '../Submenu'
 import { NoData } from '../NoData'
@@ -76,9 +77,15 @@ const PropertyItem = memo(
     )
 
     function handleItemClick() {
-      setSelectd(true)
-      requestAnimationFrame(() => {
-        navigate(`/property/${property.id}?p=${property.id}`)
+      if (!selected) {
+        setSelectd(true)
+      }
+      scheduleCallback(() => {
+        const route = `/property/${property.id}?p=${property.id}`
+        if (route !== window.location.pathname + window.location.search) {
+          navigate(route)
+        }
+        navigate(route)
       })
     }
     return (
@@ -143,7 +150,7 @@ const UnitItem = forwardRef(({ activated, propertyId, ...unit }, ref) => {
 
   function handleItemClick() {
     setIsSelected(true)
-    requestAnimationFrame(() => {
+    scheduleCallback(() => {
       navigate(
         `/property/${propertyId}/unit/${unit.id}?p=${propertyId}&u=${unit.id}`
       )

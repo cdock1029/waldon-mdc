@@ -1,4 +1,4 @@
-import React, { ConcurrentMode } from 'react'
+import React from 'react'
 import styled from 'styled-components/macro'
 import { Router } from '@reach/router'
 import { DrawerAppContent } from 'rmwc'
@@ -16,32 +16,30 @@ import Firestore from '../TestFirestoreLoader'
 function App() {
   const [isOpen, toggleMenu] = useMenuToggle()
   return (
-    <ConcurrentMode>
-      <QueryProvider>
-        <AppContainer>
-          <Drawer isOpen={isOpen} />
-          <ErrorBoundary>
-            <DrawerAppContent className="DrawerAppContent">
-              <AppBar onMenuClick={toggleMenu} />
-              <div className="Content">
-                <Router>
-                  <Dashboard path="/" key="dashboard">
-                    <PropertyDetail
-                      path="property/:propertyId"
-                      key="property-detail"
-                    >
-                      <UnitDetail path="unit/:unitId" />
-                    </PropertyDetail>
-                    <TenantDetail path="tenant/:tenantId" />
-                  </Dashboard>
-                  <Firestore path="firestore" />
-                </Router>
-              </div>
-            </DrawerAppContent>
-          </ErrorBoundary>
-        </AppContainer>
-      </QueryProvider>
-    </ConcurrentMode>
+    <QueryProvider>
+      <AppContainer>
+        <Drawer isOpen={isOpen} />
+        <ErrorBoundary>
+          <DrawerAppContent className="DrawerAppContent">
+            <AppBar onMenuClick={toggleMenu} />
+            <div className="Content">
+              <Router>
+                <Dashboard path="/" key="dashboard">
+                  <PropertyDetail
+                    path="property/:propertyId"
+                    key="property-detail"
+                  >
+                    <UnitDetail path="unit/:unitId" />
+                  </PropertyDetail>
+                  <TenantDetail path="tenant/:tenantId" />
+                </Dashboard>
+                <Firestore path="firestore" />
+              </Router>
+            </div>
+          </DrawerAppContent>
+        </ErrorBoundary>
+      </AppContainer>
+    </QueryProvider>
   )
 }
 
