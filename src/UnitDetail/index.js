@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 import { Typography } from 'rmwc'
 import Button from '@material/react-button'
 import IconButton from '@material/react-icon-button'

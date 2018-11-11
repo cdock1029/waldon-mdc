@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 import { Router } from '@reach/router'
 import { TopAppBarFixedAdjust } from '@material/react-top-app-bar'
 import { DrawerAppContent } from '@material/react-drawer'

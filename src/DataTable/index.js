@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useState, useMemo, Suspense } from 'react'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 import { Typography } from 'rmwc'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'

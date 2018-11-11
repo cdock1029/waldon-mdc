@@ -1,7 +1,7 @@
 import React from 'react'
 import { Field } from 'formik'
 import { TextField, TextFieldHelperText } from 'rmwc'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 
 export const MaterialField = ({ label, className, ...rest }) => {
   return (

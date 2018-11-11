@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 import firebase from '../firebase'
 
 export function Login() {

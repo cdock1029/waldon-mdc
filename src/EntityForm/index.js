@@ -4,7 +4,7 @@ import { Elevation } from 'rmwc'
 import Button from '@material/react-button'
 import { Padding } from '../widgets/Padding'
 import { saveDoc } from '../firebase'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 
 const FormWrapper = styled.div({
   label: 'FormWrapper',

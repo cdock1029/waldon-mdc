@@ -1,5 +1,5 @@
 import React, { memo, forwardRef } from 'react'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 import { ListItem, ListItemMeta, ListItemText } from '@material/react-list'
 import MaterialIcon from '@material/react-material-icon'
 

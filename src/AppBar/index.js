@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import TopAppBar from '@material/react-top-app-bar'
 import MaterialIcon from '@material/react-material-icon'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 import { navigate } from '@reach/router'
 import { AuthContext } from '../firebase/Auth'
 

@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react'
-import styled from 'styled-components/macro'
+import styled from '@emotion/styled'
 import { TodosResource } from '../firebase/Collection'
 import { formatDate } from '../utils/format'
 import { Spinner } from '../Spinner'
