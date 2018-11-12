@@ -1,4 +1,11 @@
-import React, { memo, useState, useEffect, useContext, forwardRef } from 'react'
+import React, {
+  memo,
+  useState,
+  useEffect,
+  useContext,
+  forwardRef,
+  Suspense,
+} from 'react'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
 import List, { ListItem, ListItemText } from '@material/react-list'
@@ -100,4 +107,9 @@ const TenantItem = memo(
 const activatedClass = 'mdc-list-item--activated'
 const selectedClass = 'mdc-list-item--selected'
 
-export default TenantList
+const MAX_DURATION = 1000
+export default props => (
+  <Suspense maxDuration={MAX_DURATION} fallback={<h2>Tenant loading</h2>}>
+    <TenantList {...props} />
+  </Suspense>
+)

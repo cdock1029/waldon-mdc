@@ -16,6 +16,7 @@ import { NoData } from '../NoData'
 import { PropertiesResource, UnitsResource } from '../firebase/Collection'
 import { useActiveCompany } from '../firebase/Auth'
 import { QueryContext } from '../Location'
+import { Spinner } from '../Spinner'
 
 export function PropertiesList({ toggleShowForm }) {
   const activeCompany = useActiveCompany()
@@ -106,7 +107,7 @@ const PropertyItem = memo(
           isOpen={isOpen}
         >
           {activated ? (
-            <Suspense fallback={<div>....</div>} maxDuration={1000}>
+            <Suspense fallback={<Spinner />} maxDuration={800}>
               <UnitsList propertyId={property.id} />
             </Suspense>
           ) : null}
@@ -181,3 +182,15 @@ const UnitItem = forwardRef(({ activated, propertyId, ...unit }, ref) => {
 })
 const activatedClass = 'mdc-list-item--activated'
 const selectedClass = 'mdc-list-item--selected'
+
+const MAX_DURATION = 1000
+export default props => {
+  return (
+    <Suspense
+      fallback={<h2>Properties loading..</h2>}
+      maxDuration={MAX_DURATION}
+    >
+      <PropertiesList {...props} />
+    </Suspense>
+  )
+}

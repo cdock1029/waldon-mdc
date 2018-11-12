@@ -33,7 +33,7 @@
     "rmwc": "^3.0.9",
     "rxfire": "^3.0.10",
     "rxjs": "^6.3.3",
-    "scheduler": "0.10.0",
+    "scheduler": "0.11.0-alpha.0",
     "yup": "^0.26.6"
   },
   "scripts": {
@@ -53,6 +53,6 @@
     "serve": "^10.0.2"
   },
   "resolutions": {
-    "scheduler": "0.10.0"
+    "scheduler": "0.11.0-alpha.0"
   }
 }

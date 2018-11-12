@@ -4,9 +4,9 @@ import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import styled from '@emotion/styled'
 import { useLocalStorage } from '../utils/useLocalStorage'
-import { PropertiesList } from './PropertiesList'
 import { Spinner } from '../Spinner'
 
+const PropertiesList = lazy(() => import('./PropertiesList'))
 const TenantList = lazy(() => import('./TenantList'))
 const NewTenantForm = lazy(() => import('./NewTenantForm'))
 const NewPropertyForm = lazy(() => import('./NewPropertyForm'))
@@ -45,25 +45,19 @@ export function Drawer({ isOpen }) {
         </TabBar>
       </DrawerHeader>
       <DrawerContent className="DrawerContent">
-        {tabIndex === 0 ? (
-          showForm ? (
-            <Suspense fallback={<Spinner />}>
+        <Suspense maxDuration={1000} fallback={<Spinner />}>
+          {tabIndex === 0 ? (
+            showForm ? (
               <NewPropertyForm toggleShowForm={toggleShowForm} />
-            </Suspense>
-          ) : (
-            <Suspense fallback={<Spinner />}>
+            ) : (
               <PropertiesList toggleShowForm={toggleShowForm} />
-            </Suspense>
-          )
-        ) : showForm ? (
-          <Suspense fallback={<Spinner />}>
+            )
+          ) : showForm ? (
             <NewTenantForm toggleShowForm={toggleShowForm} />
-          </Suspense>
-        ) : (
-          <Suspense fallback={<Spinner />}>
+          ) : (
             <TenantList toggleShowForm={toggleShowForm} />
-          </Suspense>
-        )}
+          )}
+        </Suspense>
       </DrawerContent>
     </StyledDrawer>
   )
