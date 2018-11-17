@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import { Typography } from 'rmwc'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
-// import { ChipSet, Chip } from '@material/react-chips'
+import { ChipSet, Chip } from '@material/react-chips'
 import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import {
@@ -220,38 +220,34 @@ function Transactions({ leaseId }) {
               </DataTableRow>
             </DataTableHead>
             <DataTableBody>
-              {transactions.map((t, i) => (
-                <DataTableRow key={t.id} className="transactionRow">
-                  <DataTableCell>
-                    <h6>todo chipset</h6>
-                    {/* <ChipSet>
-                      {!t.subType && (
-                        <Chip
-                          id={`type${i}`}
-                          label={t.type}
-                          style={chipStyles}
-                        />
+              {transactions.map((t, i) => {
+                console.log({ type: t.type, subType: t.subType })
+                return (
+                  <DataTableRow key={t.id} className="transactionRow">
+                    <DataTableCell>
+                      <ChipSet>
+                        {t.subType ? (
+                          <Chip
+                            id={`subtype${i}`}
+                            label={t.subType.replace('_', ' ')}
+                          />
+                        ) : (
+                          <Chip id={`type${i}`} label={t.type} />
+                        )}
+                      </ChipSet>
+                    </DataTableCell>
+                    <DataTableCell>{formatDate(t.date.toDate())}</DataTableCell>
+                    <DataTableCell
+                      alignEnd
+                      className={`money${t.type || ''} ${t.subType || ''}`}
+                    >
+                      {formatCents(
+                        `${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`
                       )}
-                      {t.subType && (
-                        <Chip
-                          id={`subtype${i}`}
-                          label={t.subType.replace('_', ' ')}
-                          style={chipStyles}
-                        />
-                      )}
-                    </ChipSet> */}
-                  </DataTableCell>
-                  <DataTableCell>{formatDate(t.date.toDate())}</DataTableCell>
-                  <DataTableCell
-                    alignEnd
-                    className={`money${t.type || ''} ${t.subType || ''}`}
-                  >
-                    {formatCents(
-                      `${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`
-                    )}
-                  </DataTableCell>
-                </DataTableRow>
-              ))}
+                    </DataTableCell>
+                  </DataTableRow>
+                )
+              })}
             </DataTableBody>
           </DataTableContent>
         </Expanded>
@@ -316,11 +312,11 @@ const Expanded = styled.div`
   }
 `
 
-// const StyledChip = styled(Chip)`
-//   font-size: 0.8em;
-//   line-height: normal;
-// `
-// const chipStyles = {
-//   fontSize: '0.8em',
-//   lineHeight: 'normal',
-// }
+const StyledChip = styled(Chip)`
+  font-size: 0.8em;
+  line-height: normal;
+`
+const chipStyles = {
+  fontSize: '0.8em',
+  lineHeight: 'normal',
+}

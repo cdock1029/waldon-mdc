@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
+import { FormGroup, H2, InputGroup, Intent, Button } from '@blueprintjs/core'
 import firebase from '../firebase'
 
 export function Login() {
@@ -43,24 +44,20 @@ function SimpleLogin() {
   const email = useInput('email')
   const password = useInput('password')
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
+    setIsSubmitting(true)
     const { value: emailValue } = email
     const { value: passwordValue } = password
-    console.log({ emailValue, passwordValue })
     try {
-      firebase
+      await firebase
         .auth()
         .signInWithEmailAndPassword(emailValue, passwordValue)
-        .catch(e => {
-          setError(e.message)
-        })
     } catch (e) {
-      console.log('unexpected error:', e)
-      email.reset()
-      password.reset()
       setError(e.message)
+      setIsSubmitting(false)
     }
   }
   function resetError() {
@@ -72,56 +69,59 @@ function SimpleLogin() {
   return (
     <div
       style={{
+        width: '350px',
+        maxWidth: '350px',
         background: '#fff',
-        padding: '2em',
+        padding: '0 2em',
         fontSize: '18px',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <h4>Sign in</h4>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-      </div>
+      <H2 style={{ margin: '1.5em 0 1em 0' }}>Sign in</H2>
+      <div>{error && <p style={{ color: 'red' }}>{error}</p>}</div>
       <form onSubmit={handleSubmit}>
-        <div
-          style={{
-            margin: '2em 0',
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <label style={{ marginRight: '2em' }}>Email</label>
-          <input
+        <FormGroup className="example" label="Email" intent={Intent.PRIMARY}>
+          <InputGroup
             {...email.input({
               type: 'email',
               required: true,
-              style: { fontSize: '18px' },
               onFocus: resetError,
             })}
+            className="bp3-fill"
+            leftIcon="user"
+            large
+            placeholder="u@whatever.com"
+            intent={Intent.PRIMARY}
           />
-        </div>
-        <div
-          style={{
-            margin: '2em 0',
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <label style={{ marginRight: '2em' }}>Password</label>
-          <input
+        </FormGroup>
+
+        <FormGroup className="example" label="Password" intent={Intent.PRIMARY}>
+          <InputGroup
             {...password.input({
               type: 'password',
               required: true,
               style: { fontSize: '18px' },
               onFocus: resetError,
             })}
+            className="bp3-fill"
+            leftIcon="lock"
+            large
+            placeholder="Enter password"
+            intent={Intent.PRIMARY}
           />
-        </div>
+        </FormGroup>
         <div
           style={{
             margin: '2em 0',
           }}
         >
-          <button>Submit</button>
+          <Button
+            disabled={isSubmitting}
+            type="submit"
+            intent={Intent.PRIMARY}
+            large
+          >
+            Submit
+          </Button>
         </div>
       </form>
     </div>
@@ -135,3 +135,4 @@ const LoginPage = styled.div`
   height: 100vh;
   padding-top: 10rem;
 `
+export default Login

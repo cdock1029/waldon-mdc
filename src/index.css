@@ -32,11 +32,10 @@ body {
   left: 0;
   bottom: 0;
   right: 0;
-
-  .form-elevation-card {
-    padding: 0 2rem;
-    background-color: #fff;
-  }
+}
+.darken .form-elevation-card {
+  padding: 0 2rem;
+  background-color: #fff;
 }
 
 .rch-rtr-rt {

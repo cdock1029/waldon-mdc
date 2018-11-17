@@ -9,6 +9,7 @@ export class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, info) {
     // Display fallback UI
+    console.log({ error, info })
     this.setState({ hasError: true, error, info })
     // You can also log the error to an error reporting service
     // logErrorToMyService(error, info);
@@ -21,7 +22,10 @@ export class ErrorBoundary extends React.Component {
         <ErrorWrap>
           <pre>{error.message}</pre>
           <br />
-          <div>{JSON.stringify(info, null, 2)}</div>
+          <textarea
+            style={{ width: '1200px', height: '400px' }}
+            value={JSON.stringify(info, null)}
+          />
         </ErrorWrap>
       )
     }
@@ -40,4 +44,5 @@ const ErrorWrap = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
+  padding: 3rem;
 `

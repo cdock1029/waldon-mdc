@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import { Router } from '@reach/router'
-import { TopAppBarFixedAdjust } from '@material/react-top-app-bar'
-import { DrawerAppContent } from '@material/react-drawer'
+import { TopAppBarFixedAdjust as MaterialTopAppBarFixedAdjust } from '@material/react-top-app-bar'
+import { DrawerAppContent as MaterialDrawerAppContent } from '@material/react-drawer'
 import { AppBar } from '../AppBar'
 import { Drawer } from '../Drawer'
 import { Dashboard } from '../Dashboard'
@@ -13,6 +13,7 @@ import TenantDetail from '../TenantDetail'
 import { QueryProvider } from '../Location'
 import { useLocalStorage } from '../utils/useLocalStorage'
 import Firestore from '../TestFirestoreLoader'
+import Experiments from '../Experiments'
 
 function App() {
   const [isOpen, toggleMenu] = useMenuToggle()
@@ -21,10 +22,10 @@ function App() {
       <ErrorBoundary>
         <AppContainer>
           <Drawer isOpen={isOpen} />
-          <DrawerAppContent className="DrawerAppContent">
+          <DrawerAppContent>
             <AppBar onMenuClick={toggleMenu} />
             <TopAppBarFixedAdjust>
-              <div className="Content">
+              <Content>
                 <Router>
                   <Dashboard path="/" key="dashboard">
                     <PropertyDetail
@@ -36,8 +37,9 @@ function App() {
                     <TenantDetail path="tenant/:tenantId" />
                   </Dashboard>
                   <Firestore path="firestore" />
+                  <Experiments path="exp" />
                 </Router>
-              </div>
+              </Content>
             </TopAppBarFixedAdjust>
           </DrawerAppContent>
         </AppContainer>
@@ -61,18 +63,27 @@ function useMenuToggle() {
 const AppContainer = styled.div`
   display: flex;
   height: 100vh;
-  .DrawerAppContent {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    .Content {
-      flex: 1;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      overflow-y: scroll;
-      padding: 0 1.5em;
-    }
-  }
 `
+const DrawerAppContent = styled(MaterialDrawerAppContent)`
+  label: DrawerAppContent;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`
+const TopAppBarFixedAdjust = styled(MaterialTopAppBarFixedAdjust)`
+  label: TopAppBarFixedAdjust;
+  display: flex;
+  flex: 1;
+`
+
+const Content = styled.div`
+  label: Content;
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  padding: 0 1.5em;
+`
+
 export default App
