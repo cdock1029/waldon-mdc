@@ -1,9 +1,8 @@
 import React, { Fragment, useContext, useState, useMemo, Suspense } from 'react'
 import styled from '@emotion/styled'
-import { Typography } from 'rmwc'
+// import { Typography } from 'rmwc'
 import Button from '@material/react-button'
 import MaterialIcon from '@material/react-material-icon'
-import { ChipSet, Chip } from '@material/react-chips'
 import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import {
@@ -16,6 +15,8 @@ import {
   DataTableCell,
 } from '@rmwc/data-table'
 import '@rmwc/data-table/data-table.css'
+import { Cell, Column, Table } from '@blueprintjs/table'
+import { Tag, Colors, H3 } from '@blueprintjs/core'
 import { formatCents, formatDate } from '../utils/format'
 import { NoData } from '../NoData'
 import { Flex } from '../widgets/Flex'
@@ -199,27 +200,54 @@ function Transactions({ leaseId }) {
   const transactions = TransactionsResource.read({ activeCompany, leaseId })
   return (
     <DataTableRow>
-      <DataTableCell colSpan={NUM_COLUMNS}>
+      <DataTableCell style={{ padding: '2.5em' }} colSpan={NUM_COLUMNS}>
         <Expanded>
           <Flex
             className="titleWrap"
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography className="title" use="headline6">
-              Transactions
-            </Typography>
+            <H3>Transactions</H3>
             <Button icon={<MaterialIcon icon="add" />}>New transaction</Button>
           </Flex>
-          <DataTableContent>
-            <DataTableHead>
-              <DataTableRow>
-                <DataTableHeadCell>Type</DataTableHeadCell>
-                <DataTableHeadCell>Date</DataTableHeadCell>
-                <DataTableHeadCell alignEnd>Amount</DataTableHeadCell>
-              </DataTableRow>
-            </DataTableHead>
-            <DataTableBody>
+          <Table numRows={transactions.length}>
+            <Column
+              name="Type"
+              cellRenderer={rowIndex => {
+                const t = transactions[rowIndex]
+                return (
+                  <Cell>
+                    {t.subType ? (
+                      <Tag minimal>{t.subType.replace('_', ' ')}</Tag>
+                    ) : (
+                      <Tag minimal>{t.type}</Tag>
+                    )}
+                  </Cell>
+                )
+              }}
+            />
+            <Column
+              name="Date"
+              cellRenderer={rowIndex => {
+                const t = transactions[rowIndex]
+                return <Cell>{formatDate(t.date.toDate())}</Cell>
+              }}
+            />
+            <Column
+              name="Amount"
+              cellRenderer={rowIndex => {
+                const t = transactions[rowIndex]
+                return (
+                  <Cell style={{ textAlign: 'right' }}>
+                    {formatCents(
+                      `${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`
+                    )}
+                  </Cell>
+                )
+              }}
+            />
+          </Table>
+          {/* <DataTableBody>
               {transactions.map((t, i) => {
                 console.log({ type: t.type, subType: t.subType })
                 return (
@@ -248,8 +276,7 @@ function Transactions({ leaseId }) {
                   </DataTableRow>
                 )
               })}
-            </DataTableBody>
-          </DataTableContent>
+            </DataTableBody> */}
         </Expanded>
       </DataTableCell>
     </DataTableRow>
@@ -293,6 +320,9 @@ const StyledTable = styled(RmwcDataTable)`
       color: red;
     }
   }
+  p {
+    margin: 0.5em 0;
+  }
 `
 
 const FullCellWrapper = styled.div`
@@ -306,17 +336,9 @@ const Expanded = styled.div`
   margin-left: 1rem;
   .titleWrap {
     flex-shrink: 0;
+    margin-bottom: 0.5em;
   }
   .title {
     margin: 1rem 0;
   }
 `
-
-const StyledChip = styled(Chip)`
-  font-size: 0.8em;
-  line-height: normal;
-`
-const chipStyles = {
-  fontSize: '0.8em',
-  lineHeight: 'normal',
-}
