@@ -35,8 +35,7 @@ export function AppBar({ onMenuClick }) {
 
 const StyledTopAppBar = styled(TopAppBar)`
   background-color: #282c34;
-  position: absolute;
-  z-index: 7;
+  position: sticky;
 
   .mdc-top-app-bar__title {
     cursor: pointer;

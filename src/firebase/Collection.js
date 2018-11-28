@@ -40,10 +40,11 @@ export const LeasesResource = createFirestoreCollectionResource(
 )
 
 export const TransactionsResource = createFirestoreCollectionResource(
-  ({ activeCompany, leaseId }) => {
+  ({ activeCompany, leaseId, where }) => {
     return {
       rootPath: `companies/${activeCompany}/leases/${leaseId}/transactions`,
       orderBy: ['date', 'asc'],
+      where,
     }
   }
 )

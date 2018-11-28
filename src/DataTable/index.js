@@ -16,7 +16,16 @@ import {
 } from '@rmwc/data-table'
 import '@rmwc/data-table/data-table.css'
 import { Cell, Column, Table } from '@blueprintjs/table'
-import { Tag, Colors, H3 } from '@blueprintjs/core'
+import {
+  Tag,
+  Colors,
+  H3,
+  Alignment,
+  Checkbox,
+  RadioGroup,
+  Radio,
+  Label,
+} from '@blueprintjs/core'
 import { formatCents, formatDate } from '../utils/format'
 import { NoData } from '../NoData'
 import { Flex } from '../widgets/Flex'
@@ -197,7 +206,24 @@ function LeaseRow({ activated, handleRowClick, lease }) {
 
 function Transactions({ leaseId }) {
   const { activeCompany } = useContext(AuthContext).claims
-  const transactions = TransactionsResource.read({ activeCompany, leaseId })
+  const [show, setShow] = useState('ALL')
+  const where = useMemo(
+    () => {
+      if (show === 'ALL') {
+        return
+      }
+      const where = []
+      if (show === 'PAYMENT') {
+        where.push(['type', '==', 'PAYMENT'])
+      }
+      if (show === 'CHARGE') {
+        where.push(['type', '==', 'CHARGE'])
+      }
+      return where
+    },
+    [show]
+  )
+  const params = { activeCompany, leaseId, where }
   return (
     <DataTableRow>
       <DataTableCell style={{ padding: '2.5em' }} colSpan={NUM_COLUMNS}>
@@ -205,81 +231,87 @@ function Transactions({ leaseId }) {
           <Flex
             className="titleWrap"
             justifyContent="space-between"
-            alignItems="center"
+            alignItems="baseline"
           >
             <H3>Transactions</H3>
+            <RadioGroup
+              label="Show"
+              selectedValue={show}
+              onChange={e => setShow(e.target.value)}
+              inline
+            >
+              <Radio label="All" value="ALL" />
+              <Radio label="Payments" value="PAYMENT" inline />
+              <Radio label="Charges" value="CHARGE" inline />
+            </RadioGroup>
             <Button icon={<MaterialIcon icon="add" />}>New transaction</Button>
           </Flex>
-          <Table numRows={transactions.length}>
-            <Column
-              name="Type"
-              cellRenderer={rowIndex => {
-                const t = transactions[rowIndex]
-                return (
-                  <Cell>
-                    {t.subType ? (
-                      <Tag minimal>{t.subType.replace('_', ' ')}</Tag>
-                    ) : (
-                      <Tag minimal>{t.type}</Tag>
-                    )}
-                  </Cell>
-                )
-              }}
-            />
-            <Column
-              name="Date"
-              cellRenderer={rowIndex => {
-                const t = transactions[rowIndex]
-                return <Cell>{formatDate(t.date.toDate())}</Cell>
-              }}
-            />
-            <Column
-              name="Amount"
-              cellRenderer={rowIndex => {
-                const t = transactions[rowIndex]
-                return (
-                  <Cell style={{ textAlign: 'right' }}>
-                    {formatCents(
-                      `${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`
-                    )}
-                  </Cell>
-                )
-              }}
-            />
-          </Table>
-          {/* <DataTableBody>
-              {transactions.map((t, i) => {
-                console.log({ type: t.type, subType: t.subType })
-                return (
-                  <DataTableRow key={t.id} className="transactionRow">
-                    <DataTableCell>
-                      <ChipSet>
-                        {t.subType ? (
-                          <Chip
-                            id={`subtype${i}`}
-                            label={t.subType.replace('_', ' ')}
-                          />
-                        ) : (
-                          <Chip id={`type${i}`} label={t.type} />
-                        )}
-                      </ChipSet>
-                    </DataTableCell>
-                    <DataTableCell>{formatDate(t.date.toDate())}</DataTableCell>
-                    <DataTableCell
-                      alignEnd
-                      className={`money${t.type || ''} ${t.subType || ''}`}
-                    >
-                      {formatCents(
-                        `${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`
-                      )}
-                    </DataTableCell>
-                  </DataTableRow>
-                )
-              })}
-            </DataTableBody> */}
+          <Suspense fallback={<Spinner />}>
+            <TableData params={params} />
+          </Suspense>
         </Expanded>
       </DataTableCell>
     </DataTableRow>
+  )
+}
+
+function TableData({ params }) {
+  const transactions = TransactionsResource.read(params)
+
+  return (
+    <Table numRows={transactions.length}>
+      <Column
+        name="Type"
+        cellRenderer={rowIndex => {
+          const t = transactions[rowIndex]
+          return (
+            <Cell>
+              <>
+                {
+                  <Tag
+                    minimal
+                    style={{
+                      color: '#fff',
+                      background:
+                        t.type === 'PAYMENT' ? Colors.GREEN1 : Colors.BLUE1,
+                    }}
+                  >
+                    {t.type}
+                    {`${t.subType ? ':' + t.subType.replace('_', ' ') : ''}`}
+                  </Tag>
+                }
+              </>
+            </Cell>
+          )
+        }}
+      />
+      <Column
+        name="Date"
+        cellRenderer={rowIndex => {
+          const t = transactions[rowIndex]
+          return <Cell>{formatDate(t.date.toDate())}</Cell>
+        }}
+      />
+      <Column
+        name="Amount"
+        style={{
+          textAlign: 'right',
+          fontFamily: 'Roboto Mono',
+        }}
+        cellRenderer={rowIndex => {
+          const t = transactions[rowIndex]
+          return (
+            <Cell
+              style={{
+                color: t.type === 'PAYMENT' ? Colors.GREEN1 : Colors.BLUE1,
+              }}
+            >
+              {formatCents(`${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`)}
+            </Cell>
+          )
+        }}
+      />
+    </Table>
   )
 }
 

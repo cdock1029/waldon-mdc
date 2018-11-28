@@ -63,6 +63,7 @@ function useMenuToggle() {
 const AppContainer = styled.div`
   display: flex;
   height: 100vh;
+  overflow-y: hidden;
 `
 const DrawerAppContent = styled(MaterialDrawerAppContent)`
   label: DrawerAppContent;
@@ -70,10 +71,12 @@ const DrawerAppContent = styled(MaterialDrawerAppContent)`
   flex-direction: column;
   flex: 1;
 `
-const TopAppBarFixedAdjust = styled(MaterialTopAppBarFixedAdjust)`
+// const TopAppBarFixedAdjust = styled(MaterialTopAppBarFixedAdjust)`
+const TopAppBarFixedAdjust = styled.div`
   label: TopAppBarFixedAdjust;
   display: flex;
   flex: 1;
+  overflow-y: scroll;
 `
 
 const Content = styled.div`
