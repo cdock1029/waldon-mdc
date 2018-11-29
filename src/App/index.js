@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import { Router } from '@reach/router'
-import { TopAppBarFixedAdjust as MaterialTopAppBarFixedAdjust } from '@material/react-top-app-bar'
+// import { TopAppBarFixedAdjust as MaterialTopAppBarFixedAdjust } from '@material/react-top-app-bar'
 import { DrawerAppContent as MaterialDrawerAppContent } from '@material/react-drawer'
 import { AppBar } from '../AppBar'
 import { Drawer } from '../Drawer'

@@ -1,8 +1,5 @@
 import React, { Fragment, useContext, useState, useMemo, Suspense } from 'react'
 import styled from '@emotion/styled'
-// import { Typography } from 'rmwc'
-import Button from '@material/react-button'
-import MaterialIcon from '@material/react-material-icon'
 import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import {
@@ -15,26 +12,17 @@ import {
   DataTableCell,
 } from '@rmwc/data-table'
 import '@rmwc/data-table/data-table.css'
-import { Cell, Column, Table } from '@blueprintjs/table'
-import {
-  Tag,
-  Colors,
-  H3,
-  Alignment,
-  Checkbox,
-  RadioGroup,
-  Radio,
-  Label,
-} from '@blueprintjs/core'
+
 import { formatCents, formatDate } from '../utils/format'
 import { NoData } from '../NoData'
-import { Flex } from '../widgets/Flex'
-import { LeasesResource, TransactionsResource } from '../firebase/Collection'
+import { LeasesResource } from '../firebase/Collection'
 import { AuthContext } from '../firebase/Auth'
 import { QueryContext } from '../Location'
 import { Spinner } from '../Spinner'
+import { LEASE_ROW_NUM_COLS } from '../utils/constants'
 
-const NUM_COLUMNS = 7
+const Transactions = React.lazy(() => import('../Transactions'))
+
 const TABLE_MIN_WIDTH = '53rem'
 const ACTIVE = 'ACTIVE'
 const INACTIVE = 'INACTIVE'
@@ -149,7 +137,7 @@ function LeaseLoadingContainer({ where, activated, handleRowClick }) {
 function EmptyTableRowWrapper({ children }) {
   return (
     <DataTableRow>
-      <DataTableCell colSpan={NUM_COLUMNS}>
+      <DataTableCell colSpan={LEASE_ROW_NUM_COLS}>
         <FullCellWrapper>{children}</FullCellWrapper>
       </DataTableCell>
     </DataTableRow>
@@ -204,117 +192,6 @@ function LeaseRow({ activated, handleRowClick, lease }) {
   )
 }
 
-function Transactions({ leaseId }) {
-  const { activeCompany } = useContext(AuthContext).claims
-  const [show, setShow] = useState('ALL')
-  const where = useMemo(
-    () => {
-      if (show === 'ALL') {
-        return
-      }
-      const where = []
-      if (show === 'PAYMENT') {
-        where.push(['type', '==', 'PAYMENT'])
-      }
-      if (show === 'CHARGE') {
-        where.push(['type', '==', 'CHARGE'])
-      }
-      return where
-    },
-    [show]
-  )
-  const params = { activeCompany, leaseId, where }
-  return (
-    <DataTableRow>
-      <DataTableCell style={{ padding: '2.5em' }} colSpan={NUM_COLUMNS}>
-        <Expanded>
-          <Flex
-            className="titleWrap"
-            justifyContent="space-between"
-            alignItems="baseline"
-          >
-            <H3>Transactions</H3>
-            <RadioGroup
-              label="Show"
-              selectedValue={show}
-              onChange={e => setShow(e.target.value)}
-              inline
-            >
-              <Radio label="All" value="ALL" />
-              <Radio label="Payments" value="PAYMENT" inline />
-              <Radio label="Charges" value="CHARGE" inline />
-            </RadioGroup>
-            <Button icon={<MaterialIcon icon="add" />}>New transaction</Button>
-          </Flex>
-          <Suspense fallback={<Spinner />}>
-            <TableData params={params} />
-          </Suspense>
-        </Expanded>
-      </DataTableCell>
-    </DataTableRow>
-  )
-}
-
-function TableData({ params }) {
-  const transactions = TransactionsResource.read(params)
-
-  return (
-    <Table numRows={transactions.length}>
-      <Column
-        name="Type"
-        cellRenderer={rowIndex => {
-          const t = transactions[rowIndex]
-          return (
-            <Cell>
-              <>
-                {
-                  <Tag
-                    minimal
-                    style={{
-                      color: '#fff',
-                      background:
-                        t.type === 'PAYMENT' ? Colors.GREEN1 : Colors.BLUE1,
-                    }}
-                  >
-                    {t.type}
-                    {`${t.subType ? ':' + t.subType.replace('_', ' ') : ''}`}
-                  </Tag>
-                }
-              </>
-            </Cell>
-          )
-        }}
-      />
-      <Column
-        name="Date"
-        cellRenderer={rowIndex => {
-          const t = transactions[rowIndex]
-          return <Cell>{formatDate(t.date.toDate())}</Cell>
-        }}
-      />
-      <Column
-        name="Amount"
-        style={{
-          textAlign: 'right',
-          fontFamily: 'Roboto Mono',
-        }}
-        cellRenderer={rowIndex => {
-          const t = transactions[rowIndex]
-          return (
-            <Cell
-              style={{
-                color: t.type === 'PAYMENT' ? Colors.GREEN1 : Colors.BLUE1,
-              }}
-            >
-              {formatCents(`${t.type === 'PAYMENT' ? '-' : ''}${t.amount}`)}
-            </Cell>
-          )
-        }}
-      />
-    </Table>
-  )
-}
-
 const StyledTabBar = styled(TabBar)`
   max-width: 18rem;
   background-color: #fff;
@@ -360,17 +237,4 @@ const StyledTable = styled(RmwcDataTable)`
 const FullCellWrapper = styled.div`
   display: flex;
   justify-content: center;
-`
-
-const Expanded = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-left: 1rem;
-  .titleWrap {
-    flex-shrink: 0;
-    margin-bottom: 0.5em;
-  }
-  .title {
-    margin: 1rem 0;
-  }
 `

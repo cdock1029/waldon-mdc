@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@blueprintjs/core": "^3.9.0",
+    "@blueprintjs/datetime": "^3.4.0",
     "@blueprintjs/table": "^3.3.0",
     "@emotion/core": "^10.0.0",
     "@emotion/styled": "^10.0.0",
@@ -21,6 +22,7 @@
     "@reach/router": "^1.3.0-alpha.1",
     "@rmwc/data-table": "^4.0.1",
     "babel-plugin-emotion": "^10.0.0",
+    "date-fns": "^2.0.0-alpha.25",
     "dinero.js": "^1.4.0",
     "firebase": "^5.5.8",
     "formik": "^1.3.1",
