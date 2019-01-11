@@ -1,0 +1,86 @@
+import { admin, functions } from '../globalDeps'
+import { TOPICS } from './tasksDeps'
+import { getMonth, subMonths, subDays, setDate, format } from 'date-fns/esm'
+const MONTH_FORMAT = 'YYYY MMMM'
+
+exports = module.exports = functions.pubsub
+  .topic(TOPICS.MONTHLY_JOB_CRON)
+  .onPublish(async (message, context) => {
+    // TODO: cloud-schedule an 'Every 1 mins' pubsub message to `TOPICS.MONTHLY_JOB_TASK_ROUTER`
+
+    // for now lets write out all logic in here... maybe this can be monolithic..
+
+    // get all companies
+    // in transaction ?
+    const companies = await admin
+      .firestore()
+      .collection('companies')
+      .get()
+
+    companies.docs.forEach(async c => {
+      const companyId = c.id
+      const leases = await c.ref
+        .collection('leases')
+        /* 
+          so.. balance > 0 is starting point (accounts for partial payments, small balances)
+          if balance > 0, and no previous late fees 'last month', apply monthly late fee ($30 e.g)
+          this captures people we haven't seen this month since no money came in to update account
+        */
+        .where('balance', '>', 0)
+        .where('status', '<', 'INACTIVE') // [active, collections,] inactive
+        .get()
+
+      leases.docs.forEach(async l => {
+        const leaseId = l.id
+        const balance = l.data().balance
+        // TODO there is a lot of differing logic that can occur here.. many different late fee policies.
+
+        // flat fee after late-day
+        // incremental fee per day
+        // extra penalty for past months overdue
+        // continuously running tally.. ($1 per day without end..), involves previous months in calculation ?
+        // conditional forms of all of above..
+        // fixed fee portion plus per-day portion..
+
+        // calculate date range of "last month"
+        // today. getmonth - 1
+        const today = new Date()
+        const monthAgo = subMonths(today, 1)
+        const lastMonthFirstDay = setDate(monthAgo, 1)
+        // tricky with 28,29,30,31
+        const lastMonthLastDay = subDays(setDate(today, 1), 1)
+
+        // if late fee already applied this month... skip ?
+        const transactions = await l.ref
+          .collection('transactions')
+          .where('date', '>', lastMonthFirstDay)
+          .where('date', '<', lastMonthLastDay)
+          .where('type', '==', 'CHARGE')
+          .where('subType', '==', 'LATE_FEE')
+          .get()
+        if (transactions.docs.length) {
+          // this lease is done, no new fee applied
+          return
+        }
+        // todo: fixed tsc errors by just returning this
+        return l.ref
+          .collection('transactions')
+          .doc()
+          .set({
+            amount: 30000, //TODO: get from company configuration, late-fee policy
+            date: admin.firestore.FieldValue.serverTimestamp(),
+            type: 'CHARGE',
+            subType: 'LATE_FEE',
+            description: `Auto monthly-late fee charge for ${format(
+              monthAgo,
+              MONTH_FORMAT,
+            )}`, //
+          })
+      })
+    })
+
+    // get non-inactive leases (with balance for late fees..)
+    // easier to charge fee before applying rent? ...
+
+    return true
+  })
