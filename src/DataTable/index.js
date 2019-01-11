@@ -1,5 +1,7 @@
+/* @jsx jsx */
+// eslint-disable-next-line no-unused-vars
+import { jsx, css } from '@emotion/core'
 import React, { Fragment, useContext, useState, useMemo, Suspense } from 'react'
-import styled from '@emotion/styled'
 import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import {
@@ -64,14 +66,55 @@ export const DataTable = () => {
   }
   return (
     <div className="wrapper-div">
-      <StyledTabBar
+      <TabBar
         activeIndex={activeTabIndex}
         handleActiveIndexUpdate={handleTabChange}
+        css={{
+          maxWidth: '18rem',
+          backgroundColor: '#fff',
+          boxShadow:
+            '0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12)',
+        }}
       >
         <Tab>Active</Tab>
         <Tab>Inactive</Tab>
-      </StyledTabBar>
-      <StyledTable>
+      </TabBar>
+      <RmwcDataTable
+        css={css`
+          box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+            0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+          border: none;
+          &,
+          table {
+            width: 100%;
+          }
+          /* max-width: 60rem; */
+          min-width: ${TABLE_MIN_WIDTH};
+          min-height: 25rem;
+          background-color: #fff;
+
+          tr.leaseRow,
+          tr.transactionRow {
+            cursor: pointer;
+          }
+          td.money {
+            font-family: 'Roboto Mono';
+
+            &.CHARGE {
+              color: initial;
+            }
+            &.PAYMENT {
+              color: darkgreen;
+            }
+            &.LATE_FEE {
+              color: red;
+            }
+          }
+          p {
+            margin: 0.5em 0;
+          }
+        `}
+      >
         <DataTableContent>
           <DataTableHead>
             <DataTableRow>
@@ -106,7 +149,7 @@ export const DataTable = () => {
             </Suspense>
           </DataTableBody>
         </DataTableContent>
-      </StyledTable>
+      </RmwcDataTable>
     </div>
   )
 }
@@ -138,7 +181,14 @@ function EmptyTableRowWrapper({ children }) {
   return (
     <DataTableRow>
       <DataTableCell colSpan={LEASE_ROW_NUM_COLS}>
-        <FullCellWrapper>{children}</FullCellWrapper>
+        <div
+          css={{
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          {children}
+        </div>
       </DataTableCell>
     </DataTableRow>
   )
@@ -191,50 +241,3 @@ function LeaseRow({ activated, handleRowClick, lease }) {
     </Fragment>
   )
 }
-
-const StyledTabBar = styled(TabBar)`
-  max-width: 18rem;
-  background-color: #fff;
-  box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
-    0 1px 3px 0 rgba(0, 0, 0, 0.12);
-`
-
-const StyledTable = styled(RmwcDataTable)`
-  box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14),
-    0 1px 3px 0 rgba(0, 0, 0, 0.12);
-  border: none;
-  &,
-  table {
-    width: 100%;
-  }
-  /* max-width: 60rem; */
-  min-width: ${TABLE_MIN_WIDTH};
-  min-height: 25rem;
-  background-color: #fff;
-
-  tr.leaseRow,
-  tr.transactionRow {
-    cursor: pointer;
-  }
-  td.money {
-    font-family: 'Roboto Mono';
-
-    &.CHARGE {
-      color: initial;
-    }
-    &.PAYMENT {
-      color: darkgreen;
-    }
-    &.LATE_FEE {
-      color: red;
-    }
-  }
-  p {
-    margin: 0.5em 0;
-  }
-`
-
-const FullCellWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-`

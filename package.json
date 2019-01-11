@@ -6,8 +6,8 @@
     "@blueprintjs/core": "^3.9.0",
     "@blueprintjs/datetime": "^3.4.0",
     "@blueprintjs/table": "^3.3.0",
-    "@emotion/core": "^10.0.0",
-    "@emotion/styled": "^10.0.0",
+    "@emotion/core": "^10.0.5",
+    "@emotion/styled": "^10.0.5",
     "@material/react-button": "^0.7.0",
     "@material/react-chips": "^0.7.0",
     "@material/react-drawer": "^0.7.0",
@@ -47,12 +47,25 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "plugins": [
+      "emotion"
+    ],
+    "rules": {
+      "emotion/jsx-import": "error",
+      "no-unused-vars": [
+        "error",
+        {
+          "varsIgnorePattern": "jsx"
+        }
+      ]
+    }
   },
   "browserslist": [
     "last 2 Chrome versions"
   ],
   "devDependencies": {
+    "eslint-plugin-emotion": "^10.0.0",
     "serve": "^10.0.2"
   }
 }
