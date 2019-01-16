@@ -14,6 +14,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "@google-cloud/logging": "^4.1.0",
+    "@google-cloud/pubsub": "^0.22.2",
     "algoliasearch": "^3.30.0",
     "array.prototype.flat": "^1.2.1",
     "axios": "^0.18.0",
