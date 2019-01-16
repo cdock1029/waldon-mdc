@@ -45,8 +45,7 @@ exports = module.exports = functions.pubsub
         companyIds.forEach(companyId => {
           const companyMessage: CompanyMessage = {
             companyId,
-            parentEventId: eventId,
-            parentEventTimestamp: timestamp,
+            parentJob: { eventId, timestamp },
           }
           const dataBuffer = Buffer.from(JSON.stringify(companyMessage))
           // publish message for each company

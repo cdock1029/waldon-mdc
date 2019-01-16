@@ -22,7 +22,7 @@ exports = module.exports = functions.pubsub
     const companyJobRef = admin
       .firestore()
       .collection(MONTHLY_JOB)
-      .doc(message.json.parentEventId)
+      .doc(message.json.parentJob!.eventId)
       .collection(MONTHLY_COMPANY_JOB)
       .doc(eventId)
 
@@ -42,8 +42,12 @@ exports = module.exports = functions.pubsub
 
         leaseIds.forEach(async leaseId => {
           const leaseMessase: LeaseMessage = {
-            parentEventId: eventId,
-            parentEventTimestamp: timestamp,
+            parentJob: {
+              eventId,
+              timestamp,
+              parentJob: message.json.parentJob,
+            },
+            companyId: message.json.companyId,
             leaseId,
           }
           const dataBuffer = Buffer.from(JSON.stringify(leaseMessase))

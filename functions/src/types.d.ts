@@ -10,8 +10,9 @@ type FSTransaction = FirebaseFirestore.Transaction
 type TransactionPromise = Promise<FSTransaction>
 
 interface JobMessage {
-  parentEventId: string
-  parentEventTimestamp: string
+  parentJob?: JobMessage
+  eventId?: string
+  timestamp?: string
 }
 
 interface CompanyMessage extends JobMessage {
@@ -19,6 +20,7 @@ interface CompanyMessage extends JobMessage {
 }
 
 interface LeaseMessage extends JobMessage {
+  companyId: string
   leaseId: string
 }
 

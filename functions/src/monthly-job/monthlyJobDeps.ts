@@ -14,12 +14,12 @@ export const MONTHLY_COMPANY_LEASE_JOB = 'monthly-company-lease-job'
 
 export const pubsub = new PubSub()
 
-const leaseTime = 5 * 1000 // 5 seconds
 export function initJob(
-  monthlyRef: FirebaseFirestore.DocumentReference
+  jobRef: FirebaseFirestore.DocumentReference,
+  leaseTimeMillis = 5000 // default 5 second lease
 ): Promise<boolean> {
   return admin.firestore().runTransaction<boolean>(async txn => {
-    const job = await txn.get(monthlyRef)
+    const job = await txn.get(jobRef)
     // another function already completed this task
     if (job.exists && (job.data() as Job).taskComplete) {
       return false
@@ -30,8 +30,8 @@ export function initJob(
     }
 
     // reserve lease to work on this task...
-    txn.set(monthlyRef, {
-      lease: new Date(new Date().getTime() + leaseTime),
+    txn.set(jobRef, {
+      lease: new Date(new Date().getTime() + leaseTimeMillis),
       taskComplete: false,
     })
     return true
@@ -46,12 +46,12 @@ export function markJobComplete(
 
 export function retryTimedOut({
   timestamp,
-  maxAge = 30000, //30 seconds
+  maxRetryWindowMillis = 30000, // default 30 second window for retries
 }: {
   timestamp: string
-  maxAge?: number
+  maxRetryWindowMillis?: number
 }): boolean {
   const eventTimestamp = Date.parse(timestamp)
   const eventAge = Date.now() - eventTimestamp
-  return eventAge > maxAge
+  return eventAge > maxRetryWindowMillis
 }
