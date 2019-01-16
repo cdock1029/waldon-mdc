@@ -10,9 +10,7 @@ export enum JobStatus {
 
 export const MONTHLY_JOB = 'monthly-job'
 export const MONTHLY_COMPANY_JOB = 'monthly-company-job'
-export const MONTHLY_COMPANY_PROPERTY_JOB = 'monthly-company-property-job'
-export const MONTHLY_COMPANY_PROPERTY_LEASE_JOB =
-  'monthly-company-property-lease-job'
+export const MONTHLY_COMPANY_LEASE_JOB = 'monthly-company-lease-job'
 
 export const pubsub = new PubSub()
 
@@ -22,13 +20,16 @@ export function initJob(
 ): Promise<boolean> {
   return admin.firestore().runTransaction<boolean>(async txn => {
     const job = await txn.get(monthlyRef)
+    // another function already completed this task
     if (job.exists && (job.data() as Job).taskComplete) {
       return false
     }
+    // job not complete, but another function working on it currently...
     if (job.exists && new Date() < (job.data() as Job).lease.toDate()) {
       return Promise.reject('Lease already taken. Try later..')
     }
 
+    // reserve lease to work on this task...
     txn.set(monthlyRef, {
       lease: new Date(new Date().getTime() + leaseTime),
       taskComplete: false,
@@ -41,4 +42,16 @@ export function markJobComplete(
 ) {
   const completedJob: Pick<Job, 'taskComplete'> = { taskComplete: true }
   return monthlyRef.set(completedJob)
+}
+
+export function retryTimedOut({
+  timestamp,
+  maxAge = 30000, //30 seconds
+}: {
+  timestamp: string
+  maxAge?: number
+}): boolean {
+  const eventTimestamp = Date.parse(timestamp)
+  const eventAge = Date.now() - eventTimestamp
+  return eventAge > maxAge
 }

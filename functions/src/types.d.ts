@@ -18,6 +18,10 @@ interface CompanyMessage extends JobMessage {
   companyId: string
 }
 
+interface LeaseMessage extends JobMessage {
+  leaseId: string
+}
+
 interface Job {
   taskComplete: boolean
   lease: FirebaseFirestore.Timestamp

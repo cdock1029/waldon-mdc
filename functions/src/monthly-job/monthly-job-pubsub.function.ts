@@ -3,20 +3,23 @@ import {
   pubsub,
   initJob,
   markJobComplete,
+  retryTimedOut,
   MONTHLY_JOB,
   MONTHLY_COMPANY_JOB,
 } from './monthlyJobDeps'
 
-const eventMaxAge = 60000 // max age: 60 seconds
+/*
+  Job: publish message for each company
+  success: when all messages published
+*/
 
 exports = module.exports = functions.pubsub
   .topic(MONTHLY_JOB)
   .onPublish((message, { eventId, timestamp }) => {
-    const eventTimestamp = Date.parse(timestamp)
-    const eventAge = Date.now() - eventTimestamp
-    if (eventAge > eventMaxAge) {
+    // quit if exceeded retry threshold
+    if (retryTimedOut({ timestamp })) {
       console.log(
-        `Dropping event ${eventId} for job ${MONTHLY_JOB} with age ${eventAge} ms.`
+        `Dropping event ${eventId} for job ${MONTHLY_JOB}. timestamp=[${timestamp}]`
       )
       return
     }
@@ -26,8 +29,10 @@ exports = module.exports = functions.pubsub
       .collection(MONTHLY_JOB)
       .doc(eventId)
 
+    // try to reserve job lease if not taken...
     return initJob(monthlyJobRef).then(async (shouldPublish: boolean) => {
       if (shouldPublish) {
+        // job lease reserved. Doing work
         const publisher = pubsub.topic(MONTHLY_COMPANY_JOB).publisher()
         const promises: Promise<any>[] = []
 
@@ -44,10 +49,13 @@ exports = module.exports = functions.pubsub
             parentEventTimestamp: timestamp,
           }
           const dataBuffer = Buffer.from(JSON.stringify(companyMessage))
+          // publish message for each company
           promises.push(publisher.publish(dataBuffer))
         })
         await Promise.all(promises)
+        // all messages published
         console.log(`Company subjobs published for eventId=[${eventId}].`)
+        // mark job complete
         return markJobComplete(monthlyJobRef)
       }
       return
