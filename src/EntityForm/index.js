@@ -25,12 +25,12 @@ const FormWrapper = styled.div({
 })
 
 export function EntityForm({
-  collectionPath,
+  rootPath,
+  path,
   initialValues,
   validationSchema,
   children,
   onCancel,
-  docId,
   elevation = 6,
 }) {
   return (
@@ -39,16 +39,17 @@ export function EntityForm({
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting, setStatus }) => {
         setSubmitting(true)
+        console.log({ values, rootPath, path })
         try {
           await saveDoc({
-            collectionPath,
+            rootPath,
+            path,
             data: Object.entries(values).reduce((acc, [key, val]) => {
               if (val || val === 0) {
                 acc[key] = val
               }
               return acc
             }, {}),
-            docId,
           })
           onCancel()
         } catch (e) {

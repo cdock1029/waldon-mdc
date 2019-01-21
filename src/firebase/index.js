@@ -18,7 +18,8 @@ firebase.firestore().settings({ timestampsInSnapshots: true })
 
 const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp()
 
-export function saveDoc({ rootPath, path, data }) {
+export function saveDoc({ rootPath, path, data, collectionPath, docId }) {
+  console.log({ rootPath, path, data, collectionPath, docId })
   let ref = firebase.firestore().collection(rootPath)
 
   const docData = {

@@ -1,11 +1,21 @@
 import { createFirestoreCollectionResource } from './index'
 
+export const CompanyResource = createFirestoreCollectionResource(
+  ({ activeCompany }) => {
+    return {
+      rootPath: 'companies',
+      path: activeCompany,
+    }
+  }
+)
+
 export const PropertiesResource = createFirestoreCollectionResource(
-  ({ activeCompany, propertyId }) => {
+  ({ activeCompany, propertyId, where }) => {
     const args = {
       rootPath: `companies/${activeCompany}/properties`,
       path: propertyId,
       orderBy: propertyId ? undefined : ['name', 'asc'],
+      where,
     }
     return args
   }

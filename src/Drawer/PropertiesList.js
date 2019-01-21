@@ -130,7 +130,7 @@ const UnitsList = memo(
     return (
       <div>
         {units.length ? (
-          units.map((unit, i) => (
+          units.map(unit => (
             <UnitItem
               key={unit.id}
               {...unit}

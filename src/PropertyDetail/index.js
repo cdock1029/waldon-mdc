@@ -46,7 +46,7 @@ export function PropertyDetail({ propertyId, children }) {
       {showUnitForm && (
         <div className="darken">
           <EntityForm
-            collectionPath={`/companies/${activeCompany}/properties/${propertyId}/units`}
+            rootPath={`/companies/${activeCompany}/properties/${propertyId}/units`}
             initialValues={{ label: '' }}
             validationSchema={UnitSchema}
             onCancel={toggleShowUnitForm}

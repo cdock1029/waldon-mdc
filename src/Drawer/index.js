@@ -4,6 +4,8 @@ import Tab from '@material/react-tab'
 import TabBar from '@material/react-tab-bar'
 import styled from '@emotion/styled'
 import { useLocalStorage } from '../utils/useLocalStorage'
+import { CompanyResource } from '../firebase/Collection'
+import { useActiveCompany } from '../firebase/Auth'
 import { Spinner } from '../Spinner'
 
 const PropertiesList = lazy(() => import('./PropertiesList'))
@@ -12,6 +14,8 @@ const NewTenantForm = lazy(() => import('./NewTenantForm'))
 const NewPropertyForm = lazy(() => import('./NewPropertyForm'))
 
 export function Drawer({ isOpen }) {
+  const activeCompany = useActiveCompany()
+  const company = CompanyResource.read({ activeCompany })
   const [tabIndex, setTabIndex] = useLocalStorage({
     key: 'drawer_tab',
     defaultValue: 0,
@@ -37,7 +41,9 @@ export function Drawer({ isOpen }) {
           handleActiveIndexUpdate={handleSetTabIndex}
         >
           <Tab>
-            <span className="mdc-tab__text-label">Properties</span>
+            <span className="mdc-tab__text-label">
+              Properties ({company.propertyCount})
+            </span>
           </Tab>
           <Tab>
             <span className="mdc-tab__text-label">Tenants</span>
