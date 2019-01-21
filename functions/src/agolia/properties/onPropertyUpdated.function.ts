@@ -1,9 +1,8 @@
 import { functions } from '../../globalDeps'
 import { index } from '../algoliaDeps'
-import { PROPERTY } from './deps'
 
 exports = module.exports = functions.firestore
-  .document(PROPERTY)
+  .document('companies/{companyId}/properties/{propertyId}')
   .onUpdate(async (change, context) => {
     const data = { ...change.after.data(), objectID: change.after.id }
     try {

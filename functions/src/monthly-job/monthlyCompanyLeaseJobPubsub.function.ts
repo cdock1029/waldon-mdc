@@ -32,46 +32,57 @@ exports = module.exports = functions.pubsub
         /* 1. apply rent for the month
            2. determine if late fee needs applied, calculate, add charge.
         */
+        const leaseRef = admin
+          .firestore()
+          .collection('companies')
+          .doc(message.json.companyId)
+          .collection('leases')
+          .doc(message.json.leaseId)
+        const txnsRef = leaseRef.collection('transactions')
 
         return admin
           .firestore()
           .runTransaction(async txn => {
-            const leaseRef = admin
-              .firestore()
-              .collection('companies')
-              .doc(message.json.companyId)
-              .collection('leases')
-              .doc(message.json.leaseId)
-
             const leaseSnap = await txn.get(leaseRef)
-            const lease = leaseSnap.data() as { balance: number }
+            const lease = leaseSnap.data() as { balance: number; rent: number }
 
             // if balance <= 0, skip
             if (lease.balance > 0) {
               // check for existing LATE_FEE last month..
-              const prevMonthLateFees = await leaseRef
+              const prevMonthLateFeesQuery = leaseRef
                 .collection('transactions')
                 .where('date', '>=', 'prev month day 1')
                 .where('date', '<=', 'prev month last day')
                 .where('SUB_TYPE', '==', 'LATE_FEE')
-                .get()
+
+              const prevMonthLateFees = await txn.get(prevMonthLateFeesQuery)
 
               if (prevMonthLateFees.empty) {
                 // no existing late fee, lets apply if applicable..
+
+                // if bal < PENALTY_FEE_THRESHOLD(100?), fee = STANDARD_LATE_FEE(30)
+                // else fee = PENALTY_FEE_AMOUNT(100?)
+                const lateFeeTxn: Txn = {
+                  amount: 0,
+                  date: new Date(),
+                  type: 'CHARGE',
+                  subType: 'LATE_FEE',
+                }
+                txn.create(txnsRef.doc(), lateFeeTxn)
               }
             }
 
-            // positive bal, no charge yet. Amount??
-            // if bal < PENALTY_FEE_THRESHOLD(100?), fee = STANDARD_LATE_FEE(30)
-            // else fee = PENALTY_FEE_AMOUNT(100?)
-
             // rent = lease.rent
-
-            // batch save: {rent, lateFee?} CHARGES
-
-            // mark job complete
+            const rentTxn: Txn = {
+              amount: lease.rent,
+              date: new Date(),
+              type: 'CHARGE',
+              subType: 'RENT',
+            }
+            txn.create(txnsRef.doc(), rentTxn)
           })
           .then(() => {
+            // mark job complete
             return markJobComplete(leaseJobRef)
           })
       }

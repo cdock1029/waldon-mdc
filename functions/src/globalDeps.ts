@@ -1,6 +1,6 @@
 import * as firebaseFunctions from 'firebase-functions'
 import * as firebaseAdmin from 'firebase-admin'
-import Logging from '@google-cloud/logging'
+const { Logging } = require('@google-cloud/logging')
 
 firebaseAdmin.initializeApp()
 firebaseAdmin.firestore().settings({ timestampsInSnapshots: true })

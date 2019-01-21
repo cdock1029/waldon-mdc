@@ -4,6 +4,8 @@ declare module 'doasync'
 declare module 'dinero.js'
 
 declare module '@google-cloud/pubsub'
+declare module '@google-cloud/logging'
+declare module 'query-string'
 
 type DocSnap = FirebaseFirestore.DocumentSnapshot
 type FSTransaction = FirebaseFirestore.Transaction
@@ -27,4 +29,11 @@ interface LeaseMessage extends JobMessage {
 interface Job {
   taskComplete: boolean
   lease: FirebaseFirestore.Timestamp
+}
+
+interface Txn {
+  amount: number
+  date: Date
+  type: 'PAYMENT' | 'CHARGE'
+  subType?: 'LATE_FEE' | 'RENT'
 }
