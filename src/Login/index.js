@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 import { Link } from '@reach/router'
-import { FormGroup, H2, InputGroup, Intent, Button } from '@blueprintjs/core'
+import {
+  FormGroup,
+  H2,
+  InputGroup,
+  Intent,
+  Button,
+  H3,
+} from '@blueprintjs/core'
 import firebase from '../firebase'
 import { useInput } from '../utils/useInput'
 
 export function Login() {
   const [showSignUp, setShowSignUp] = useState(false)
+  const [showReset, setShowReset] = useState(false)
 
   useEffect(() => {
     document.querySelector('body').classList.add('darken')
@@ -14,18 +22,101 @@ export function Login() {
       document.querySelector('body').classList.remove('darken')
     }
   }, [])
+
+  function showResetForm() {
+    setShowReset(true)
+  }
+  function hideResetForm() {
+    setShowReset(false)
+  }
   return (
     <LoginPage>
-      {showSignUp ? (
+      {showReset ? (
+        <ResetPassword hideResetForm={hideResetForm} />
+      ) : showSignUp ? (
         <SimpleSignup showLogin={() => setShowSignUp(false)} />
       ) : (
-        <SimpleLogin showSignUp={() => setShowSignUp(true)} />
+        <SimpleLogin
+          showSignUp={() => setShowSignUp(true)}
+          showResetForm={showResetForm}
+        />
       )}
     </LoginPage>
   )
 }
 
-function SimpleLogin({ showSignUp }) {
+function ResetPassword({ hideResetForm }) {
+  const email = useInput('email')
+  const [emailSent, setEmailSent] = useState(false)
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setIsSubmitting(true)
+    const { value: emailValue } = email
+    try {
+      await firebase.auth().sendPasswordResetEmail(emailValue)
+      setEmailSent(true)
+    } catch (e) {
+      setError(e.message)
+      setIsSubmitting(false)
+    }
+  }
+  function resetError() {
+    if (error) {
+      setError('')
+    }
+  }
+  return (
+    <SimpleWrapper>
+      {emailSent ? (
+        <div>
+          <H3>Email has been sent.</H3>
+          <p>Check your email to complete the password-reset process.</p>
+        </div>
+      ) : (
+        <>
+          <H2 style={{ margin: '1.5em 0 1em 0' }}>Reset password</H2>
+          <div>{error && <p style={{ color: 'red' }}>{error}</p>}</div>
+          <form onSubmit={handleSubmit}>
+            <FormGroup label="Enter your email address" intent={Intent.PRIMARY}>
+              <InputGroup
+                {...email.input({
+                  type: 'email',
+                  required: true,
+                  onFocus: resetError,
+                })}
+                className="bp3-fill"
+                leftIcon="user"
+                large
+                placeholder="your@email.com"
+                intent={Intent.PRIMARY}
+              />
+            </FormGroup>
+            <ButtonRow>
+              <Button
+                disabled={isSubmitting || !!error}
+                type="submit"
+                intent={Intent.PRIMARY}
+                large
+              >
+                Send reset-email
+              </Button>
+            </ButtonRow>
+          </form>
+        </>
+      )}
+
+      <ButtonRow>
+        <Link to="signin" onClick={hideResetForm}>
+          Go back to sign-in
+        </Link>
+      </ButtonRow>
+    </SimpleWrapper>
+  )
+}
+
+function SimpleLogin({ showSignUp, showResetForm }) {
   const email = useInput('email')
   const password = useInput('password')
   const [error, setError] = useState('')
@@ -99,6 +190,11 @@ function SimpleLogin({ showSignUp }) {
             Sign up
           </Link>
         </ButtonRow>
+        <ButtonRow>
+          <Link to="reset" onClick={showResetForm}>
+            Reset password
+          </Link>
+        </ButtonRow>
       </form>
     </SimpleWrapper>
   )
@@ -108,7 +204,6 @@ function SimpleSignup({ showLogin }) {
   const email = useInput('email')
   const password = useInput('password')
   const password2 = useInput('password2')
-  // const company = useInput('company')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -200,7 +295,7 @@ function SimpleSignup({ showLogin }) {
           >
             Submit
           </Button>
-          <Link to="login" onClick={showLogin}>
+          <Link to="signin" onClick={showLogin}>
             Sign in
           </Link>
         </ButtonRow>
