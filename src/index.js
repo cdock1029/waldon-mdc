@@ -1,11 +1,12 @@
-import React, { lazy, memo, Suspense } from 'react'
+import React, { lazy, memo, Suspense, useState } from 'react'
 import ReactDOM from 'react-dom'
+import { FocusStyleManager } from '@blueprintjs/core'
 import './index.css'
 import firebase from './firebase'
 import { AuthProvider, AuthContext } from './firebase/Auth'
 import * as serviceWorker from './serviceWorker'
 import { Loading } from './Loading'
-import { FocusStyleManager } from '@blueprintjs/core'
+import CreateCompany from './CreateCompany'
 
 FocusStyleManager.onlyShowFocusOnTabs()
 
@@ -33,12 +34,18 @@ firebase
       <Suspense maxDuration={600} fallback={<AppLoading key="appLoad" />}>
         <AuthProvider>
           <AuthContext.Consumer>
-            {({ user }) => {
+            {({ user, claims, signOut }) => {
               if (typeof user === 'undefined') {
                 return <AppLoading key="appLoad" />
               }
               if (!user) {
                 return <Login />
+              }
+              if (!user.emailVerified) {
+                return <EmailVerification user={user} signOut={signOut} />
+              }
+              if (!claims.activeCompany) {
+                return <CreateCompany user={user} signOut={signOut} />
               }
               return <App />
             }}
@@ -47,5 +54,47 @@ firebase
       </Suspense>
     )
   })
+
+function EmailVerification({ user, signOut }) {
+  const [emailSent, setEmailSent] = useState(false)
+  function sendEmail() {
+    user.sendEmailVerification().then(() => {
+      setInterval(() => {
+        user.reload()
+        console.log('reloaded user...', { emailVerified: user.emailVerified })
+        if (user.emailVerified) {
+          window.location.reload()
+        }
+      }, 3000)
+      setEmailSent(true)
+    })
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginTop: '2em',
+      }}
+    >
+      <h3>Email is not verified.</h3>
+      <h4>Click button to send verification email to: {user.email}</h4>
+      {emailSent ? (
+        <h5>
+          Email sent. Check your inbox, and follow verification link to proceed.
+        </h5>
+      ) : (
+        <div>
+          <button style={{ marginRight: '2em' }} onClick={sendEmail}>
+            Send verification email
+          </button>
+          <button onClick={signOut}>Sign out</button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 serviceWorker.unregister()
