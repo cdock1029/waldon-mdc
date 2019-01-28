@@ -10,14 +10,14 @@ exports = module.exports = functions.https.onCall(
     if (!context.auth) {
       throw new functions.https.HttpsError(
         'failed-precondition',
-        'Function must be called while authenticated.',
+        'Function must be called while authenticated.'
       )
     }
     const activeCompany: string | undefined = context.auth.token.activeCompany
     if (!activeCompany) {
       throw new functions.https.HttpsError(
         'permission-denied',
-        'Function must be called while authenticated.',
+        'Function must be called while authenticated.'
       )
     }
 
@@ -63,17 +63,17 @@ exports = module.exports = functions.https.onCall(
                     propSnap.docs.map(unitDoc =>
                       serialize({
                         ...unitDoc.data(),
-                        name: unitDoc.data().label,
+                        name: unitDoc.data().name,
                         entity: 'unit',
                         objectID: unitDoc.id,
                         companyId,
-                      }),
-                    ),
+                      })
+                    )
                   )
                 return propResult.concat(units)
-              }),
-            ),
-          ),
+              })
+            )
+          )
       )
       result.push(
         // level 1
@@ -90,9 +90,9 @@ exports = module.exports = functions.https.onCall(
                 entity: 'tenant',
                 objectID: tenDoc.id,
                 companyId,
-              }),
-            ),
-          ),
+              })
+            )
+          )
       )
       result.push(
         // level 1
@@ -106,9 +106,9 @@ exports = module.exports = functions.https.onCall(
                 entity: 'lease',
                 objectID: leaseDoc.id,
                 companyId,
-              }),
-            ),
-          ),
+              })
+            )
+          )
       )
 
       // const companyResult = await Promise.all(result)
@@ -134,5 +134,5 @@ exports = module.exports = functions.https.onCall(
       await reportError(e, { user: context.auth.uid })
       return { success: false, error: e.mssage }
     }
-  },
+  }
 )
