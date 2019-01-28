@@ -44,7 +44,8 @@ firebase
               if (!user.emailVerified) {
                 return <EmailVerification user={user} signOut={signOut} />
               }
-              if (!claims.activeCompany) {
+              // if (!claims.activeCompany) {
+              if (1 === 1) {
                 return <CreateCompany user={user} signOut={signOut} />
               }
               return <App />
