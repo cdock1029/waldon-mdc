@@ -8,17 +8,12 @@ import {
 } from '@blueprintjs/core'
 import { saveDoc } from '../firebase'
 import { useInput } from '../utils/useInput'
+import Stripe from '../Stripe'
 
 export default function CreateCompany({ signOut, user }) {
   const name = useInput('name')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  // const auth = useContext(AuthContext)
-  // const user = auth.user
-
-  // window.refreshMe = () => {
-  //   user.getIdToken(true)
-  // }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -31,10 +26,6 @@ export default function CreateCompany({ signOut, user }) {
         data: { name: nameValue, createdBy: user.uid },
       })
       console.log('Company saved. Updating user credentials...')
-      // setTimeout(() => {
-      //   console.log('refreshing token..')
-      //   user.getIdToken(true)
-      // }, 500)
     } catch (e) {
       setError(e.message)
       setIsSubmitting(false)
@@ -76,6 +67,16 @@ export default function CreateCompany({ signOut, user }) {
           </Button>
         </ButtonGroup>
       </form>
+      <div
+        style={{
+          width: '500px',
+          padding: '2em',
+          border: '1px solid darkgray',
+          marginTop: '2em',
+        }}
+      >
+        <Stripe />
+      </div>
     </div>
   )
 }

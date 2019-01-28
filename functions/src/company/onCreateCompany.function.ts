@@ -1,36 +1,35 @@
-import { admin, functions } from '../globalDeps'
+import { functions, admin } from '../globalDeps'
+import { stripe } from './stripeDeps'
 
 exports = module.exports = functions.firestore
   .document('companies/{companyId}')
   .onCreate(async (snap, context) => {
     const createdBy = snap.data()!.createdBy
-    const companyId = context.params.companyId
+    const companyId = snap.id
 
-    const userProfileRef = admin
-      .firestore()
-      .collection('userProfiles')
-      .doc(createdBy)
+    const [user] = await Promise.all([
+      admin.auth().getUser(createdBy),
+      admin.auth().setCustomUserClaims(createdBy, { activeCompany: companyId }),
+    ])
 
-    return admin
-      .auth()
-      .setCustomUserClaims(createdBy, { activeCompany: companyId })
-      .then(() => {
-        console.log(`company ${companyId} set for user ${createdBy}`)
-        return admin.firestore().runTransaction(async txn => {
-          const profileSnap = await txn.get(userProfileRef)
+    const customer = await stripe.customers.create(
+      {
+        email: user.email,
+        metadata: { companyId },
+      },
+      { idempotency_key: companyId }
+    )
 
-          const profileChange = {
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          } //{ activeCompany: snap.id }
+    const batch = admin.firestore().batch()
+    const userProfileRef = admin.firestore().doc(`userProfiles/${user.uid}`)
 
-          if (profileSnap.exists) {
-            return txn.update(userProfileRef, profileChange)
-          } else {
-            return txn.create(userProfileRef, {
-              ...profileChange,
-              createdAt: profileChange.updatedAt,
-            })
-          }
-        })
-      })
+    // hack to refresh user token on client
+    batch.update(userProfileRef, {
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    })
+    batch.update(snap.ref, {
+      stripeCustomerId: customer.id,
+    })
+
+    return batch.commit()
   })

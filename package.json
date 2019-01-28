@@ -33,6 +33,7 @@
     "react-cache": "^2.0.0-alpha.1",
     "react-dom": "^16.7.0-alpha.2",
     "react-scripts": "^2.1.1",
+    "react-stripe-elements": "^2.0.2",
     "rmwc": "^4.0.1",
     "rxfire": "^3.0.10",
     "rxjs": "^6.3.3",
