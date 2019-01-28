@@ -1,9 +1,9 @@
 import * as Yup from 'yup'
 
 export const UnitSchema = Yup.object().shape({
-  label: Yup.string()
+  name: Yup.string()
     .max(100)
-    .required('Unit label is required'),
+    .required('Unit name is required'),
 })
 
 export const PropertySchema = Yup.object().shape({

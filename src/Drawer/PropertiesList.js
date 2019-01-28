@@ -17,6 +17,7 @@ import { PropertiesResource, UnitsResource } from '../firebase/Collection'
 import { useActiveCompany } from '../firebase/Auth'
 import { QueryContext } from '../Location'
 import { Spinner } from '../Spinner'
+import { sortUnits } from '../utils/index'
 
 export function PropertiesList({ toggleShowForm }) {
   const activeCompany = useActiveCompany()
@@ -121,10 +122,11 @@ const PropertyItem = memo(
 const UnitsList = memo(
   function UnitsListComponent({ propertyId }) {
     const activeCompany = useActiveCompany()
-    const units = UnitsResource.read({
+    let units = UnitsResource.read({
       activeCompany,
       propertyId,
     })
+    units = sortUnits(units)
     const { u } = useContext(QueryContext)
 
     return (
@@ -176,7 +178,7 @@ const UnitItem = forwardRef(({ activated, propertyId, ...unit }, ref) => {
       }
       onClick={handleItemClick}
     >
-      <ListItemText primaryText={unit.label} />
+      <ListItemText primaryText={unit.name} />
     </ListItem>
   )
 })

@@ -29,7 +29,9 @@ export function PropertyDetail({ propertyId, children }) {
     <PropertyDetailWrapper>
       <div className="header">
         <div className="title-bar property">
-          <Typography use="headline4">{property.name}</Typography>
+          <Typography use="headline4">
+            {property.name} ({property.unitCount || 0})
+          </Typography>
           <IconButton type="button" onClick={toggleShowPropertyForm}>
             <MaterialIcon icon="edit" />
           </IconButton>
@@ -47,7 +49,7 @@ export function PropertyDetail({ propertyId, children }) {
         <div className="darken">
           <EntityForm
             rootPath={`/companies/${activeCompany}/properties/${propertyId}/units`}
-            initialValues={{ label: '' }}
+            initialValues={{ name: '' }}
             validationSchema={UnitSchema}
             onCancel={toggleShowUnitForm}
           >
@@ -55,7 +57,7 @@ export function PropertyDetail({ propertyId, children }) {
               <Typography use="headline5">New sub unit</Typography>
             </div>
             <div>
-              <MaterialField name="label" label="Unit label" />
+              <MaterialField name="name" label="Unit name" />
             </div>
           </EntityForm>
         </div>
@@ -63,7 +65,7 @@ export function PropertyDetail({ propertyId, children }) {
       {showPropertyForm && (
         <div className="darken">
           <EntityForm
-            rootPath="properties"
+            rootPath={`/companies/${activeCompany}/properties`}
             path={propertyId}
             initialValues={{ name: property.name }}
             validationSchema={PropertySchema}

@@ -40,7 +40,7 @@ export function UnitDetail({ propertyId, unitId }) {
     <UnitDetailWrapper>
       <div className="header">
         <div className="title-bar unit">
-          <Typography use="headline6">{unit.label}</Typography>
+          <Typography use="headline6">{unit.name}</Typography>
           <IconButton type="button" onClick={toggleShowUnitForm}>
             <MaterialIcon icon="edit" />
           </IconButton>
@@ -51,7 +51,7 @@ export function UnitDetail({ propertyId, unitId }) {
           <EntityForm
             rootPath={`/companies/${activeCompany}/properties/${propertyId}/units`}
             path={unitId}
-            initialValues={{ label: unit.label }}
+            initialValues={{ name: unit.name }}
             validationSchema={UnitSchema}
             onCancel={toggleShowUnitForm}
           >
@@ -64,7 +64,7 @@ export function UnitDetail({ propertyId, unitId }) {
               </Button>
             </div>
             <div>
-              <MaterialField name="label" label="Unit label" />
+              <MaterialField name="name" label="Unit name" />
             </div>
           </EntityForm>
         </div>
